@@ -4,6 +4,7 @@ import { GameLoop } from './GameLoop';
 import { SceneManager } from '../scenes/SceneManager';
 import type { SceneContext } from '../scenes/Scene';
 import { AssetLoader } from '../loaders/AssetLoader';
+import { InputSystem } from '../systems/InputSystem';
 import { LoadingScene } from '../scenes/LoadingScene';
 import { MenuScene } from '../scenes/MenuScene';
 import { GameScene } from '../scenes/GameScene';
@@ -15,6 +16,7 @@ export class Game implements Disposable {
   private gameLoop: GameLoop;
   private sceneManager: SceneManager;
   private assetLoader: AssetLoader;
+  private inputSystem: InputSystem;
   private isRunning: boolean = false;
   private isPaused: boolean = false;
 
@@ -35,6 +37,7 @@ export class Game implements Disposable {
     this.renderer = new Renderer(this.canvas);
     this.sceneManager = new SceneManager();
     this.assetLoader = new AssetLoader();
+    this.inputSystem = new InputSystem();
 
     this.gameLoop = new GameLoop(
       (deltaTime) => this.update(deltaTime),
@@ -62,7 +65,7 @@ export class Game implements Disposable {
     this.sceneManager.switchScene('loading');
     this.gameLoop.start();
 
-    console.info('[Game] Started with Loading, Menu, and Game scenes');
+    console.info('[Game] Started with InputSystem');
   }
 
   public pause(): void {
@@ -78,6 +81,7 @@ export class Game implements Disposable {
   private update(deltaTime: number): void {
     if (this.isPaused) return;
     this.sceneManager.update(deltaTime);
+    this.inputSystem.update();
   }
 
   private render(): void {
@@ -95,6 +99,7 @@ export class Game implements Disposable {
     return {
       uiRoot: this.uiRoot,
       switchScene: (name: string) => this.sceneManager.switchScene(name),
+      inputSystem: this.inputSystem,
     };
   }
 
@@ -118,6 +123,10 @@ export class Game implements Disposable {
     return this.assetLoader;
   }
 
+  public getInputSystem(): InputSystem {
+    return this.inputSystem;
+  }
+
   public getIsPaused(): boolean {
     return this.isPaused;
   }
@@ -127,6 +136,7 @@ export class Game implements Disposable {
     window.removeEventListener('resize', this.handleResize);
     this.gameLoop.dispose();
     this.sceneManager.dispose();
+    this.inputSystem.dispose();
     this.renderer.dispose();
   }
 }

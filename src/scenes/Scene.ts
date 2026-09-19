@@ -1,8 +1,10 @@
 import type { Disposable } from '../types';
+import type { InputSystem } from '../systems/InputSystem';
 
 export interface SceneContext {
   readonly uiRoot: HTMLElement;
   readonly switchScene: (sceneName: string) => void;
+  readonly inputSystem: InputSystem;
 }
 
 export interface IScene extends Disposable {
