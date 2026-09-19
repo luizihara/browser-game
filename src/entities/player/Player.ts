@@ -6,6 +6,7 @@ export class Player extends Entity {
   public speed: number = PLAYER_CONFIG.speed;
   public hp: number = PLAYER_CONFIG.maxHp;
   public maxHp: number = PLAYER_CONFIG.maxHp;
+  public radius: number = PLAYER_CONFIG.radius;
 
   constructor() {
     const group = new THREE.Group();

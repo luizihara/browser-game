@@ -1,17 +1,26 @@
 import * as THREE from 'three';
 import type { Player } from './Player';
 import { InputAction, type InputSystem } from '../../systems/InputSystem';
+import type { ArenaBounds } from '../../world/ArenaBounds';
 import type { Updatable } from '../../types';
 
 export class PlayerController implements Updatable {
   private player: Player;
   private inputSystem: InputSystem;
+  private bounds: ArenaBounds | null = null;
   // Reusable Vector3 to eliminate per-frame allocations
   private moveDirection: THREE.Vector3 = new THREE.Vector3();
 
-  constructor(player: Player, inputSystem: InputSystem) {
+  constructor(player: Player, inputSystem: InputSystem, bounds?: ArenaBounds) {
     this.player = player;
     this.inputSystem = inputSystem;
+    if (bounds) {
+      this.bounds = bounds;
+    }
+  }
+
+  public setBounds(bounds: ArenaBounds | null): void {
+    this.bounds = bounds;
   }
 
   public update(deltaTime: number): void {
@@ -46,6 +55,11 @@ export class PlayerController implements Updatable {
       this.player.getMesh().rotation.y = angle;
     } else {
       this.moveDirection.set(0, 0, 0);
+    }
+
+    // Enforce arena boundaries
+    if (this.bounds) {
+      this.bounds.clampPosition(this.player.position, this.player.radius);
     }
   }
 

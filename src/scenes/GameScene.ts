@@ -48,9 +48,16 @@ export class GameScene extends BaseScene {
     if (!this.player) {
       this.player = new Player();
       this.player.addToScene(this.threeScene);
-      this.playerController = new PlayerController(this.player, this.context.inputSystem);
+      this.playerController = new PlayerController(
+        this.player,
+        this.context.inputSystem,
+        this.world.getBounds()
+      );
       this.cameraController.setTarget(this.player.position, true);
+    } else if (this.playerController && this.world) {
+      this.playerController.setBounds(this.world.getBounds());
     }
+
     this.isPaused = false;
     this.runTime = 0;
     this.hud.mount(this.context.uiRoot);
@@ -139,6 +146,10 @@ export class GameScene extends BaseScene {
       this.world.dispose();
       this.world = null;
     }
+  }
+
+  public getWorld(): World | null {
+    return this.world;
   }
 
   public getIsPaused(): boolean {
