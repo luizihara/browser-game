@@ -12,8 +12,7 @@ export class Renderer implements Disposable {
       powerPreference: 'high-performance',
     });
 
-    const pixelRatio = Math.min(window.devicePixelRatio, GRAPHICS_CONFIG.maxPixelRatio);
-    this.renderer.setPixelRatio(pixelRatio);
+    this.updatePixelRatio();
     this.renderer.setClearColor(GRAPHICS_CONFIG.clearColor);
     this.renderer.shadowMap.enabled = GRAPHICS_CONFIG.shadows;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -21,7 +20,14 @@ export class Renderer implements Disposable {
     this.resize(window.innerWidth, window.innerHeight);
   }
 
+  public updatePixelRatio(): void {
+    const pixelRatio = Math.min(window.devicePixelRatio, GRAPHICS_CONFIG.maxPixelRatio);
+    this.renderer.setPixelRatio(pixelRatio);
+  }
+
   public resize(width: number, height: number): void {
+    if (width <= 0 || height <= 0) return;
+    this.updatePixelRatio();
     this.renderer.setSize(width, height, false);
   }
 
