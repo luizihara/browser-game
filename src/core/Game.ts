@@ -3,6 +3,9 @@ import { Renderer } from './Renderer';
 import { GameLoop } from './GameLoop';
 import { SceneManager } from '../scenes/SceneManager';
 import type { SceneContext } from '../scenes/Scene';
+import { AssetLoader } from '../loaders/AssetLoader';
+import { LoadingScene } from '../scenes/LoadingScene';
+import { MenuScene } from '../scenes/MenuScene';
 
 export class Game implements Disposable {
   private canvas: HTMLCanvasElement;
@@ -10,6 +13,7 @@ export class Game implements Disposable {
   private renderer: Renderer;
   private gameLoop: GameLoop;
   private sceneManager: SceneManager;
+  private assetLoader: AssetLoader;
   private isRunning: boolean = false;
   private isPaused: boolean = false;
 
@@ -29,6 +33,7 @@ export class Game implements Disposable {
 
     this.renderer = new Renderer(this.canvas);
     this.sceneManager = new SceneManager();
+    this.assetLoader = new AssetLoader();
 
     this.gameLoop = new GameLoop(
       (deltaTime) => this.update(deltaTime),
@@ -36,6 +41,13 @@ export class Game implements Disposable {
     );
 
     this.handleResize = this.handleResize.bind(this);
+    this.setupScenes();
+  }
+
+  private setupScenes(): void {
+    const context = this.getContext();
+    this.sceneManager.register(new LoadingScene(context, this.assetLoader));
+    this.sceneManager.register(new MenuScene(context));
   }
 
   public start(): void {
@@ -45,9 +57,10 @@ export class Game implements Disposable {
     window.addEventListener('resize', this.handleResize);
     this.handleResize();
 
+    this.sceneManager.switchScene('loading');
     this.gameLoop.start();
 
-    console.info('[Game] Started with SceneManager');
+    console.info('[Game] Started with LoadingScene');
   }
 
   public pause(): void {
@@ -97,6 +110,10 @@ export class Game implements Disposable {
 
   public getSceneManager(): SceneManager {
     return this.sceneManager;
+  }
+
+  public getAssetLoader(): AssetLoader {
+    return this.assetLoader;
   }
 
   public getIsPaused(): boolean {
