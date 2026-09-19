@@ -4,12 +4,15 @@ import type { Renderer } from '../core/Renderer';
 import { World } from '../world/World';
 import { Player } from '../entities/player/Player';
 import { PlayerController } from '../entities/player/PlayerController';
+import { GameCamera } from '../camera/GameCamera';
+import { CameraController } from '../camera/CameraController';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
   private renderer: Renderer;
   private threeScene: THREE.Scene;
-  private camera: THREE.PerspectiveCamera;
+  private gameCamera: GameCamera;
+  private cameraController: CameraController;
   private world: World | null = null;
   private player: Player | null = null;
   private playerController: PlayerController | null = null;
@@ -18,14 +21,8 @@ export class GameScene extends BaseScene {
     super(context);
     this.renderer = renderer;
     this.threeScene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(
-      60,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
-    this.camera.position.set(0, 15, 12);
-    this.camera.lookAt(0, 0, 0);
+    this.gameCamera = new GameCamera(window.innerWidth, window.innerHeight);
+    this.cameraController = new CameraController(this.gameCamera);
   }
 
   public override enter(): void {
@@ -36,6 +33,7 @@ export class GameScene extends BaseScene {
       this.player = new Player();
       this.player.addToScene(this.threeScene);
       this.playerController = new PlayerController(this.player, this.context.inputSystem);
+      this.cameraController.setTarget(this.player.position, true);
     }
   }
 
@@ -43,15 +41,17 @@ export class GameScene extends BaseScene {
     if (this.playerController) {
       this.playerController.update(deltaTime);
     }
+    if (this.cameraController) {
+      this.cameraController.update(deltaTime);
+    }
   }
 
   public override render(): void {
-    this.renderer.render(this.threeScene, this.camera);
+    this.renderer.render(this.threeScene, this.gameCamera.getThreeCamera());
   }
 
   public override resize(width: number, height: number): void {
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+    this.gameCamera.resize(width, height);
   }
 
   public override dispose(): void {
@@ -75,11 +75,15 @@ export class GameScene extends BaseScene {
     return this.playerController;
   }
 
+  public getCameraController(): CameraController {
+    return this.cameraController;
+  }
+
   public getThreeScene(): THREE.Scene {
     return this.threeScene;
   }
 
-  public getCamera(): THREE.PerspectiveCamera {
-    return this.camera;
+  public getGameCamera(): GameCamera {
+    return this.gameCamera;
   }
 }
