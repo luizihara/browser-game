@@ -26,6 +26,27 @@
   text-shadow: 0 4px 20px rgba(255, 78, 80, 0.3);
 }
 
+.game-over-title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #e53e3e, #ff4e50);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 25px rgba(229, 62, 62, 0.6);
+}
+
+.survival-stat {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #cbd5e0;
+  margin-bottom: 2rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+
 .loading-text {
   font-size: 1.25rem;
   color: #a0aec0;

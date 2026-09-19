@@ -6,13 +6,18 @@ import { Player } from '../entities/player/Player';
 import { PlayerController } from '../entities/player/PlayerController';
 import { EntityManager } from '../entities/EntityManager';
 import { SandboxSpawner } from '../systems/SandboxSpawner';
+import { EnemySpawner } from '../systems/EnemySpawner';
+import { EnemyMovementSystem } from '../systems/EnemyMovementSystem';
+import { CombatSystem } from '../systems/CombatSystem';
 import { GameCamera } from '../camera/GameCamera';
 import { CameraController } from '../camera/CameraController';
 import { HUD } from '../ui/HUD';
 import { PauseMenu } from '../ui/PauseMenu';
+import { GameOverMenu } from '../ui/GameOverMenu';
 import { InputAction } from '../systems/InputSystem';
 import { formatTime } from '../utils/math';
 import { FpsTracker, IS_DEV } from '../utils/debug';
+import { PLAYER_CONFIG } from '../config/playerConfig';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -23,11 +28,16 @@ export class GameScene extends BaseScene {
   private world: World | null = null;
   private entityManager: EntityManager;
   private sandboxSpawner: SandboxSpawner | null = null;
+  private enemySpawner: EnemySpawner;
+  private enemyMovementSystem: EnemyMovementSystem;
+  private combatSystem: CombatSystem;
   private player: Player | null = null;
   private playerController: PlayerController | null = null;
   private hud: HUD;
   private pauseMenu: PauseMenu;
+  private gameOverMenu: GameOverMenu;
   private isPaused: boolean = false;
+  private isGameOver: boolean = false;
   private runTime: number = 0;
   private fpsTracker: FpsTracker;
 
@@ -40,8 +50,18 @@ export class GameScene extends BaseScene {
     this.cameraController = new CameraController(this.gameCamera);
     this.hud = new HUD();
     this.fpsTracker = new FpsTracker();
+
+    this.enemySpawner = new EnemySpawner(this.entityManager, null, null);
+    this.enemyMovementSystem = new EnemyMovementSystem(null, null);
+    this.combatSystem = new CombatSystem(null);
+
     this.pauseMenu = new PauseMenu(
       () => this.resume(),
+      () => this.goToMainMenu()
+    );
+
+    this.gameOverMenu = new GameOverMenu(
+      () => this.restart(),
       () => this.goToMainMenu()
     );
   }
@@ -63,17 +83,32 @@ export class GameScene extends BaseScene {
       this.playerController.setBounds(this.world.getBounds());
     }
 
+    const bounds = this.world.getBounds();
+    this.enemySpawner.setTarget(this.player);
+    this.enemySpawner.setBounds(bounds);
+    this.enemyMovementSystem.setTarget(this.player);
+    this.enemyMovementSystem.setBounds(bounds);
+    this.combatSystem.setPlayer(this.player);
+
     if (IS_DEV && !this.sandboxSpawner) {
-      this.sandboxSpawner = new SandboxSpawner(this.entityManager, this.world.getBounds());
+      this.sandboxSpawner = new SandboxSpawner(this.entityManager, bounds);
     }
 
     this.isPaused = false;
+    this.isGameOver = false;
     this.runTime = 0;
     this.hud.mount(this.context.uiRoot);
     this.hud.updateTime(formatTime(this.runTime));
+    if (this.player) {
+      this.hud.updateHp(this.player.hp, this.player.maxHp);
+    }
   }
 
   public override update(deltaTime: number): void {
+    if (this.isGameOver) {
+      return;
+    }
+
     if (this.context.inputSystem.isActionJustPressed(InputAction.Pause)) {
       if (this.isPaused) {
         this.resume();
@@ -88,18 +123,23 @@ export class GameScene extends BaseScene {
     }
 
     // Dev Debug Keybinds
-    if (IS_DEV && this.sandboxSpawner) {
+    if (IS_DEV) {
       if (this.context.inputSystem.isActionJustPressed(InputAction.DebugSpawn)) {
-        this.sandboxSpawner.spawnBatch();
+        this.sandboxSpawner?.spawnBatch();
+      }
+      if (this.context.inputSystem.isActionJustPressed(InputAction.DebugSpawnEnemy)) {
+        this.enemySpawner.spawnBatch();
       }
       if (this.context.inputSystem.isActionJustPressed(InputAction.DebugClear)) {
-        this.sandboxSpawner.clearDummies();
+        this.sandboxSpawner?.clearDummies();
+        this.enemySpawner.clear();
       }
     }
 
     this.runTime += deltaTime;
     this.hud.updateTime(formatTime(this.runTime));
 
+    // Update active entities (includes Player and any SandboxDummies)
     this.entityManager.update(deltaTime);
 
     if (this.playerController) {
@@ -108,8 +148,21 @@ export class GameScene extends BaseScene {
     if (this.cameraController) {
       this.cameraController.update(deltaTime);
     }
+
+    // Update Enemies & Combat
+    this.enemySpawner.update(deltaTime, this.runTime);
+    this.enemyMovementSystem.update(this.enemySpawner.getEnemies(), deltaTime);
+    this.combatSystem.update(this.enemySpawner.getEnemies());
+
+    // Check Player Status & Update HUD
     if (this.player) {
       this.hud.updateHp(this.player.hp, this.player.maxHp);
+
+      if (this.player.hp <= 0) {
+        this.triggerGameOver();
+        return;
+      }
+
       if (IS_DEV) {
         const fps = this.fpsTracker.update();
         this.hud.updateDebug(
@@ -123,8 +176,37 @@ export class GameScene extends BaseScene {
     }
   }
 
+  private triggerGameOver(): void {
+    this.isGameOver = true;
+    this.gameOverMenu.mount(this.context.uiRoot, formatTime(this.runTime));
+  }
+
+  public restart(): void {
+    this.gameOverMenu.unmount();
+    this.pauseMenu.unmount();
+    this.isGameOver = false;
+    this.isPaused = false;
+    this.runTime = 0;
+
+    if (this.player) {
+      this.player.resetHp();
+      this.player.position.set(
+        PLAYER_CONFIG.initialPosition.x,
+        PLAYER_CONFIG.initialPosition.y,
+        PLAYER_CONFIG.initialPosition.z
+      );
+      this.cameraController.setTarget(this.player.position, true);
+      this.hud.updateHp(this.player.hp, this.player.maxHp);
+    }
+
+    this.enemySpawner.clear();
+    this.sandboxSpawner?.clearDummies();
+    this.hud.updateTime(formatTime(this.runTime));
+    this.context.inputSystem.reset();
+  }
+
   public pause(): void {
-    if (this.isPaused) return;
+    if (this.isPaused || this.isGameOver) return;
     this.isPaused = true;
     this.pauseMenu.mount(this.context.uiRoot);
   }
@@ -137,7 +219,10 @@ export class GameScene extends BaseScene {
   }
 
   private goToMainMenu(): void {
-    this.resume();
+    this.gameOverMenu.unmount();
+    this.pauseMenu.unmount();
+    this.isPaused = false;
+    this.isGameOver = false;
     this.context.switchScene('menu');
   }
 
@@ -150,18 +235,22 @@ export class GameScene extends BaseScene {
   }
 
   public override exit(): void {
+    this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
     this.hud.unmount();
     this.isPaused = false;
+    this.isGameOver = false;
   }
 
   public override dispose(): void {
+    this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
     this.hud.unmount();
     if (this.sandboxSpawner) {
       this.sandboxSpawner.dispose();
       this.sandboxSpawner = null;
     }
+    this.enemySpawner.dispose();
     this.entityManager.dispose();
     this.player = null;
     this.playerController = null;
@@ -169,6 +258,10 @@ export class GameScene extends BaseScene {
       this.world.dispose();
       this.world = null;
     }
+  }
+
+  public getEnemySpawner(): EnemySpawner {
+    return this.enemySpawner;
   }
 
   public getSandboxSpawner(): SandboxSpawner | null {
@@ -185,6 +278,10 @@ export class GameScene extends BaseScene {
 
   public getIsPaused(): boolean {
     return this.isPaused;
+  }
+
+  public getIsGameOver(): boolean {
+    return this.isGameOver;
   }
 
   public getRunTime(): number {
