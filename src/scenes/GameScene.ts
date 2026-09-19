@@ -10,6 +10,7 @@ import { HUD } from '../ui/HUD';
 import { PauseMenu } from '../ui/PauseMenu';
 import { InputAction } from '../systems/InputSystem';
 import { formatTime } from '../utils/math';
+import { FpsTracker, IS_DEV } from '../utils/debug';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -24,6 +25,7 @@ export class GameScene extends BaseScene {
   private pauseMenu: PauseMenu;
   private isPaused: boolean = false;
   private runTime: number = 0;
+  private fpsTracker: FpsTracker;
 
   constructor(context: SceneContext, renderer: Renderer) {
     super(context);
@@ -32,6 +34,7 @@ export class GameScene extends BaseScene {
     this.gameCamera = new GameCamera(window.innerWidth, window.innerHeight);
     this.cameraController = new CameraController(this.gameCamera);
     this.hud = new HUD();
+    this.fpsTracker = new FpsTracker();
     this.pauseMenu = new PauseMenu(
       () => this.resume(),
       () => this.goToMainMenu()
@@ -79,6 +82,15 @@ export class GameScene extends BaseScene {
     }
     if (this.player) {
       this.hud.updateHp(this.player.hp, this.player.maxHp);
+      if (IS_DEV) {
+        const fps = this.fpsTracker.update();
+        this.hud.updateDebug(
+          fps,
+          this.player.position.x,
+          this.player.position.y,
+          this.player.position.z
+        );
+      }
     }
   }
 

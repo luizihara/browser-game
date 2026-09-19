@@ -1,10 +1,13 @@
 import '../styles/hud.css';
+import { IS_DEV } from '../utils/debug';
 
 export class HUD {
   private element: HTMLDivElement | null = null;
   private hpLabel: HTMLSpanElement | null = null;
   private hpFill: HTMLDivElement | null = null;
   private timerText: HTMLSpanElement | null = null;
+  private debugFpsValue: HTMLSpanElement | null = null;
+  private debugPosValue: HTMLSpanElement | null = null;
 
   public mount(parent: HTMLElement): void {
     if (this.element) return;
@@ -45,6 +48,32 @@ export class HUD {
     topBar.appendChild(hpContainer);
     topBar.appendChild(timerContainer);
 
+    // Dev Debug Block
+    if (IS_DEV) {
+      const debugContainer = document.createElement('div');
+      debugContainer.className = 'hud-debug-container';
+
+      const fpsItem = document.createElement('div');
+      fpsItem.className = 'hud-debug-item';
+      fpsItem.textContent = 'FPS: ';
+      this.debugFpsValue = document.createElement('span');
+      this.debugFpsValue.className = 'hud-debug-value';
+      this.debugFpsValue.textContent = '60';
+      fpsItem.appendChild(this.debugFpsValue);
+
+      const posItem = document.createElement('div');
+      posItem.className = 'hud-debug-item';
+      posItem.textContent = 'POS: ';
+      this.debugPosValue = document.createElement('span');
+      this.debugPosValue.className = 'hud-debug-value';
+      this.debugPosValue.textContent = '(0.0, 0.0, 0.0)';
+      posItem.appendChild(this.debugPosValue);
+
+      debugContainer.appendChild(fpsItem);
+      debugContainer.appendChild(posItem);
+      topBar.appendChild(debugContainer);
+    }
+
     this.element.appendChild(topBar);
     parent.appendChild(this.element);
   }
@@ -65,6 +94,16 @@ export class HUD {
     }
   }
 
+  public updateDebug(fps: number, x: number, y: number, z: number): void {
+    if (!IS_DEV) return;
+    if (this.debugFpsValue) {
+      this.debugFpsValue.textContent = `${fps}`;
+    }
+    if (this.debugPosValue) {
+      this.debugPosValue.textContent = `(${x.toFixed(1)}, ${y.toFixed(1)}, ${z.toFixed(1)})`;
+    }
+  }
+
   public getRootElement(): HTMLDivElement | null {
     return this.element;
   }
@@ -77,5 +116,7 @@ export class HUD {
     this.hpLabel = null;
     this.hpFill = null;
     this.timerText = null;
+    this.debugFpsValue = null;
+    this.debugPosValue = null;
   }
 }
