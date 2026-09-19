@@ -7,6 +7,7 @@ import { PlayerController } from '../entities/player/PlayerController';
 import { GameCamera } from '../camera/GameCamera';
 import { CameraController } from '../camera/CameraController';
 import { HUD } from '../ui/HUD';
+import { formatTime } from '../utils/math';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -18,6 +19,7 @@ export class GameScene extends BaseScene {
   private player: Player | null = null;
   private playerController: PlayerController | null = null;
   private hud: HUD;
+  private runTime: number = 0;
 
   constructor(context: SceneContext, renderer: Renderer) {
     super(context);
@@ -38,10 +40,15 @@ export class GameScene extends BaseScene {
       this.playerController = new PlayerController(this.player, this.context.inputSystem);
       this.cameraController.setTarget(this.player.position, true);
     }
+    this.runTime = 0;
     this.hud.mount(this.context.uiRoot);
+    this.hud.updateTime(formatTime(this.runTime));
   }
 
   public override update(deltaTime: number): void {
+    this.runTime += deltaTime;
+    this.hud.updateTime(formatTime(this.runTime));
+
     if (this.playerController) {
       this.playerController.update(deltaTime);
     }
@@ -77,6 +84,10 @@ export class GameScene extends BaseScene {
       this.world.dispose();
       this.world = null;
     }
+  }
+
+  public getRunTime(): number {
+    return this.runTime;
   }
 
   public getPlayer(): Player | null {
