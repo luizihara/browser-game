@@ -7,6 +7,8 @@ export class Player extends Entity {
   public hp: number = PLAYER_CONFIG.maxHp;
   public maxHp: number = PLAYER_CONFIG.maxHp;
   public radius: number = PLAYER_CONFIG.radius;
+  private invulnerableTimer: number = 0;
+  private bodyMaterial: THREE.MeshStandardMaterial;
 
   constructor() {
     const group = new THREE.Group();
@@ -42,11 +44,51 @@ export class Player extends Entity {
 
     super(group);
 
+    this.bodyMaterial = bodyMat;
+
     this.position.set(
       PLAYER_CONFIG.initialPosition.x,
       PLAYER_CONFIG.initialPosition.y,
       PLAYER_CONFIG.initialPosition.z
     );
+  }
+
+  public takeDamage(amount: number): boolean {
+    if (this.invulnerableTimer > 0 || this.hp <= 0) {
+      return false;
+    }
+
+    this.hp = Math.max(0, this.hp - amount);
+    this.invulnerableTimer = PLAYER_CONFIG.invulnerabilityDuration;
+
+    return true;
+  }
+
+  public isInvulnerable(): boolean {
+    return this.invulnerableTimer > 0;
+  }
+
+  public resetHp(): void {
+    this.hp = this.maxHp;
+    this.invulnerableTimer = 0;
+    this.bodyMaterial.color.setHex(PLAYER_CONFIG.color);
+  }
+
+  public override update(deltaTime: number): void {
+    if (this.invulnerableTimer > 0) {
+      this.invulnerableTimer -= deltaTime;
+
+      // Visual flash effect during i-frames
+      const flash = Math.floor(this.invulnerableTimer * 16) % 2 === 0;
+      this.bodyMaterial.color.setHex(
+        flash ? PLAYER_CONFIG.damageFlashColor : PLAYER_CONFIG.color
+      );
+
+      if (this.invulnerableTimer <= 0) {
+        this.invulnerableTimer = 0;
+        this.bodyMaterial.color.setHex(PLAYER_CONFIG.color);
+      }
+    }
   }
 
   public override dispose(): void {

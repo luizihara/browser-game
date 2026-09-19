@@ -4,8 +4,10 @@ export const PLAYER_CONFIG = {
   height: 1.5,
   color: 0x3182ce,
   accentColor: 0x63b3ed,
+  damageFlashColor: 0xffffff,
   initialPosition: { x: 0, y: 0.75, z: 0 },
   maxHp: 100,
+  invulnerabilityDuration: 0.5, // seconds
   visorSize: { width: 0.3, height: 0.15, depth: 0.3 },
   visorOffsetY: 0.3,
 } as const;
