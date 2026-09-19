@@ -1,8 +1,10 @@
 import type { Disposable } from '../types';
+import { Renderer } from './Renderer';
 
 export class Game implements Disposable {
   private canvas: HTMLCanvasElement;
   private uiRoot: HTMLElement;
+  private renderer: Renderer;
   private isRunning: boolean = false;
   private isPaused: boolean = false;
 
@@ -20,6 +22,8 @@ export class Game implements Disposable {
     this.canvas = canvas;
     this.uiRoot = uiRoot;
 
+    this.renderer = new Renderer(this.canvas);
+
     this.handleResize = this.handleResize.bind(this);
   }
 
@@ -30,7 +34,7 @@ export class Game implements Disposable {
     window.addEventListener('resize', this.handleResize);
     this.handleResize();
 
-    console.info('[Game] Started successfully');
+    console.info('[Game] Started successfully with WebGLRenderer');
   }
 
   public pause(): void {
@@ -44,7 +48,9 @@ export class Game implements Disposable {
   }
 
   public handleResize(): void {
-    // Will be wired to Renderer, Camera, and Scenes in subsequent tasks
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    this.renderer.resize(width, height);
   }
 
   public getCanvas(): HTMLCanvasElement {
@@ -55,6 +61,10 @@ export class Game implements Disposable {
     return this.uiRoot;
   }
 
+  public getRenderer(): Renderer {
+    return this.renderer;
+  }
+
   public getIsPaused(): boolean {
     return this.isPaused;
   }
@@ -62,5 +72,6 @@ export class Game implements Disposable {
   public dispose(): void {
     this.isRunning = false;
     window.removeEventListener('resize', this.handleResize);
+    this.renderer.dispose();
   }
 }
