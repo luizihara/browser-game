@@ -6,6 +6,7 @@ import { Player } from '../entities/player/Player';
 import { PlayerController } from '../entities/player/PlayerController';
 import { GameCamera } from '../camera/GameCamera';
 import { CameraController } from '../camera/CameraController';
+import { HUD } from '../ui/HUD';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -16,6 +17,7 @@ export class GameScene extends BaseScene {
   private world: World | null = null;
   private player: Player | null = null;
   private playerController: PlayerController | null = null;
+  private hud: HUD;
 
   constructor(context: SceneContext, renderer: Renderer) {
     super(context);
@@ -23,6 +25,7 @@ export class GameScene extends BaseScene {
     this.threeScene = new THREE.Scene();
     this.gameCamera = new GameCamera(window.innerWidth, window.innerHeight);
     this.cameraController = new CameraController(this.gameCamera);
+    this.hud = new HUD();
   }
 
   public override enter(): void {
@@ -35,6 +38,7 @@ export class GameScene extends BaseScene {
       this.playerController = new PlayerController(this.player, this.context.inputSystem);
       this.cameraController.setTarget(this.player.position, true);
     }
+    this.hud.mount(this.context.uiRoot);
   }
 
   public override update(deltaTime: number): void {
@@ -43,6 +47,9 @@ export class GameScene extends BaseScene {
     }
     if (this.cameraController) {
       this.cameraController.update(deltaTime);
+    }
+    if (this.player) {
+      this.hud.updateHp(this.player.hp, this.player.maxHp);
     }
   }
 
@@ -54,7 +61,12 @@ export class GameScene extends BaseScene {
     this.gameCamera.resize(width, height);
   }
 
+  public override exit(): void {
+    this.hud.unmount();
+  }
+
   public override dispose(): void {
+    this.hud.unmount();
     if (this.player) {
       this.player.removeFromScene(this.threeScene);
       this.player.dispose();
@@ -77,6 +89,10 @@ export class GameScene extends BaseScene {
 
   public getCameraController(): CameraController {
     return this.cameraController;
+  }
+
+  public getHUD(): HUD {
+    return this.hud;
   }
 
   public getThreeScene(): THREE.Scene {
