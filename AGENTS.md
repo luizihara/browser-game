@@ -22,10 +22,12 @@ Portanto, **toda decisão técnica tomada no presente deve permitir essa escala 
 
 1. **Responsabilidade Única (Single Responsibility Principle)**:
    - Cada classe tem uma única razão para mudar.
-   - Entidades (`Player`, `Enemy`) apenas representam dados e malhas 3D.
-   - Controladores (`PlayerController`) interpretam comandos e aplicam física/cinemática.
-   - Sistemas (`InputSystem`) capturam e abstraem eventos do navegador.
-   - Cenas (`GameScene`) orquestram o ciclo de vida dos seus atores.
+   - Entidades (`Player`, `SandboxDummy`, `Enemy`) representam dados e malhas 3D.
+   - `EntityManager` gerencia a coleção, ciclo de vida e renderização de entidades.
+   - Controladores (`PlayerController`) interpretam comandos e aplicam cinemática.
+   - Sistemas (`InputSystem`, `SandboxSpawner`) cuidam de tarefas isoladas.
+   - O mundo (`World`, `ArenaBounds`) delimita o espaço e iluminação.
+   - Cenas (`GameScene`) orquestram seus atores.
    - `Game.ts` atua apenas como coordenador geral.
 
 2. **Desacoplamento de Input**:
@@ -38,13 +40,14 @@ Portanto, **toda decisão técnica tomada no presente deve permitir essa escala 
    - O tempo é centralizado em `src/core/Time.ts` com proteção de teto (`GAME_CONFIG.maxDeltaTime`).
 
 4. **Zero Garbage Collection no Game Loop**:
-   - O método `update()` é chamado 60–144 vezes por segundo.
+   - O método `update()` é chamado 60–144 vezes por segundo com centenas de entidades.
    - Não crie novas instâncias de `THREE.Vector3`, matrizes ou objetos descartáveis dentro do loop.
    - Guarde variáveis auxiliares como propriedades privadas reutilizáveis na classe.
+   - O `EntityManager` realiza iterações indexadas padrão e remoções O(1) via swap-and-pop.
 
 5. **Interface desacoplada (HTML/CSS Overlays)**:
    - Toda UI (menus, HUD, overlays) reside em elementos DOM sobre o canvas (`#ui-root`).
-   - Não renderize texto ou interface 2D no canvas WebGL a menos que seja um elemento intra-mundo (ex: barra de vida de inimigo via sprite se necessário).
+   - Não renderize texto ou interface 2D no canvas WebGL a menos que seja um elemento intra-mundo.
    - Atualize nós do DOM existentes (`textContent`, `style.width`), nunca recrie o DOM a cada frame.
 
 ---
@@ -56,11 +59,11 @@ src/
 ├── camera/      # Câmera e controladores de acompanhamento
 ├── config/      # Constantes de configuração centralizadas (sem magic numbers)
 ├── core/        # Game, GameLoop, Renderer, Time
-├── entities/    # Classes base e entidades do jogo (Player, etc.)
+├── entities/    # Classes base, EntityManager e entidades (Player, SandboxDummy)
 ├── loaders/     # Carregamento assíncrono e cache de assets
 ├── scenes/      # Scene interface, SceneManager e cenas do jogo
 ├── styles/      # Arquivos CSS modulares (global, hud, menu)
-├── systems/     # Sistemas independentes (InputSystem, etc.)
+├── systems/     # Sistemas independentes (InputSystem, SandboxSpawner)
 ├── types/       # Tipagens e interfaces globais
 └── utils/       # Funções utilitárias (matemática, debug)
 ```
