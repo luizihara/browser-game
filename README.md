@@ -1,6 +1,6 @@
 # Survivor 3D
 
-Um jogo 3D para navegador do gênero **survivor / bullet heaven** (inspirado no conceito popularizado por jogos como *Vampire Survivors*), desenvolvido com tecnologias web modernas focando em alto desempenho, arquitetura limpa e escalabilidade para centenas de entidades simultâneas.
+Um jogo 3D para navegador do gênero **survivor / bullet heaven** (inspirado no conceito de jogabilidade de *Vampire Survivors*), desenvolvido com tecnologias web modernas focando em alto desempenho, arquitetura limpa e escalabilidade para centenas de entidades simultâneas.
 
 ---
 
@@ -53,8 +53,9 @@ Um jogo 3D para navegador do gênero **survivor / bullet heaven** (inspirado no 
 | **A** / **Seta para a Esquerda**| Movimenta para a Esquerda (Oeste no plano XZ) | Jogo |
 | **D** / **Seta para a Direita** | Movimenta para a Direita (Leste no plano XZ) | Jogo |
 | **ESC** | Pausa / Despausa o jogo | Jogo / Pause |
+| **E** | Spawna lote de 5 inimigos perseguidores | DEV Mode |
 | **B** | Spawna lote de 20 entidades de teste (*Sandbox Dummies*) | DEV Mode |
-| **C** | Limpa todas as entidades de teste ativas | DEV Mode |
+| **C** | Limpa todos os inimigos e entidades de teste ativas | DEV Mode |
 
 *Nota: O movimento diagonal é normalizado por vetor, garantindo que o personagem se desloque na mesma velocidade em qualquer direção.*
 
@@ -67,14 +68,17 @@ O projeto segue princípios de responsabilidade única (SRP) e baixo acoplamento
 1. **Main Entry (`src/main.ts`)**: Apenas instancia e inicializa o orquestrador `Game`. Não contém regras de negócio.
 2. **Game Core (`src/core/Game.ts`)**: Coordenador mestre da aplicação. Gerencia o ciclo de vida, WebGLRenderer, GameLoop, SceneManager e redimensionamento de janela.
 3. **Time & Game Loop (`src/core/Time.ts`, `src/core/GameLoop.ts`)**: Separação estrita entre `update(deltaTime)` e `render()`. Utiliza `deltaTime` com teto de segurança (`MAX_DELTA_TIME = 0.1s`) para proteger contra congelamentos de aba.
-4. **Input System (`src/systems/InputSystem.ts`)**: Camada de abstração que mapeia códigos de teclas para ações conceituais (`MoveUp`, `MoveDown`, `MoveLeft`, `MoveRight`, `Pause`, `DebugSpawn`, `DebugClear`), desacoplando o teclado das entidades.
+4. **Input System (`src/systems/InputSystem.ts`)**: Camada de abstração que mapeia códigos de teclas para ações conceituais (`MoveUp`, `MoveDown`, `MoveLeft`, `MoveRight`, `Pause`, `DebugSpawn`, `DebugClear`, `DebugSpawnEnemy`), desacoplando o teclado das entidades.
 5. **Gerenciador de Entidades (`src/entities/EntityManager.ts`)**: Gerencia o ciclo de vida e atualização sequencial de todas as entidades ativas sem alocação de lixo no loop e com remoção O(1) via swap-and-pop.
 6. **Limites da Arena (`src/world/ArenaBounds.ts`)**: Paredes tridimensionais perimetrais com contenção matemática (`clampPosition`), contendo o jogador e entidades sem a sobrecarga de uma engine física externa.
-7. **Player & Controller (`src/entities/player/`)**: O `Player` é uma entidade Three.js pura com modelo 3D (cápsula + visor direcional). O `PlayerController` interpreta os comandos do `InputSystem`, normaliza direções e aplica `speed * deltaTime` reutilizando vetores em memória (Zero Garbage Collection).
-8. **Câmera Isométrica Suave (`src/camera/`)**: `GameCamera` encapsula uma `PerspectiveCamera` com ângulo top-down/isométrico. O `CameraController` realiza acompanhamento suave amortecido (`lerp` exponencial independente de taxa de quadros).
-9. **Cenário (`src/world/`)**: Chão com grade indicadora de deslocamento espacial e iluminação balanceada (HemisphereLight + DirectionalLight gerando sombras dinâmicas).
-10. **Gerenciador de Cenas (`src/scenes/`)**: Ciclo de vida desacoplado (`init`, `enter`, `update`, `render`, `resize`, `exit`, `dispose`).
-11. **UI desacoplada (`src/ui/`, `src/styles/`)**: Menus e HUD renderizados sobre o canvas em HTML/CSS com overlays posicionados via CSS puro.
+7. **Player & Controller (`src/entities/player/`)**: O `Player` é uma entidade Three.js pura com modelo 3D (cápsula + visor direcional). O `PlayerController` interpreta os comandos do `InputSystem`, normaliza direções e aplica `speed * deltaTime` reutilizando vetores em memória (Zero Garbage Collection). Possui sistema de dano com *i-frames* (0.5s) e flash visual.
+8. **Inimigos & Perseguição (`src/entities/enemy/`, `src/systems/`)**: Inimigos com modelo 3D sombreado perseguem o jogador continuamente via `EnemyMovementSystem` com matemática vetorial normalizada Zero-GC.
+9. **Spawner Progressivo (`src/systems/EnemySpawner.ts`)**: Inimigos são gerados em um anel externo fora da visão da câmera com taxa de aparição acelerada com o passar do tempo de sobrevivência.
+10. **Combate & Game Over (`src/systems/CombatSystem.ts`, `src/ui/GameOverMenu.ts`)**: Detecção circular de dano de contato entre inimigos e jogador. Ao esgotar o HP, a tela de Game Over é acionada exibindo o tempo total sobrevivido e permitindo reinício instantâneo ou retorno ao menu principal.
+11. **Câmera Isométrica Suave (`src/camera/`)**: `GameCamera` encapsula uma `PerspectiveCamera` com ângulo top-down/isométrico. O `CameraController` realiza acompanhamento suave amortecido (`lerp` exponencial independente de taxa de quadros).
+12. **Cenário (`src/world/`)**: Chão com grade indicadora de deslocamento espacial e iluminação balanceada (HemisphereLight + DirectionalLight gerando sombras dinâmicas).
+13. **Gerenciador de Cenas (`src/scenes/`)**: Ciclo de vida desacoplado (`init`, `enter`, `update`, `render`, `resize`, `exit`, `dispose`).
+14. **UI desacoplada (`src/ui/`, `src/styles/`)**: Menus, HUD e Game Over renderizados sobre o canvas em HTML/CSS com overlays posicionados via CSS puro.
 
 ---
 
@@ -87,6 +91,7 @@ src/
 │   └── GameCamera.ts
 ├── config/
 │   ├── cameraConfig.ts
+│   ├── enemyConfig.ts
 │   ├── gameConfig.ts
 │   ├── graphicsConfig.ts
 │   ├── playerConfig.ts
@@ -100,6 +105,8 @@ src/
 ├── entities/
 │   ├── Entity.ts
 │   ├── EntityManager.ts
+│   ├── enemy/
+│   │   └── Enemy.ts
 │   ├── player/
 │   │   ├── Player.ts
 │   │   └── PlayerController.ts
@@ -118,6 +125,9 @@ src/
 │   ├── hud.css
 │   └── menu.css
 ├── systems/
+│   ├── CombatSystem.ts
+│   ├── EnemyMovementSystem.ts
+│   ├── EnemySpawner.ts
 │   ├── InputSystem.ts
 │   └── SandboxSpawner.ts
 ├── types/
@@ -150,3 +160,11 @@ src/
 - [x] Entidades de teste (*Sandbox Dummy*) com animação procedural para benchmark
 - [x] Spawner de teste (`SandboxSpawner`) com atalhos de dev (**B** spawnar lote, **C** limpar)
 - [x] Contador de entidades ativas exibido no HUD de desenvolvimento
+
+### Milestone 3 — ENEMIES (Concluída)
+- [x] Entidade `Enemy` com malha 3D distinta, olhos brilhantes e atributos de combate
+- [x] `EnemyMovementSystem` com perseguição direcional ao Player e Zero-GC
+- [x] `EnemySpawner` gerando inimigos em anel fora da visão da câmera com curva de dificuldade por tempo
+- [x] Sistema de combate com dano de contato, período de invulnerabilidade (0.5s *i-frames*) e flash visual no jogador
+- [x] Barra de HP diminuindo em tempo real no HUD
+- [x] Tela e fluxo de **Game Over** exibindo tempo de sobrevivência com botões `[ TRY AGAIN ]` e `[ MAIN MENU ]`
