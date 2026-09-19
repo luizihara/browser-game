@@ -4,6 +4,7 @@ import type { Renderer } from '../core/Renderer';
 import { World } from '../world/World';
 import { Player } from '../entities/player/Player';
 import { PlayerController } from '../entities/player/PlayerController';
+import { EntityManager } from '../entities/EntityManager';
 import { GameCamera } from '../camera/GameCamera';
 import { CameraController } from '../camera/CameraController';
 import { HUD } from '../ui/HUD';
@@ -19,6 +20,7 @@ export class GameScene extends BaseScene {
   private gameCamera: GameCamera;
   private cameraController: CameraController;
   private world: World | null = null;
+  private entityManager: EntityManager;
   private player: Player | null = null;
   private playerController: PlayerController | null = null;
   private hud: HUD;
@@ -31,6 +33,7 @@ export class GameScene extends BaseScene {
     super(context);
     this.renderer = renderer;
     this.threeScene = new THREE.Scene();
+    this.entityManager = new EntityManager(this.threeScene);
     this.gameCamera = new GameCamera(window.innerWidth, window.innerHeight);
     this.cameraController = new CameraController(this.gameCamera);
     this.hud = new HUD();
@@ -47,7 +50,7 @@ export class GameScene extends BaseScene {
     }
     if (!this.player) {
       this.player = new Player();
-      this.player.addToScene(this.threeScene);
+      this.entityManager.add(this.player);
       this.playerController = new PlayerController(
         this.player,
         this.context.inputSystem,
@@ -80,6 +83,8 @@ export class GameScene extends BaseScene {
 
     this.runTime += deltaTime;
     this.hud.updateTime(formatTime(this.runTime));
+
+    this.entityManager.update(deltaTime);
 
     if (this.playerController) {
       this.playerController.update(deltaTime);
@@ -136,16 +141,17 @@ export class GameScene extends BaseScene {
   public override dispose(): void {
     this.pauseMenu.unmount();
     this.hud.unmount();
-    if (this.player) {
-      this.player.removeFromScene(this.threeScene);
-      this.player.dispose();
-      this.player = null;
-      this.playerController = null;
-    }
+    this.entityManager.dispose();
+    this.player = null;
+    this.playerController = null;
     if (this.world) {
       this.world.dispose();
       this.world = null;
     }
+  }
+
+  public getEntityManager(): EntityManager {
+    return this.entityManager;
   }
 
   public getWorld(): World | null {

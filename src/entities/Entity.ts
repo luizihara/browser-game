@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import type { Disposable } from '../types';
+import type { Disposable, Updatable } from '../types';
 
-export abstract class Entity implements Disposable {
+export abstract class Entity implements Disposable, Updatable {
   protected mesh: THREE.Object3D;
 
   constructor(mesh: THREE.Object3D) {
@@ -15,6 +15,8 @@ export abstract class Entity implements Disposable {
   public getMesh(): THREE.Object3D {
     return this.mesh;
   }
+
+  public update(_deltaTime: number): void {}
 
   public addToScene(scene: THREE.Scene): void {
     scene.add(this.mesh);
