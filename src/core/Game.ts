@@ -1,10 +1,12 @@
 import type { Disposable } from '../types';
 import { Renderer } from './Renderer';
+import { GameLoop } from './GameLoop';
 
 export class Game implements Disposable {
   private canvas: HTMLCanvasElement;
   private uiRoot: HTMLElement;
   private renderer: Renderer;
+  private gameLoop: GameLoop;
   private isRunning: boolean = false;
   private isPaused: boolean = false;
 
@@ -23,6 +25,10 @@ export class Game implements Disposable {
     this.uiRoot = uiRoot;
 
     this.renderer = new Renderer(this.canvas);
+    this.gameLoop = new GameLoop(
+      (deltaTime) => this.update(deltaTime),
+      () => this.render()
+    );
 
     this.handleResize = this.handleResize.bind(this);
   }
@@ -34,7 +40,9 @@ export class Game implements Disposable {
     window.addEventListener('resize', this.handleResize);
     this.handleResize();
 
-    console.info('[Game] Started successfully with WebGLRenderer');
+    this.gameLoop.start();
+
+    console.info('[Game] Started with GameLoop and Time management');
   }
 
   public pause(): void {
@@ -45,6 +53,15 @@ export class Game implements Disposable {
   public resume(): void {
     if (!this.isRunning || !this.isPaused) return;
     this.isPaused = false;
+  }
+
+  private update(_deltaTime: number): void {
+    if (this.isPaused) return;
+    // Scenes will be updated here in Scene Architecture task
+  }
+
+  private render(): void {
+    // Scenes will be rendered here via renderer in Scene Architecture task
   }
 
   public handleResize(): void {
@@ -72,6 +89,7 @@ export class Game implements Disposable {
   public dispose(): void {
     this.isRunning = false;
     window.removeEventListener('resize', this.handleResize);
+    this.gameLoop.dispose();
     this.renderer.dispose();
   }
 }
