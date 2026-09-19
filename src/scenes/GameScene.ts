@@ -5,6 +5,7 @@ import { World } from '../world/World';
 import { Player } from '../entities/player/Player';
 import { PlayerController } from '../entities/player/PlayerController';
 import { EntityManager } from '../entities/EntityManager';
+import { SandboxSpawner } from '../systems/SandboxSpawner';
 import { GameCamera } from '../camera/GameCamera';
 import { CameraController } from '../camera/CameraController';
 import { HUD } from '../ui/HUD';
@@ -21,6 +22,7 @@ export class GameScene extends BaseScene {
   private cameraController: CameraController;
   private world: World | null = null;
   private entityManager: EntityManager;
+  private sandboxSpawner: SandboxSpawner | null = null;
   private player: Player | null = null;
   private playerController: PlayerController | null = null;
   private hud: HUD;
@@ -61,6 +63,10 @@ export class GameScene extends BaseScene {
       this.playerController.setBounds(this.world.getBounds());
     }
 
+    if (IS_DEV && !this.sandboxSpawner) {
+      this.sandboxSpawner = new SandboxSpawner(this.entityManager, this.world.getBounds());
+    }
+
     this.isPaused = false;
     this.runTime = 0;
     this.hud.mount(this.context.uiRoot);
@@ -79,6 +85,16 @@ export class GameScene extends BaseScene {
 
     if (this.isPaused) {
       return;
+    }
+
+    // Dev Debug Keybinds
+    if (IS_DEV && this.sandboxSpawner) {
+      if (this.context.inputSystem.isActionJustPressed(InputAction.DebugSpawn)) {
+        this.sandboxSpawner.spawnBatch();
+      }
+      if (this.context.inputSystem.isActionJustPressed(InputAction.DebugClear)) {
+        this.sandboxSpawner.clearDummies();
+      }
     }
 
     this.runTime += deltaTime;
@@ -100,7 +116,8 @@ export class GameScene extends BaseScene {
           fps,
           this.player.position.x,
           this.player.position.y,
-          this.player.position.z
+          this.player.position.z,
+          this.entityManager.getCount()
         );
       }
     }
@@ -141,6 +158,10 @@ export class GameScene extends BaseScene {
   public override dispose(): void {
     this.pauseMenu.unmount();
     this.hud.unmount();
+    if (this.sandboxSpawner) {
+      this.sandboxSpawner.dispose();
+      this.sandboxSpawner = null;
+    }
     this.entityManager.dispose();
     this.player = null;
     this.playerController = null;
@@ -148,6 +169,10 @@ export class GameScene extends BaseScene {
       this.world.dispose();
       this.world = null;
     }
+  }
+
+  public getSandboxSpawner(): SandboxSpawner | null {
+    return this.sandboxSpawner;
   }
 
   public getEntityManager(): EntityManager {

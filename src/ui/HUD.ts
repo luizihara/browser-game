@@ -7,6 +7,7 @@ export class HUD {
   private hpFill: HTMLDivElement | null = null;
   private timerText: HTMLSpanElement | null = null;
   private debugFpsValue: HTMLSpanElement | null = null;
+  private debugEntityValue: HTMLSpanElement | null = null;
   private debugPosValue: HTMLSpanElement | null = null;
 
   public mount(parent: HTMLElement): void {
@@ -61,6 +62,14 @@ export class HUD {
       this.debugFpsValue.textContent = '60';
       fpsItem.appendChild(this.debugFpsValue);
 
+      const entityItem = document.createElement('div');
+      entityItem.className = 'hud-debug-item';
+      entityItem.textContent = 'ENTITIES: ';
+      this.debugEntityValue = document.createElement('span');
+      this.debugEntityValue.className = 'hud-debug-value';
+      this.debugEntityValue.textContent = '1';
+      entityItem.appendChild(this.debugEntityValue);
+
       const posItem = document.createElement('div');
       posItem.className = 'hud-debug-item';
       posItem.textContent = 'POS: ';
@@ -70,6 +79,7 @@ export class HUD {
       posItem.appendChild(this.debugPosValue);
 
       debugContainer.appendChild(fpsItem);
+      debugContainer.appendChild(entityItem);
       debugContainer.appendChild(posItem);
       topBar.appendChild(debugContainer);
     }
@@ -94,10 +104,13 @@ export class HUD {
     }
   }
 
-  public updateDebug(fps: number, x: number, y: number, z: number): void {
+  public updateDebug(fps: number, x: number, y: number, z: number, entityCount?: number): void {
     if (!IS_DEV) return;
     if (this.debugFpsValue) {
       this.debugFpsValue.textContent = `${fps}`;
+    }
+    if (this.debugEntityValue && entityCount !== undefined) {
+      this.debugEntityValue.textContent = `${entityCount}`;
     }
     if (this.debugPosValue) {
       this.debugPosValue.textContent = `(${x.toFixed(1)}, ${y.toFixed(1)}, ${z.toFixed(1)})`;
@@ -117,6 +130,7 @@ export class HUD {
     this.hpFill = null;
     this.timerText = null;
     this.debugFpsValue = null;
+    this.debugEntityValue = null;
     this.debugPosValue = null;
   }
 }
