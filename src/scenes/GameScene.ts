@@ -3,6 +3,7 @@ import { BaseScene, type SceneContext } from './Scene';
 import type { Renderer } from '../core/Renderer';
 import { World } from '../world/World';
 import { Player } from '../entities/player/Player';
+import { PlayerController } from '../entities/player/PlayerController';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -11,6 +12,7 @@ export class GameScene extends BaseScene {
   private camera: THREE.PerspectiveCamera;
   private world: World | null = null;
   private player: Player | null = null;
+  private playerController: PlayerController | null = null;
 
   constructor(context: SceneContext, renderer: Renderer) {
     super(context);
@@ -33,6 +35,13 @@ export class GameScene extends BaseScene {
     if (!this.player) {
       this.player = new Player();
       this.player.addToScene(this.threeScene);
+      this.playerController = new PlayerController(this.player, this.context.inputSystem);
+    }
+  }
+
+  public override update(deltaTime: number): void {
+    if (this.playerController) {
+      this.playerController.update(deltaTime);
     }
   }
 
@@ -50,6 +59,7 @@ export class GameScene extends BaseScene {
       this.player.removeFromScene(this.threeScene);
       this.player.dispose();
       this.player = null;
+      this.playerController = null;
     }
     if (this.world) {
       this.world.dispose();
@@ -59,6 +69,10 @@ export class GameScene extends BaseScene {
 
   public getPlayer(): Player | null {
     return this.player;
+  }
+
+  public getPlayerController(): PlayerController | null {
+    return this.playerController;
   }
 
   public getThreeScene(): THREE.Scene {
