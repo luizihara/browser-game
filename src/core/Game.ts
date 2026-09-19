@@ -1,12 +1,15 @@
 import type { Disposable } from '../types';
 import { Renderer } from './Renderer';
 import { GameLoop } from './GameLoop';
+import { SceneManager } from '../scenes/SceneManager';
+import type { SceneContext } from '../scenes/Scene';
 
 export class Game implements Disposable {
   private canvas: HTMLCanvasElement;
   private uiRoot: HTMLElement;
   private renderer: Renderer;
   private gameLoop: GameLoop;
+  private sceneManager: SceneManager;
   private isRunning: boolean = false;
   private isPaused: boolean = false;
 
@@ -25,6 +28,8 @@ export class Game implements Disposable {
     this.uiRoot = uiRoot;
 
     this.renderer = new Renderer(this.canvas);
+    this.sceneManager = new SceneManager();
+
     this.gameLoop = new GameLoop(
       (deltaTime) => this.update(deltaTime),
       () => this.render()
@@ -42,7 +47,7 @@ export class Game implements Disposable {
 
     this.gameLoop.start();
 
-    console.info('[Game] Started with GameLoop and Time management');
+    console.info('[Game] Started with SceneManager');
   }
 
   public pause(): void {
@@ -55,19 +60,27 @@ export class Game implements Disposable {
     this.isPaused = false;
   }
 
-  private update(_deltaTime: number): void {
+  private update(deltaTime: number): void {
     if (this.isPaused) return;
-    // Scenes will be updated here in Scene Architecture task
+    this.sceneManager.update(deltaTime);
   }
 
   private render(): void {
-    // Scenes will be rendered here via renderer in Scene Architecture task
+    this.sceneManager.render();
   }
 
   public handleResize(): void {
     const width = window.innerWidth;
     const height = window.innerHeight;
     this.renderer.resize(width, height);
+    this.sceneManager.resize(width, height);
+  }
+
+  public getContext(): SceneContext {
+    return {
+      uiRoot: this.uiRoot,
+      switchScene: (name: string) => this.sceneManager.switchScene(name),
+    };
   }
 
   public getCanvas(): HTMLCanvasElement {
@@ -82,6 +95,10 @@ export class Game implements Disposable {
     return this.renderer;
   }
 
+  public getSceneManager(): SceneManager {
+    return this.sceneManager;
+  }
+
   public getIsPaused(): boolean {
     return this.isPaused;
   }
@@ -90,6 +107,7 @@ export class Game implements Disposable {
     this.isRunning = false;
     window.removeEventListener('resize', this.handleResize);
     this.gameLoop.dispose();
+    this.sceneManager.dispose();
     this.renderer.dispose();
   }
 }
