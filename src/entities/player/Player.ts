@@ -24,14 +24,18 @@ export class Player extends Entity {
     group.add(bodyMesh);
 
     // Visor/Direction indicator to show facing orientation
-    const visorGeo = new THREE.BoxGeometry(0.3, 0.15, 0.3);
+    const visorGeo = new THREE.BoxGeometry(
+      PLAYER_CONFIG.visorSize.width,
+      PLAYER_CONFIG.visorSize.height,
+      PLAYER_CONFIG.visorSize.depth
+    );
     const visorMat = new THREE.MeshStandardMaterial({
       color: PLAYER_CONFIG.accentColor,
       roughness: 0.2,
       metalness: 0.8,
     });
     const visorMesh = new THREE.Mesh(visorGeo, visorMat);
-    visorMesh.position.set(0, 0.3, -PLAYER_CONFIG.radius);
+    visorMesh.position.set(0, PLAYER_CONFIG.visorOffsetY, -PLAYER_CONFIG.radius);
     visorMesh.castShadow = true;
     group.add(visorMesh);
 

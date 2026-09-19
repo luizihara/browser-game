@@ -6,4 +6,6 @@ export const PLAYER_CONFIG = {
   accentColor: 0x63b3ed,
   initialPosition: { x: 0, y: 0.75, z: 0 },
   maxHp: 100,
+  visorSize: { width: 0.3, height: 0.15, depth: 0.3 },
+  visorOffsetY: 0.3,
 } as const;
