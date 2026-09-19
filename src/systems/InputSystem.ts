@@ -8,6 +8,7 @@ export const InputAction = {
   Pause: 'Pause',
   DebugSpawn: 'DebugSpawn',
   DebugClear: 'DebugClear',
+  DebugSpawnEnemy: 'DebugSpawnEnemy',
 } as const;
 
 export type InputAction = (typeof InputAction)[keyof typeof InputAction];
@@ -43,9 +44,10 @@ export class InputSystem implements Disposable {
 
     this.bindKey('Escape', InputAction.Pause);
 
-    // Development sandbox debug keys
+    // Development sandbox & enemy debug keys
     this.bindKey('KeyB', InputAction.DebugSpawn);
     this.bindKey('KeyC', InputAction.DebugClear);
+    this.bindKey('KeyE', InputAction.DebugSpawnEnemy);
   }
 
   public bindKey(code: string, action: InputAction): void {
