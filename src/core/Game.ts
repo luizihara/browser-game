@@ -6,6 +6,7 @@ import type { SceneContext } from '../scenes/Scene';
 import { AssetLoader } from '../loaders/AssetLoader';
 import { LoadingScene } from '../scenes/LoadingScene';
 import { MenuScene } from '../scenes/MenuScene';
+import { GameScene } from '../scenes/GameScene';
 
 export class Game implements Disposable {
   private canvas: HTMLCanvasElement;
@@ -48,6 +49,7 @@ export class Game implements Disposable {
     const context = this.getContext();
     this.sceneManager.register(new LoadingScene(context, this.assetLoader));
     this.sceneManager.register(new MenuScene(context));
+    this.sceneManager.register(new GameScene(context, this.renderer));
   }
 
   public start(): void {
@@ -60,7 +62,7 @@ export class Game implements Disposable {
     this.sceneManager.switchScene('loading');
     this.gameLoop.start();
 
-    console.info('[Game] Started with LoadingScene');
+    console.info('[Game] Started with Loading, Menu, and Game scenes');
   }
 
   public pause(): void {
