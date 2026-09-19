@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { BaseScene, type SceneContext } from './Scene';
 import type { Renderer } from '../core/Renderer';
 import { World } from '../world/World';
+import { Player } from '../entities/player/Player';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -9,6 +10,7 @@ export class GameScene extends BaseScene {
   private threeScene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
   private world: World | null = null;
+  private player: Player | null = null;
 
   constructor(context: SceneContext, renderer: Renderer) {
     super(context);
@@ -28,6 +30,10 @@ export class GameScene extends BaseScene {
     if (!this.world) {
       this.world = new World(this.threeScene);
     }
+    if (!this.player) {
+      this.player = new Player();
+      this.player.addToScene(this.threeScene);
+    }
   }
 
   public override render(): void {
@@ -40,10 +46,19 @@ export class GameScene extends BaseScene {
   }
 
   public override dispose(): void {
+    if (this.player) {
+      this.player.removeFromScene(this.threeScene);
+      this.player.dispose();
+      this.player = null;
+    }
     if (this.world) {
       this.world.dispose();
       this.world = null;
     }
+  }
+
+  public getPlayer(): Player | null {
+    return this.player;
   }
 
   public getThreeScene(): THREE.Scene {
