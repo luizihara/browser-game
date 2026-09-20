@@ -526,6 +526,114 @@ export class SoundManager implements Disposable {
     };
   }
 
+  private ambientOsc: OscillatorNode | null = null;
+  private ambientGain: GainNode | null = null;
+
+  public startBiomeAmbience(theme: 'nature' | 'magma' | 'frost'): void {
+    this.stopBiomeAmbience();
+    if (!this.audioContext || !this.masterGain) return;
+    try {
+      const now = this.audioContext.currentTime;
+      const osc = this.audioContext.createOscillator();
+      const gain = this.audioContext.createGain();
+      const filter = this.audioContext.createBiquadFilter();
+
+      if (theme === 'magma') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(55, now);
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(130, now);
+        gain.gain.setValueAtTime(0.045, now);
+      } else if (theme === 'frost') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(220, now);
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(440, now);
+        gain.gain.setValueAtTime(0.035, now);
+      } else {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(110, now);
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(260, now);
+        gain.gain.setValueAtTime(0.03, now);
+      }
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.masterGain);
+      osc.start(now);
+
+      this.ambientOsc = osc;
+      this.ambientGain = gain;
+    } catch {
+      // Audio context might be suspended
+    }
+  }
+
+  public stopBiomeAmbience(): void {
+    if (this.ambientOsc) {
+      try {
+        this.ambientOsc.stop();
+        this.ambientOsc.disconnect();
+      } catch {}
+      this.ambientOsc = null;
+    }
+    if (this.ambientGain) {
+      try {
+        this.ambientGain.disconnect();
+      } catch {}
+      this.ambientGain = null;
+    }
+  }
+
+  public playBreakableShatter(type: 'pot' | 'barrel' | 'crystal' = 'pot'): void {
+    if (!this.canPlay('break_prop', 0.05)) return;
+    if (!this.audioContext || !this.masterGain) return;
+
+    const now = this.audioContext.currentTime;
+    const osc = this.audioContext.createOscillator();
+    const gain = this.audioContext.createGain();
+    const filter = this.audioContext.createBiquadFilter();
+
+    if (type === 'barrel') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(140, now);
+      osc.frequency.exponentialRampToValueAtTime(30, now + 0.12);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(350, now);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+    } else if (type === 'crystal') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, now);
+      osc.frequency.exponentialRampToValueAtTime(1760, now + 0.18);
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1200, now);
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+    } else {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(320, now);
+      osc.frequency.exponentialRampToValueAtTime(60, now + 0.12);
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(200, now);
+      gain.gain.setValueAtTime(0.22, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    }
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc.start(now);
+    osc.stop(now + 0.25);
+    osc.onended = () => {
+      osc.disconnect();
+      filter.disconnect();
+      gain.disconnect();
+    };
+  }
+
   public setMasterVolume(val: number): void {
     this.masterVolume = Math.max(0, Math.min(1, val));
     if (this.audioContext && this.masterGain && !this.muted) {
@@ -548,6 +656,7 @@ export class SoundManager implements Disposable {
   }
 
   public dispose(): void {
+    this.stopBiomeAmbience();
     if (this.unsubscribeSettings) {
       this.unsubscribeSettings();
       this.unsubscribeSettings = null;

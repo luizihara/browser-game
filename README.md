@@ -323,5 +323,32 @@ src/
 - [x] **Recompensas Lendárias de Derrota**:
   - Derrotar um chefe concede explosão massiva de partículas, Baú de Tesouro garantido, gemas douradas de 1000 XP e drop de arena.
 
+### Milestone 15 — MULTI-STAGE BIOME SYSTEM, STAGE SELECTION MENU, ENVIRONMENTAL BREAKABLES & AMBIENT WEATHER / AUDIO (Concluída)
+- [x] **Sistema Multi-Estágios & Biomas Únicos (`src/config/stageConfig.ts`)**:
+  - 🌿 **Verdant Citadel (Estágio 1)**: Prado verdejante de ruínas antigas, flores silvestres, cogumelos luminosos e vegetação viçosa (Dificuldade Padrão).
+  - 🌋 **Infernal Caldera (Estágio 2)**: Caldeira vulcânica de basalto negro, veios incandescentes de magma, cinzas no ar, +20% de velocidade dos inimigos e +30% de recompensa em ouro. Desbloqueado ao sobreviver 3 minutos na Verdant Citadel.
+  - ❄️ **Glacial Crypts (Estágio 3)**: Criptas congeladas de permafrost, pilares de gelo ciano luminescentes, nevasca contínua, +30% de HP dos inimigos e +25% de bônus de XP. Desbloqueado ao sobreviver 3 minutos na Infernal Caldera.
+- [x] **Menu de Seleção de Biomas & Estágios (`StageSelectMenu.ts`, `MainMenu.ts`, `menu.css`)**:
+  - Interface visual imponente com cards dedicados para cada bioma, ícones temáticos, badges de perigo, tags com multiplicadores de risco/recompensa, condições de desbloqueio e recordes pessoais salvos (Tempo Sobrevivido, Kills e Badge de Vitória 🏆).
+  - Fluxo integrado e coeso: `Menu Principal` $\rightarrow$ `Seleção de Personagem` $\rightarrow$ `Seleção de Estágio` $\rightarrow$ `Início da Partida`.
+- [x] **Mutação de Bioma em Tempo de Execução com Zero-GC (`Ground.ts`, `Lighting.ts`, `ArenaBounds.ts`, `PropBuilder.ts`, `World.ts`)**:
+  - Reutilização inteligente de buffers de vértices de `PlaneGeometry` via `applyBiomeColors()`, repintando o piso com paletas e padrões de ladrilho procedurais específicos de cada bioma sem alocar geometrias novas.
+  - Ajuste dinâmico de iluminação atmosférica e cor do céu em `Lighting.applyBiomeLighting()`, e recoloração de muretas e pilares em `ArenaBounds.applyBiomeMaterials()`.
+  - Geração procedural de cenografia instanciada (`PropBuilder.buildForBiome()`) com árvores de magma, rochas pontiagudas de basalto, pilares de gelo e cristais de geada.
+- [x] **Objetos Destrutíveis de Arena & Drops Extras (`BreakableProp.ts`, `DestructibleSystem.ts`)**:
+  - Objetos ambientais 3D temáticos espalhados pela arena: Vasos de cerâmica na Cidadela, Barris reforçados na Caldeira e Cristais de gelo nas Criptas.
+  - Destruição interativa através do impacto de projéteis ou proximidade da Aura Sagrada / Supernovas.
+  - Recompensas instantâneas ao quebrar: moedas de ouro (+8 a 18🪙), corações de cura (+15 HP com número flutuante verde) e gemas bônus de experiência verde.
+  - Efeitos de estilhaços tridimensionais coloridos e sistema de respawn gradual respeitando distância segura do herói.
+- [x] **Simulação de Clima Atmosférico com Partículas Zero-GC (`ParticleSystem.ts`, `GameScene.ts`)**:
+  - Emissão contínua de fagulhas e cinzas incandescentes ascendentes (`emitAmbientEmbers`) no bioma vulcânico.
+  - Tempestade de neve com flocos ciano flutuando suavemente com vento lateral (`emitAmbientSnow`) no bioma glacial.
+- [x] **Áudio Procedural & Drones de Bioma Web Audio API (`SoundManager.ts`)**:
+  - Trilha sonora procedural contínua com sintetizador aditivo em tempo real gerando drones atmosféricos harmônicos para cada bioma (harmônicos quentes para prado, ressonância profunda e crepitação para vulcão, sub-graves eufônicos gelados para as criptas).
+  - Efeitos sonoros dedicados para quebra de cerâmica, impacto em madeira e despedaçamento de gelo cristalino.
+- [x] **Persistência de Recordes e Desbloqueios por Estágio (`metaConfig.ts`, `MetaManager.ts`)**:
+  - Armazenamento independente de melhor tempo, maior contagem de abates e status de vitória para cada um dos 3 biomas com sincronização no `localStorage`.
+
+
 
 

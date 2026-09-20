@@ -4,6 +4,7 @@ import { Lighting } from './Lighting';
 import { ArenaBounds } from './ArenaBounds';
 import { PropBuilder } from '../art/PropBuilder';
 import { WORLD_CONFIG } from '../config/worldConfig';
+import type { StageConfig } from '../config/stageConfig';
 import type { Disposable } from '../types';
 
 export class World implements Disposable {
@@ -22,6 +23,20 @@ export class World implements Disposable {
     this.lighting.addToScene(scene);
     this.arenaBounds.addToScene(scene);
     this.propBuilder.addToScene(scene);
+  }
+
+  public applyStage(stage: StageConfig): void {
+    const v = stage.visual;
+    this.ground.applyBiomeColors(v.groundBaseColor, v.groundTileA, v.groundTileB);
+    this.lighting.applyBiomeLighting(
+      v.skyColor,
+      v.groundLightColor,
+      v.hemisphereIntensity,
+      v.sunColor,
+      v.sunIntensity
+    );
+    this.arenaBounds.applyBiomeMaterials(v.wallColor, v.pillarColor);
+    this.propBuilder.buildForBiome(stage.id, WORLD_CONFIG.arenaWidth, WORLD_CONFIG.arenaDepth);
   }
 
   public getBounds(): ArenaBounds {

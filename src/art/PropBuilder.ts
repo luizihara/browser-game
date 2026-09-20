@@ -1,23 +1,47 @@
 import * as THREE from 'three';
 import { ToonMaterialFactory } from './ToonMaterialFactory';
 import { PALETTE } from './Palette';
+import type { StageId } from '../config/stageConfig';
 import type { Disposable } from '../types';
 
 export class PropBuilder implements Disposable {
   private group: THREE.Group;
   private meshes: THREE.InstancedMesh[] = [];
 
-  constructor(arenaWidth: number, arenaDepth: number) {
+  constructor(arenaWidth: number, arenaDepth: number, biome: StageId = 'verdant') {
     this.group = new THREE.Group();
+    this.buildForBiome(biome, arenaWidth, arenaDepth);
+  }
 
-    this.buildPerimeterTrees(arenaWidth, arenaDepth);
-    this.buildCornerRocks(arenaWidth, arenaDepth);
-    this.buildInteriorGrassTufts(arenaWidth, arenaDepth);
-    this.buildWildflowers(arenaWidth, arenaDepth);
-    this.buildAncientPillars(arenaWidth, arenaDepth);
-    this.buildCentralCobblestones();
-    this.buildGlowingMushrooms(arenaWidth, arenaDepth);
-    this.buildFieldBoulders(arenaWidth, arenaDepth);
+  public buildForBiome(biome: StageId, width: number, depth: number): void {
+    this.clear();
+
+    switch (biome) {
+      case 'verdant':
+        this.buildPerimeterTrees(width, depth);
+        this.buildCornerRocks(width, depth);
+        this.buildInteriorGrassTufts(width, depth);
+        this.buildWildflowers(width, depth);
+        this.buildAncientPillars(width, depth);
+        this.buildCentralCobblestones();
+        this.buildGlowingMushrooms(width, depth);
+        this.buildFieldBoulders(width, depth);
+        break;
+
+      case 'inferno':
+        this.buildVolcanicSpires(width, depth);
+        this.buildBasaltColumns(width, depth);
+        this.buildMagmaGeodes(width, depth);
+        this.buildCharredRocks(width, depth);
+        break;
+
+      case 'glacial':
+        this.buildSnowPines(width, depth);
+        this.buildIceCrystals(width, depth);
+        this.buildFrostMonoliths(width, depth);
+        this.buildSnowDrifts(width, depth);
+        break;
+    }
   }
 
   private registerInstancedMesh(mesh: THREE.InstancedMesh): void {
@@ -373,6 +397,246 @@ export class PropBuilder implements Disposable {
     this.registerInstancedMesh(rockMesh);
   }
 
+  private buildVolcanicSpires(width: number, depth: number): void {
+    const halfW = width / 2;
+    const halfD = depth / 2;
+    const totalSpires = 32;
+
+    const spireGeo = new THREE.ConeGeometry(0.5, 3.2, 5);
+    spireGeo.translate(0, 1.6, 0);
+    const spireMat = ToonMaterialFactory.getMaterial(0x1c1917);
+    const spireMesh = new THREE.InstancedMesh(spireGeo, spireMat, totalSpires);
+    spireMesh.castShadow = true;
+    spireMesh.receiveShadow = true;
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < totalSpires; i++) {
+      const angle = (i / totalSpires) * Math.PI * 2;
+      const r = Math.min(halfW, halfD) * (0.8 + Math.abs(Math.sin(i * 3.7)) * 0.25);
+      const x = Math.cos(angle) * r;
+      const z = Math.sin(angle) * r;
+      const s = 0.8 + Math.abs(Math.cos(i * 2.1)) * 0.6;
+
+      dummy.position.set(x, 0, z);
+      dummy.rotation.set(Math.sin(i) * 0.15, i * 0.9, Math.cos(i) * 0.15);
+      dummy.scale.set(s, s * 1.3, s);
+      dummy.updateMatrix();
+      spireMesh.setMatrixAt(i, dummy.matrix);
+    }
+    this.registerInstancedMesh(spireMesh);
+  }
+
+  private buildBasaltColumns(width: number, depth: number): void {
+    const halfW = width * 0.42;
+    const halfD = depth * 0.42;
+    const totalCols = 24;
+
+    const colGeo = new THREE.CylinderGeometry(0.45, 0.45, 2.2, 6);
+    colGeo.translate(0, 1.1, 0);
+    const colMat = ToonMaterialFactory.getMaterial(0x292524);
+    const colMesh = new THREE.InstancedMesh(colGeo, colMat, totalCols);
+    colMesh.castShadow = true;
+    colMesh.receiveShadow = true;
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < totalCols; i++) {
+      const x = ((Math.sin(i * 47.1) * 1000) % 1) * halfW * 1.8 - halfW * 0.9;
+      const z = ((Math.cos(i * 39.3) * 1000) % 1) * halfD * 1.8 - halfD * 0.9;
+      const s = 0.7 + Math.abs(Math.sin(i * 1.5)) * 0.5;
+
+      dummy.position.set(x, 0, z);
+      dummy.rotation.set(0, i * 0.5, 0);
+      dummy.scale.set(s, s * 0.9, s);
+      dummy.updateMatrix();
+      colMesh.setMatrixAt(i, dummy.matrix);
+    }
+    this.registerInstancedMesh(colMesh);
+  }
+
+  private buildMagmaGeodes(width: number, depth: number): void {
+    const halfW = width * 0.44;
+    const halfD = depth * 0.44;
+    const totalGeodes = 36;
+
+    const geo = new THREE.DodecahedronGeometry(0.45, 0);
+    const mat = new THREE.MeshStandardMaterial({
+      color: 0xf97316,
+      emissive: 0xea580c,
+      emissiveIntensity: 1.2,
+      roughness: 0.25,
+    });
+    const geodeMesh = new THREE.InstancedMesh(geo, mat, totalGeodes);
+    geodeMesh.castShadow = true;
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < totalGeodes; i++) {
+      const x = ((Math.sin(i * 73.11) * 1000) % 1) * halfW * 1.8 - halfW * 0.9;
+      const z = ((Math.cos(i * 81.17) * 1000) % 1) * halfD * 1.8 - halfD * 0.9;
+      const s = 0.5 + Math.abs(Math.sin(i * 3.3)) * 0.5;
+
+      dummy.position.set(x, 0.25, z);
+      dummy.rotation.set(i * 0.4, i * 1.1, i * 0.7);
+      dummy.scale.set(s, s, s);
+      dummy.updateMatrix();
+      geodeMesh.setMatrixAt(i, dummy.matrix);
+    }
+    this.registerInstancedMesh(geodeMesh);
+  }
+
+  private buildCharredRocks(width: number, depth: number): void {
+    const halfW = width * 0.45;
+    const halfD = depth * 0.45;
+    const totalRocks = 30;
+
+    const geo = new THREE.DodecahedronGeometry(0.65, 0);
+    geo.scale(1.2, 0.6, 1.0);
+    const mat = ToonMaterialFactory.getMaterial(0x0c0a09);
+    const rockMesh = new THREE.InstancedMesh(geo, mat, totalRocks);
+    rockMesh.castShadow = true;
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < totalRocks; i++) {
+      const x = ((Math.sin(i * 29.13) * 1000) % 1) * halfW * 1.8 - halfW * 0.9;
+      const z = ((Math.cos(i * 31.19) * 1000) % 1) * halfD * 1.8 - halfD * 0.9;
+      const s = 0.6 + Math.abs(Math.cos(i * 2.5)) * 0.6;
+
+      dummy.position.set(x, 0.2, z);
+      dummy.rotation.set(0.1, i * 1.4, 0.05);
+      dummy.scale.set(s, s, s);
+      dummy.updateMatrix();
+      rockMesh.setMatrixAt(i, dummy.matrix);
+    }
+    this.registerInstancedMesh(rockMesh);
+  }
+
+  private buildSnowPines(width: number, depth: number): void {
+    const halfW = width / 2;
+    const halfD = depth / 2;
+    const totalTrees = 36;
+
+    const trunkGeo = new THREE.CylinderGeometry(0.25, 0.4, 2.2, 5);
+    trunkGeo.translate(0, 1.1, 0);
+    const trunkMat = ToonMaterialFactory.getMaterial(0x1e293b);
+    const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, totalTrees);
+
+    const foliageGeo = new THREE.ConeGeometry(1.5, 3.2, 5);
+    foliageGeo.translate(0, 2.8, 0);
+    const foliageMat = ToonMaterialFactory.getMaterial(0xe0f2fe);
+    const foliageMesh = new THREE.InstancedMesh(foliageGeo, foliageMat, totalTrees);
+    foliageMesh.castShadow = true;
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < totalTrees; i++) {
+      const angle = (i / totalTrees) * Math.PI * 2;
+      const r = Math.min(halfW, halfD) * (0.85 + Math.abs(Math.sin(i * 2.3)) * 0.2);
+      const x = Math.cos(angle) * r;
+      const z = Math.sin(angle) * r;
+      const s = 0.8 + Math.abs(Math.sin(i * 1.7)) * 0.45;
+
+      dummy.position.set(x, 0, z);
+      dummy.rotation.set(0, i * 0.7, 0);
+      dummy.scale.set(s, s, s);
+      dummy.updateMatrix();
+      trunkMesh.setMatrixAt(i, dummy.matrix);
+      foliageMesh.setMatrixAt(i, dummy.matrix);
+    }
+    this.registerInstancedMesh(trunkMesh);
+    this.registerInstancedMesh(foliageMesh);
+  }
+
+  private buildIceCrystals(width: number, depth: number): void {
+    const halfW = width * 0.44;
+    const halfD = depth * 0.44;
+    const totalCrystals = 34;
+
+    const geo = new THREE.ConeGeometry(0.35, 1.8, 5);
+    geo.translate(0, 0.9, 0);
+    const mat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.9,
+      roughness: 0.15,
+      metalness: 0.35,
+    });
+    const crystalMesh = new THREE.InstancedMesh(geo, mat, totalCrystals);
+    crystalMesh.castShadow = true;
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < totalCrystals; i++) {
+      const x = ((Math.sin(i * 61.7) * 1000) % 1) * halfW * 1.8 - halfW * 0.9;
+      const z = ((Math.cos(i * 53.9) * 1000) % 1) * halfD * 1.8 - halfD * 0.9;
+      const s = 0.6 + Math.abs(Math.sin(i * 2.9)) * 0.6;
+
+      dummy.position.set(x, 0, z);
+      dummy.rotation.set(Math.sin(i) * 0.2, i * 1.3, Math.cos(i) * 0.2);
+      dummy.scale.set(s, s, s);
+      dummy.updateMatrix();
+      crystalMesh.setMatrixAt(i, dummy.matrix);
+    }
+    this.registerInstancedMesh(crystalMesh);
+  }
+
+  private buildFrostMonoliths(width: number, depth: number): void {
+    const halfW = width * 0.35;
+    const halfD = depth * 0.35;
+    const totalMonoliths = 10;
+
+    const geo = new THREE.BoxGeometry(0.8, 3.2, 0.8);
+    geo.translate(0, 1.6, 0);
+    const mat = ToonMaterialFactory.getMaterial(0x0284c7);
+    const mesh = new THREE.InstancedMesh(geo, mat, totalMonoliths);
+    mesh.castShadow = true;
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < totalMonoliths; i++) {
+      const angle = (i / totalMonoliths) * Math.PI * 2;
+      const r = Math.min(halfW, halfD) * 0.75;
+      const x = Math.cos(angle) * r;
+      const z = Math.sin(angle) * r;
+
+      dummy.position.set(x, 0, z);
+      dummy.rotation.set(0.08, i * 0.8, -0.08);
+      dummy.scale.set(1.0, 0.8 + Math.abs(Math.sin(i)) * 0.6, 1.0);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+    }
+    this.registerInstancedMesh(mesh);
+  }
+
+  private buildSnowDrifts(width: number, depth: number): void {
+    const halfW = width * 0.45;
+    const halfD = depth * 0.45;
+    const totalDrifts = 40;
+
+    const geo = new THREE.DodecahedronGeometry(0.7, 1);
+    geo.scale(1.4, 0.4, 1.2);
+    const mat = ToonMaterialFactory.getMaterial(0xf0f9ff);
+    const mesh = new THREE.InstancedMesh(geo, mat, totalDrifts);
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < totalDrifts; i++) {
+      const x = ((Math.sin(i * 89.3) * 1000) % 1) * halfW * 1.8 - halfW * 0.9;
+      const z = ((Math.cos(i * 97.1) * 1000) % 1) * halfD * 1.8 - halfD * 0.9;
+      const s = 0.7 + Math.abs(Math.sin(i * 1.8)) * 0.6;
+
+      dummy.position.set(x, 0.1, z);
+      dummy.rotation.set(0, i * 0.5, 0);
+      dummy.scale.set(s, s, s);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
+    }
+    this.registerInstancedMesh(mesh);
+  }
+
+  public clear(): void {
+    for (let i = 0; i < this.meshes.length; i++) {
+      this.group.remove(this.meshes[i]!);
+      this.meshes[i]!.geometry.dispose();
+    }
+    this.meshes = [];
+    this.group.clear();
+  }
+
   public addToScene(scene: THREE.Scene): void {
     scene.add(this.group);
   }
@@ -382,10 +646,6 @@ export class PropBuilder implements Disposable {
   }
 
   public dispose(): void {
-    for (let i = 0; i < this.meshes.length; i++) {
-      this.meshes[i]!.geometry.dispose();
-    }
-    this.meshes = [];
-    this.group.clear();
+    this.clear();
   }
 }

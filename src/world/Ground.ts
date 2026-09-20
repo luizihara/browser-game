@@ -103,4 +103,40 @@ export class Ground implements Disposable {
       this.arenaBorderLine = null;
     }
   }
+
+  public applyBiomeColors(baseColor: number, tileA: number, tileB: number): void {
+    const geometry = this.mesh.geometry as THREE.PlaneGeometry;
+    const colorAttr = geometry.getAttribute('color') as THREE.BufferAttribute;
+    if (!colorAttr) return;
+
+    const colors = colorAttr.array as Float32Array;
+    const count = geometry.attributes.position!.count;
+    const posAttr = geometry.attributes.position!;
+
+    const colorA = new THREE.Color(baseColor);
+    const colorB = new THREE.Color(tileA);
+    const colorC = new THREE.Color(tileB);
+    const tempColor = new THREE.Color();
+
+    for (let i = 0; i < count; i++) {
+      const x = posAttr.getX(i);
+      const y = posAttr.getY(i);
+
+      const val = Math.sin(x * 0.1) * Math.cos(y * 0.1) * 0.5 + 0.5;
+      const checker = (Math.floor(x / 4) + Math.floor(y / 4)) % 2 === 0 ? 0.15 : 0;
+      const factor = Math.min(1.0, Math.max(0, val * 0.8 + checker));
+
+      if (factor < 0.5) {
+        tempColor.lerpColors(colorC, colorA, factor * 2);
+      } else {
+        tempColor.lerpColors(colorA, colorB, (factor - 0.5) * 2);
+      }
+
+      colors[i * 3] = tempColor.r;
+      colors[i * 3 + 1] = tempColor.g;
+      colors[i * 3 + 2] = tempColor.b;
+    }
+
+    colorAttr.needsUpdate = true;
+  }
 }

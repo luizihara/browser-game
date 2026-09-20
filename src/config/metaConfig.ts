@@ -4,6 +4,13 @@ import {
   type MetaUpgradeId,
 } from './metaUpgradeConfig';
 import { CHARACTER_CONFIG, type CharacterId } from './characterConfig';
+import type { StageId } from './stageConfig';
+
+export interface StageRecord {
+  bestTime: number;
+  maxKills: number;
+  cleared: boolean;
+}
 
 export interface PlayerRecords {
   bestTime: number; // in seconds
@@ -14,6 +21,9 @@ export interface PlayerRecords {
   upgrades: Record<MetaUpgradeId, number>;
   selectedCharacter: CharacterId;
   unlockedCharacters: CharacterId[];
+  selectedStage: StageId;
+  unlockedStages: StageId[];
+  stageRecords: Record<StageId, StageRecord>;
 }
 
 const STORAGE_KEY = 'survivor_player_records';
@@ -29,6 +39,12 @@ const DEFAULT_UPGRADES: Record<MetaUpgradeId, number> = {
   greed: 0,
 };
 
+const DEFAULT_STAGE_RECORDS: Record<StageId, StageRecord> = {
+  verdant: { bestTime: 0, maxKills: 0, cleared: false },
+  inferno: { bestTime: 0, maxKills: 0, cleared: false },
+  glacial: { bestTime: 0, maxKills: 0, cleared: false },
+};
+
 const DEFAULT_RECORDS: PlayerRecords = {
   bestTime: 0,
   highestLevel: 1,
@@ -38,6 +54,9 @@ const DEFAULT_RECORDS: PlayerRecords = {
   upgrades: { ...DEFAULT_UPGRADES },
   selectedCharacter: 'knight',
   unlockedCharacters: ['knight', 'mage'],
+  selectedStage: 'verdant',
+  unlockedStages: ['verdant'],
+  stageRecords: { ...DEFAULT_STAGE_RECORDS },
 };
 
 export class MetaManager {
@@ -69,6 +88,12 @@ export class MetaManager {
           },
           selectedCharacter: parsed.selectedCharacter || 'knight',
           unlockedCharacters: parsed.unlockedCharacters || ['knight', 'mage'],
+          selectedStage: parsed.selectedStage || 'verdant',
+          unlockedStages: parsed.unlockedStages || ['verdant'],
+          stageRecords: {
+            ...DEFAULT_STAGE_RECORDS,
+            ...(parsed.stageRecords || {}),
+          },
         };
       }
     } catch {
@@ -78,6 +103,9 @@ export class MetaManager {
       ...DEFAULT_RECORDS,
       upgrades: { ...DEFAULT_UPGRADES },
       unlockedCharacters: ['knight', 'mage'],
+      selectedStage: 'verdant',
+      unlockedStages: ['verdant'],
+      stageRecords: { ...DEFAULT_STAGE_RECORDS },
     };
   }
 
@@ -180,7 +208,48 @@ export class MetaManager {
     return true;
   }
 
-  public submitRun(runTime: number, level: number, kills: number, gold: number): boolean {
+  public getSelectedStage(): StageId {
+    return this.records.selectedStage || 'verdant';
+  }
+
+  public setSelectedStage(id: StageId): void {
+    if (this.isStageUnlocked(id)) {
+      this.records.selectedStage = id;
+      this.saveRecords();
+    }
+  }
+
+  public isStageUnlocked(id: StageId): boolean {
+    return this.records.unlockedStages?.includes(id) ?? id === 'verdant';
+  }
+
+  public unlockStage(id: StageId): boolean {
+    if (this.isStageUnlocked(id)) return true;
+    if (!this.records.unlockedStages) {
+      this.records.unlockedStages = ['verdant'];
+    }
+    this.records.unlockedStages.push(id);
+    this.saveRecords();
+    return true;
+  }
+
+  public getStageRecord(id: StageId): StageRecord {
+    return (
+      this.records.stageRecords?.[id] ?? {
+        bestTime: 0,
+        maxKills: 0,
+        cleared: false,
+      }
+    );
+  }
+
+  public submitRun(
+    runTime: number,
+    level: number,
+    kills: number,
+    gold: number,
+    stageId: StageId = this.records.selectedStage || 'verdant'
+  ): boolean {
     let isNewRecord = false;
 
     if (runTime > this.records.bestTime) {
@@ -194,6 +263,38 @@ export class MetaManager {
     if (kills > this.records.maxKills) {
       this.records.maxKills = kills;
       isNewRecord = true;
+    }
+
+    // Update Stage-Specific Record
+    if (!this.records.stageRecords) {
+      this.records.stageRecords = {
+        verdant: { bestTime: 0, maxKills: 0, cleared: false },
+        inferno: { bestTime: 0, maxKills: 0, cleared: false },
+        glacial: { bestTime: 0, maxKills: 0, cleared: false },
+      };
+    }
+    const currentStageRecord = this.records.stageRecords[stageId] ?? {
+      bestTime: 0,
+      maxKills: 0,
+      cleared: false,
+    };
+    if (runTime > currentStageRecord.bestTime) {
+      currentStageRecord.bestTime = runTime;
+    }
+    if (kills > currentStageRecord.maxKills) {
+      currentStageRecord.maxKills = kills;
+    }
+    if (runTime >= 300) {
+      currentStageRecord.cleared = true;
+    }
+    this.records.stageRecords[stageId] = currentStageRecord;
+
+    // Stage Progression Unlock Check
+    if (stageId === 'verdant' && runTime >= 180) {
+      this.unlockStage('inferno');
+    }
+    if (stageId === 'inferno' && runTime >= 180) {
+      this.unlockStage('glacial');
     }
 
     // Apply Greed meta upgrade multiplier to end of run gold

@@ -41,6 +41,10 @@ import type { BossId } from '../config/bossConfig';
 import { TelegraphSystem } from '../systems/TelegraphSystem';
 import { RadarSystem } from '../systems/RadarSystem';
 import { DamageNumberSystem, type DamageNumberType } from '../fx/DamageNumberSystem';
+import { STAGE_CONFIG, type StageId } from '../config/stageConfig';
+import { DestructibleSystem, type PropDrop } from '../systems/DestructibleSystem';
+import type { BreakableProp } from '../entities/destructible/BreakableProp';
+import { AuraWeapon } from '../weapons/AuraWeapon';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -58,6 +62,9 @@ export class GameScene extends BaseScene {
   private experienceSystem: ExperienceSystem;
   private upgradeSystem: UpgradeSystem;
   private directorSystem: DirectorSystem;
+  private destructibleSystem: DestructibleSystem;
+  private currentStageId: StageId = 'verdant';
+  private weatherTimer: number = 0;
   private particleSystem: ParticleSystem;
   private damageNumberSystem: DamageNumberSystem = new DamageNumberSystem();
   private telegraphSystem: TelegraphSystem = new TelegraphSystem();
@@ -108,6 +115,7 @@ export class GameScene extends BaseScene {
     this.weaponSystem = new WeaponSystem(this.entityManager, this.threeScene);
     this.experienceSystem = new ExperienceSystem(this.entityManager);
     this.pickupSystem = new PickupSystem(this.entityManager);
+    this.destructibleSystem = new DestructibleSystem(this.entityManager);
     this.upgradeSystem = new UpgradeSystem();
     this.directorSystem = new DirectorSystem();
     this.chestModal = new TreasureChestModal();
@@ -133,9 +141,15 @@ export class GameScene extends BaseScene {
     const selectedCharId = MetaManager.getInstance().getSelectedCharacter();
     const charDef = CHARACTER_CONFIG[selectedCharId] ?? CHARACTER_CONFIG.knight;
 
+    this.currentStageId = MetaManager.getInstance().getSelectedStage();
+    const stageDef = STAGE_CONFIG[this.currentStageId] ?? STAGE_CONFIG.verdant;
+
     if (!this.world) {
       this.world = new World(this.threeScene);
     }
+    this.world.applyStage(stageDef);
+    this.soundManager.startBiomeAmbience(stageDef.ambientTheme);
+
     if (!this.player) {
       this.player = new Player(selectedCharId);
       this.entityManager.add(this.player);
@@ -153,6 +167,7 @@ export class GameScene extends BaseScene {
     }
 
     const bounds = this.world.getBounds();
+    this.destructibleSystem.initForStage(stageDef.destructibleType, bounds);
     this.enemySpawner.setTarget(this.player);
     this.enemySpawner.setBounds(bounds);
     this.enemyMovementSystem.setTarget(this.player);
@@ -484,6 +499,37 @@ export class GameScene extends BaseScene {
       });
     }
 
+    // Update Destructible Environmental Props & Collisions
+    this.destructibleSystem.update(
+      deltaTime,
+      this.weaponSystem.getActiveProjectiles(),
+      (prop, drop) => this.onPropShattered(prop, drop)
+    );
+
+    // Check aura pulse breaking nearby props
+    const auraWeapon = this.weaponSystem.getWeapon('aura');
+    if (auraWeapon && auraWeapon instanceof AuraWeapon && auraWeapon.isPulsing && this.player) {
+      this.destructibleSystem.breakNear(
+        this.player.position.x,
+        this.player.position.z,
+        auraWeapon.pulseRadius,
+        (prop, drop) => this.onPropShattered(prop, drop)
+      );
+    }
+
+    // Ambient Weather Particle Generation
+    const currentStage = STAGE_CONFIG[this.currentStageId] ?? STAGE_CONFIG.verdant;
+    if (this.player) {
+      this.weatherTimer += deltaTime;
+      if (currentStage.visual.ambientWeather === 'embers' && this.weatherTimer >= 0.08) {
+        this.weatherTimer = 0;
+        this.particleSystem.emitAmbientEmbers(this.player.position.x, this.player.position.z, 2);
+      } else if (currentStage.visual.ambientWeather === 'snow' && this.weatherTimer >= 0.05) {
+        this.weatherTimer = 0;
+        this.particleSystem.emitAmbientSnow(this.player.position.x, this.player.position.z, 4);
+      }
+    }
+
     // Check Player Status & Update HUD
     if (this.player) {
       this.hud.updateHp(this.player.hp, this.player.maxHp);
@@ -626,16 +672,71 @@ export class GameScene extends BaseScene {
     this.context.inputSystem.reset();
   }
 
+  private onPropShattered(prop: BreakableProp, drop: PropDrop): void {
+    this.soundManager.playBreakableShatter(prop.propType);
+    this.particleSystem.emitHitSparks(
+      prop.position.x,
+      0.5,
+      prop.position.z,
+      prop.getColor()
+    );
+
+    const stageDef = STAGE_CONFIG[this.currentStageId] ?? STAGE_CONFIG.verdant;
+
+    switch (drop.type) {
+      case 'gold': {
+        const greedBonus = MetaManager.getInstance().getStatBonus('greed');
+        const amount = Math.round(drop.amount * (1.0 + greedBonus) * stageDef.modifiers.goldMult);
+        MetaManager.getInstance().addGold(amount);
+        this.damageNumberSystem.spawn(
+          prop.position.x,
+          prop.position.y + 0.6,
+          prop.position.z,
+          amount,
+          'crit'
+        );
+        break;
+      }
+      case 'heal': {
+        if (this.player && this.player.hp > 0) {
+          this.player.heal(drop.amount);
+          this.hud.updateHp(this.player.hp, this.player.maxHp);
+          this.soundManager.playHeal();
+          this.damageNumberSystem.spawn(
+            this.player.position.x,
+            this.player.position.y + 0.8,
+            this.player.position.z,
+            drop.amount,
+            'heal'
+          );
+        }
+        break;
+      }
+      case 'xp': {
+        this.experienceSystem.spawnGem(
+          prop.position.x,
+          prop.position.z,
+          'green',
+          drop.amount
+        );
+        break;
+      }
+    }
+  }
+
   private triggerGameOver(): void {
     this.isGameOver = true;
     this.soundManager.playGameOver();
+    const stageDef = STAGE_CONFIG[this.currentStageId] ?? STAGE_CONFIG.verdant;
     const level = this.experienceSystem.getLevel();
-    const goldEarned = Math.floor(this.killCount * 0.5 + this.runTime * 0.2 + level * 5);
+    const baseGold = Math.floor(this.killCount * 0.5 + this.runTime * 0.2 + level * 5);
+    const goldEarned = Math.round(baseGold * stageDef.modifiers.goldMult);
     MetaManager.getInstance().submitRun(
       this.runTime,
       level,
       this.killCount,
-      goldEarned
+      goldEarned,
+      this.currentStageId
     );
     this.gameOverMenu.mount(this.context.uiRoot, formatTime(this.runTime));
   }
@@ -645,13 +746,16 @@ export class GameScene extends BaseScene {
     this.soundManager.playLevelUp();
     this.cameraController.addTrauma(0.5);
 
+    const stageDef = STAGE_CONFIG[this.currentStageId] ?? STAGE_CONFIG.verdant;
     const level = this.experienceSystem.getLevel();
-    const goldEarned = Math.floor(this.killCount * 1.0 + this.runTime * 0.5 + level * 20);
+    const baseGold = Math.floor(this.killCount * 1.0 + this.runTime * 0.5 + level * 20);
+    const goldEarned = Math.round(baseGold * stageDef.modifiers.goldMult);
     const isNewRecord = MetaManager.getInstance().submitRun(
       this.runTime,
       level,
       this.killCount,
-      goldEarned
+      goldEarned,
+      this.currentStageId
     );
 
     const weaponStats: WeaponDamageStat[] = (Object.keys(this.weaponDamageDealt) as WeaponId[])
@@ -678,6 +782,7 @@ export class GameScene extends BaseScene {
     const selectedCharId = meta.getSelectedCharacter();
     const charDef = CHARACTER_CONFIG[selectedCharId] ?? CHARACTER_CONFIG.knight;
     const stats = charDef.statModifiers;
+    const stageDef = STAGE_CONFIG[this.currentStageId] ?? STAGE_CONFIG.verdant;
 
     // Vitality: +Max HP with class offset
     this.player.maxHp = Math.max(20, PLAYER_CONFIG.maxHp + stats.maxHpOffset + meta.getStatBonus('vitality'));
@@ -705,8 +810,11 @@ export class GameScene extends BaseScene {
     this.experienceSystem.setPickupRange(baseRange);
     this.pickupSystem.setPickupRange(baseRange);
 
-    // Growth: +XP multiplier
-    this.experienceSystem.xpMultiplier = 1.0 + meta.getStatBonus('growth');
+    // Growth: +XP multiplier combined with stage modifier
+    this.experienceSystem.xpMultiplier = (1.0 + meta.getStatBonus('growth')) * stageDef.modifiers.xpMult;
+
+    // Director enemy multipliers based on stage
+    this.directorSystem.setStageModifiers(stageDef.modifiers.enemyHpMult, stageDef.modifiers.enemySpeedMult);
   }
 
   private onCollectPickup(item: PickupItem): void {
@@ -837,6 +945,14 @@ export class GameScene extends BaseScene {
     const selectedCharId = MetaManager.getInstance().getSelectedCharacter();
     const charDef = CHARACTER_CONFIG[selectedCharId] ?? CHARACTER_CONFIG.knight;
 
+    this.currentStageId = MetaManager.getInstance().getSelectedStage();
+    const stageDef = STAGE_CONFIG[this.currentStageId] ?? STAGE_CONFIG.verdant;
+
+    if (this.world) {
+      this.world.applyStage(stageDef);
+    }
+    this.soundManager.startBiomeAmbience(stageDef.ambientTheme);
+
     if (this.player) {
       this.player.setCharacter(selectedCharId);
       this.upgradeSystem.reset(
@@ -854,6 +970,12 @@ export class GameScene extends BaseScene {
       this.cameraController.setTarget(this.player.position, true);
       this.cameraController.resetTrauma();
       this.hud.updateHp(this.player.hp, this.player.maxHp);
+    }
+
+    const bounds = this.world ? this.world.getBounds() : null;
+    this.destructibleSystem.clear();
+    if (bounds) {
+      this.destructibleSystem.initForStage(stageDef.destructibleType, bounds);
     }
 
     this.enemySpawner.clear();
@@ -897,6 +1019,8 @@ export class GameScene extends BaseScene {
     this.levelUpMenu.unmount();
     this.chestModal.unmount();
     this.damageNumberSystem.clear();
+    this.destructibleSystem.clear();
+    this.soundManager.stopBiomeAmbience();
     this.isPaused = false;
     this.isGameOver = false;
     this.isVictory = false;
@@ -921,6 +1045,8 @@ export class GameScene extends BaseScene {
     this.chestModal.unmount();
     this.hud.unmount();
     this.damageNumberSystem.clear();
+    this.destructibleSystem.clear();
+    this.soundManager.stopBiomeAmbience();
     this.removeActiveBoss();
     this.telegraphSystem.clear();
     this.radarSystem.clear();
@@ -939,6 +1065,8 @@ export class GameScene extends BaseScene {
     this.chestModal.unmount();
     this.hud.unmount();
     this.damageNumberSystem.dispose();
+    this.destructibleSystem.dispose();
+    this.soundManager.stopBiomeAmbience();
     this.removeActiveBoss();
     this.telegraphSystem.dispose();
     this.radarSystem.dispose();

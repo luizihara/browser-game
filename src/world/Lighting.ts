@@ -46,6 +46,20 @@ export class Lighting implements Disposable {
     scene.remove(this.directionalLight);
   }
 
+  public applyBiomeLighting(
+    skyColor: number,
+    groundColor: number,
+    hemiIntensity: number,
+    sunColor: number,
+    sunIntensity: number
+  ): void {
+    this.ambientLight.color.setHex(skyColor);
+    this.ambientLight.groundColor.setHex(groundColor);
+    this.ambientLight.intensity = hemiIntensity;
+    this.directionalLight.color.setHex(sunColor);
+    this.directionalLight.intensity = sunIntensity;
+  }
+
   public dispose(): void {
     this.directionalLight.dispose();
   }

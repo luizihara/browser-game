@@ -275,6 +275,70 @@ export class ParticleSystem implements Disposable, Updatable {
     this.markBuffersUpdated();
   }
 
+  public emitAmbientEmbers(x: number, z: number, count: number = 3): void {
+    const colors = [0xf97316, 0xfbbf24, 0xef4444];
+    for (let c = 0; c < count; c++) {
+      const slot = this.allocateSlot();
+      const pIdx = slot * 3;
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 3.0 + Math.random() * 12.0;
+
+      this.positions[pIdx] = x + Math.cos(angle) * dist;
+      this.positions[pIdx + 1] = 0.1 + Math.random() * 0.4;
+      this.positions[pIdx + 2] = z + Math.sin(angle) * dist;
+
+      this.velX[slot] = (Math.random() - 0.5) * 0.6;
+      this.velY[slot] = 0.8 + Math.random() * 1.2;
+      this.velZ[slot] = (Math.random() - 0.5) * 0.6;
+
+      const pColor = colors[Math.floor(Math.random() * colors.length)];
+      this.setColorAt(slot, pColor);
+
+      this.alphas[slot] = 0.85;
+      const sz = 0.18 + Math.random() * 0.12;
+      this.sizes[slot] = sz;
+      this.initialSizes[slot] = sz;
+
+      this.life[slot] = 0;
+      this.maxLife[slot] = 1.8 + Math.random() * 1.4;
+      this.gravity[slot] = 0;
+      this.drag[slot] = 0.05;
+    }
+    this.markBuffersUpdated();
+  }
+
+  public emitAmbientSnow(x: number, z: number, count: number = 4): void {
+    const colors = [0xf8fafc, 0xe0f2fe, 0xbae6fd];
+    for (let c = 0; c < count; c++) {
+      const slot = this.allocateSlot();
+      const pIdx = slot * 3;
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 2.0 + Math.random() * 14.0;
+
+      this.positions[pIdx] = x + Math.cos(angle) * dist;
+      this.positions[pIdx + 1] = 5.0 + Math.random() * 3.0;
+      this.positions[pIdx + 2] = z + Math.sin(angle) * dist;
+
+      this.velX[slot] = (Math.random() - 0.5) * 0.8 + 0.3;
+      this.velY[slot] = -(1.2 + Math.random() * 1.0);
+      this.velZ[slot] = (Math.random() - 0.5) * 0.8;
+
+      const pColor = colors[Math.floor(Math.random() * colors.length)];
+      this.setColorAt(slot, pColor);
+
+      this.alphas[slot] = 0.75;
+      const sz = 0.16 + Math.random() * 0.12;
+      this.sizes[slot] = sz;
+      this.initialSizes[slot] = sz;
+
+      this.life[slot] = 0;
+      this.maxLife[slot] = 2.5 + Math.random() * 1.5;
+      this.gravity[slot] = 0;
+      this.drag[slot] = 0.02;
+    }
+    this.markBuffersUpdated();
+  }
+
   public update(deltaTime: number): void {
     if (this.activeCount === 0) {
       if (this.geometry.drawRange.count !== 0) {

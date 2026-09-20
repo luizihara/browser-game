@@ -71,6 +71,14 @@ export class AuraWeapon implements Weapon {
     return this.level >= this.maxLevel;
   }
 
+  public get pulseRadius(): number {
+    return this.currentWaveRadius;
+  }
+
+  public get isPulsing(): boolean {
+    return this.pulseTimer > 0;
+  }
+
   public upgrade(): boolean {
     if (this.isMaxLevel) return false;
     this.level++;

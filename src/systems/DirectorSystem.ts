@@ -12,9 +12,16 @@ export class DirectorSystem {
   private triggeredEventIds: Set<string> = new Set();
   private nextRecurringTime: number = 0;
   private lastScheduledTime: number = 0;
+  private stageHpMult: number = 1.0;
+  private stageSpeedMult: number = 1.0;
 
   constructor() {
     this.initTimeline();
+  }
+
+  public setStageModifiers(hpMult: number, speedMult: number): void {
+    this.stageHpMult = hpMult;
+    this.stageSpeedMult = speedMult;
   }
 
   private initTimeline(): void {
@@ -30,14 +37,14 @@ export class DirectorSystem {
 
   public getMultipliers(): EnemyStatMultipliers {
     const minutes = this.runTime / 60;
-    const hp = 1.0 + minutes * DIRECTOR_CONFIG.scaling.hpGrowthPerMinute;
+    const hp = (1.0 + minutes * DIRECTOR_CONFIG.scaling.hpGrowthPerMinute) * this.stageHpMult;
     const damage = 1.0 + minutes * DIRECTOR_CONFIG.scaling.damageGrowthPerMinute;
     const speed =
-      1.0 +
+      (1.0 +
       Math.min(
         DIRECTOR_CONFIG.scaling.speedGrowthMax,
         minutes * DIRECTOR_CONFIG.scaling.speedGrowthPerMinute
-      );
+      )) * this.stageSpeedMult;
     return { hp, damage, speed };
   }
 

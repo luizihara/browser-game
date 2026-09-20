@@ -2,6 +2,7 @@ import { GAME_CONFIG } from '../config/gameConfig';
 import { SettingsMenu } from './SettingsMenu';
 import { MetaShopMenu } from './MetaShopMenu';
 import { CharacterSelectMenu } from './CharacterSelectMenu';
+import { StageSelectMenu } from './StageSelectMenu';
 import { MetaManager } from '../config/metaConfig';
 import { formatTime } from '../utils/math';
 import '../styles/menu.css';
@@ -12,6 +13,8 @@ export class MainMenu {
   private settingsMenu: SettingsMenu;
   private metaShopMenu: MetaShopMenu;
   private characterSelectMenu: CharacterSelectMenu;
+  private stageSelectMenu: StageSelectMenu;
+  private parentContainer: HTMLElement | null = null;
 
   constructor(onStart: () => void) {
     this.onStartCallback = onStart;
@@ -31,10 +34,27 @@ export class MainMenu {
       }
     });
 
+    this.stageSelectMenu = new StageSelectMenu(
+      () => {
+        this.stageSelectMenu.unmount();
+        this.onStartCallback();
+      },
+      () => {
+        this.stageSelectMenu.unmount();
+        if (this.parentContainer) {
+          this.characterSelectMenu.mount(this.parentContainer);
+        }
+      }
+    );
+
     this.characterSelectMenu = new CharacterSelectMenu(
       () => {
         this.characterSelectMenu.unmount();
-        this.onStartCallback();
+        if (this.parentContainer) {
+          this.stageSelectMenu.mount(this.parentContainer);
+        } else {
+          this.onStartCallback();
+        }
       },
       () => {
         this.characterSelectMenu.unmount();
@@ -48,6 +68,7 @@ export class MainMenu {
 
   public mount(parent: HTMLElement): void {
     if (this.element) return;
+    this.parentContainer = parent;
 
     this.element = document.createElement('div');
     this.element.className = 'overlay-screen';
@@ -122,9 +143,11 @@ export class MainMenu {
     this.settingsMenu.unmount();
     this.metaShopMenu.unmount();
     this.characterSelectMenu.unmount();
+    this.stageSelectMenu.unmount();
     if (this.element && this.element.parentElement) {
       this.element.parentElement.removeChild(this.element);
     }
     this.element = null;
+    this.parentContainer = null;
   }
 }

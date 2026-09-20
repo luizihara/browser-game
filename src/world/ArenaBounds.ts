@@ -118,6 +118,23 @@ export class ArenaBounds implements Disposable {
     return this.group;
   }
 
+  public applyBiomeMaterials(wallColor: number, pillarColor: number): void {
+    const newWallMat = ToonMaterialFactory.getMaterial(wallColor);
+    const newPillarMat = ToonMaterialFactory.getMaterial(pillarColor);
+    this.wallMaterial = newWallMat;
+    this.pillarMaterial = newPillarMat;
+
+    this.group.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        if (child.geometry instanceof THREE.CylinderGeometry) {
+          child.material = newPillarMat;
+        } else if (child.geometry instanceof THREE.BoxGeometry) {
+          child.material = newWallMat;
+        }
+      }
+    });
+  }
+
   public addToScene(scene: THREE.Scene): void {
     scene.add(this.group);
   }

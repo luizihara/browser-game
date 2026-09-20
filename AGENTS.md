@@ -26,8 +26,10 @@ O jogo conta com:
 - Drops especiais 3D de arena (`PickupItem`, `PickupSystem`) com Baús de Tesouro (`TreasureChestModal`), Poções de Vida, Ímã Cósmico e Bomba Sacra;
 - Seleção de Personagens e 4 Heróis Únicos (`CharacterSelectMenu`, `characterConfig.ts`, `CharacterBuilder.ts`): Sir Roderick (Cavaleiro), Elara (Maga), Kage (Ladino) e Aurelius (Templário), cada qual com modelo 3D low-poly próprio, arma inicial exclusiva, passivas e desbloqueio por ouro persistente no `MetaManager`;
 - Super-Armas Evoluídas e Sinergias (`evolutionConfig.ts`, `WeaponSystem.ts`, `UpgradeSystem.ts`): 4 armas evoluídas lendárias (*Holy Astral Beam, Aegis Citadel, Solar Supernova, Thousand Shadow Blades*) combinando armas Lv 5 com passivas adquiridas, disponíveis no modal de Level Up e Baús;
-- Números de Dano Flutuantes Zero-GC e Acertos Críticos (`DamageNumberSystem.ts`, `CombatSystem.ts`): Feedback visual de combate com projeção 3D para tela, cores temáticas por elemento/arma, tipografia de acertos críticos com exclamação (*CRIT!*) e alternância nas Configurações;
-- Confrontos Épicos com Chefes, Decais de Telégrafo de Perigo e Radar Minimap (`bossConfig.ts`, `Boss.ts`, `TelegraphSystem.ts`, `RadarSystem.ts`, `HUD.ts`): Mid-Boss *Gorgonath the Earthbreaker* (150s) e Final Boss *Malakor the Shadow Overlord* (260s) com IA de máquina de estados, imunidade a knockback, telégrafos de solo pré-alocados para impactos circulares e investidas retangulares, barra de vida de chefe no HUD e minimapa radar com rastreador fora de tela.
+- Confrontos Épicos com Chefes, Decais de Telégrafo de Perigo e Radar Minimap (`bossConfig.ts`, `Boss.ts`, `TelegraphSystem.ts`, `RadarSystem.ts`, `HUD.ts`): Mid-Boss *Gorgonath the Earthbreaker* (150s) e Final Boss *Malakor the Shadow Overlord* (260s) com IA de máquina de estados, imunidade a knockback, telégrafos de solo pré-alocados para impactos circulares e investidas retangulares, barra de vida de chefe no HUD e minimapa radar com rastreador fora de tela;
+- Sistema Multi-Estágios & Biomas Únicos (`stageConfig.ts`, `StageSelectMenu.ts`, `World.ts`, `Ground.ts`, `Lighting.ts`, `ArenaBounds.ts`, `PropBuilder.ts`): 3 biomas com paletas dinâmicas em tempo de execução (*Verdant Citadel*, *Infernal Caldera* com +20% velocidade e +30% ouro, *Glacial Crypts* com +30% HP e +25% XP), desbloqueios por tempo, recordes persistentes e mutação de vértices e iluminação Zero-GC;
+- Objetos Destrutíveis de Arena & Drops Extras (`BreakableProp.ts`, `DestructibleSystem.ts`): Vasos de cerâmica, barris reforçados e cristais de gelo que quebram com projéteis ou pulsos de aura, liberando ouro, corações de cura e gemas bônus de XP;
+- Clima Atmosférico Procedural e Áudio de Bioma (`ParticleSystem.ts`, `SoundManager.ts`): Fagulhas/cinzas vulcânicas ascendentes, tempestade de neve contínua e sintetizador aditivo em tempo real de drones harmônicos para cada ambiente.
 
 Portanto, **toda decisão técnica tomada no presente deve permitir essa escala sem exigir reescritas completas**.
 
@@ -79,14 +81,14 @@ src/
 ├── camera/      # Câmera e controladores de acompanhamento com screen shake
 ├── config/      # Constantes de configuração centralizadas (sem magic numbers)
 ├── core/        # Game, GameLoop, Renderer, Time
-├── entities/    # Classes base, EntityManager e entidades (Player, Enemy, Projectile, XpGem, PickupItem, SandboxDummy)
+├── entities/    # Classes base, EntityManager e entidades (Player, Enemy, Projectile, XpGem, PickupItem, BreakableProp, Boss, SandboxDummy)
 ├── fx/          # Sistema de partículas Zero-GC, shaders visuais e DamageNumberSystem
 ├── loaders/     # Carregamento assíncrono e cache de assets
 ├── scenes/      # Scene interface, SceneManager e cenas do jogo
 ├── styles/      # Arquivos CSS modulares (global, hud, menu, level-up)
-├── systems/     # Sistemas independentes (InputSystem, EnemyMovementSystem, EnemySpawner, DirectorSystem, CombatSystem, WeaponSystem, ExperienceSystem, UpgradeSystem, PickupSystem)
+├── systems/     # Sistemas independentes (InputSystem, EnemyMovementSystem, EnemySpawner, DirectorSystem, CombatSystem, WeaponSystem, ExperienceSystem, UpgradeSystem, PickupSystem, DestructibleSystem, TelegraphSystem, RadarSystem)
 ├── types/       # Tipagens e interfaces globais
-├── ui/          # Overlays DOM (HUD, PauseMenu, GameOverMenu, LevelUpMenu, SettingsMenu, VictoryMenu, MetaShopMenu, CharacterSelectMenu, TreasureChestModal)
+├── ui/          # Overlays DOM (HUD, PauseMenu, GameOverMenu, LevelUpMenu, SettingsMenu, VictoryMenu, MetaShopMenu, CharacterSelectMenu, StageSelectMenu, TreasureChestModal)
 ├── utils/       # Funções utilitárias (matemática, debug)
 └── weapons/     # Interface Weapon e implementações (ProjectileWeapon, OrbitalWeapon, AuraWeapon, DaggerWeapon)
 ```
