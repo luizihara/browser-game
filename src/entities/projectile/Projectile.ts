@@ -20,15 +20,26 @@ export class Projectile extends Entity {
     damage: number = WEAPON_CONFIG.wand.damage,
     speed: number = WEAPON_CONFIG.wand.projectileSpeed,
     radius: number = WEAPON_CONFIG.wand.projectileRadius,
-    lifetime: number = WEAPON_CONFIG.wand.projectileLifetime
+    lifetime: number = WEAPON_CONFIG.wand.projectileLifetime,
+    color: number = WEAPON_CONFIG.wand.color,
+    emissiveColor: number = WEAPON_CONFIG.wand.emissiveColor,
+    emissiveIntensity: number = WEAPON_CONFIG.wand.emissiveIntensity,
+    isDagger: boolean = false
   ) {
-    const geo = new THREE.SphereGeometry(radius, 8, 8);
+    let geo: THREE.BufferGeometry;
+    if (isDagger) {
+      geo = new THREE.ConeGeometry(radius, radius * 3.5, 6);
+      geo.rotateX(Math.PI / 2);
+    } else {
+      geo = new THREE.SphereGeometry(radius, 8, 8);
+    }
+
     const mat = new THREE.MeshStandardMaterial({
-      color: WEAPON_CONFIG.wand.color,
-      emissive: WEAPON_CONFIG.wand.emissiveColor,
-      emissiveIntensity: WEAPON_CONFIG.wand.emissiveIntensity,
+      color,
+      emissive: emissiveColor,
+      emissiveIntensity,
       roughness: 0.2,
-      metalness: 0.5,
+      metalness: 0.6,
     });
 
     const mesh = new THREE.Mesh(geo, mat);
@@ -44,6 +55,10 @@ export class Projectile extends Entity {
     this.dirZ = dirZ;
 
     this.position.set(startX, startY, startZ);
+
+    if (isDagger) {
+      this.mesh.rotation.y = Math.atan2(dirX, dirZ);
+    }
   }
 
   public override update(deltaTime: number): void {
@@ -57,5 +72,16 @@ export class Projectile extends Entity {
 
     this.position.x += this.dirX * this.speed * deltaTime;
     this.position.z += this.dirZ * this.speed * deltaTime;
+  }
+
+  public override dispose(): void {
+    if (this.mesh instanceof THREE.Mesh) {
+      this.mesh.geometry.dispose();
+      if (Array.isArray(this.mesh.material)) {
+        this.mesh.material.forEach((m) => m.dispose());
+      } else {
+        this.mesh.material.dispose();
+      }
+    }
   }
 }
