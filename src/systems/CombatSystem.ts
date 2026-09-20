@@ -1,5 +1,6 @@
 import type { Player } from '../entities/player/Player';
 import type { Enemy } from '../entities/enemy/Enemy';
+import type { Projectile } from '../entities/projectile/Projectile';
 
 export class CombatSystem {
   private player: Player | null = null;
@@ -12,26 +13,63 @@ export class CombatSystem {
     this.player = player;
   }
 
-  public update(enemies: readonly Enemy[]): void {
-    if (!this.player || this.player.hp <= 0) return;
+  public update(
+    enemies: readonly Enemy[],
+    projectiles?: readonly Projectile[],
+    onEnemyKilled?: (enemy: Enemy) => void,
+    onProjectileHit?: (projectile: Projectile) => void
+  ): void {
+    // 1. Player contact damage check
+    if (this.player && this.player.hp > 0) {
+      const px = this.player.position.x;
+      const pz = this.player.position.z;
+      const pRadius = this.player.radius;
 
-    const px = this.player.position.x;
-    const pz = this.player.position.z;
-    const pRadius = this.player.radius;
+      for (let i = 0; i < enemies.length; i++) {
+        const enemy = enemies[i];
+        if (enemy.isDead) continue;
 
-    for (let i = 0; i < enemies.length; i++) {
-      const enemy = enemies[i];
-      if (enemy.isDead) continue;
+        const dx = px - enemy.position.x;
+        const dz = pz - enemy.position.z;
+        const minDist = pRadius + enemy.radius;
 
-      const dx = px - enemy.position.x;
-      const dz = pz - enemy.position.z;
-      const minDist = pRadius + enemy.radius;
+        if (dx * dx + dz * dz <= minDist * minDist) {
+          const tookDamage = this.player.takeDamage(enemy.damage);
+          if (tookDamage) {
+            break;
+          }
+        }
+      }
+    }
 
-      if (dx * dx + dz * dz <= minDist * minDist) {
-        const tookDamage = this.player.takeDamage(enemy.damage);
-        if (tookDamage) {
-          // If player just took damage, i-frames are triggered so we can exit early this frame
-          break;
+    // 2. Projectile vs Enemy collision check
+    if (projectiles && projectiles.length > 0) {
+      for (let p = 0; p < projectiles.length; p++) {
+        const proj = projectiles[p];
+        if (proj.isExpired) continue;
+
+        const projX = proj.position.x;
+        const projZ = proj.position.z;
+        const projRadius = proj.radius;
+
+        for (let e = 0; e < enemies.length; e++) {
+          const enemy = enemies[e];
+          if (enemy.isDead) continue;
+
+          const dx = projX - enemy.position.x;
+          const dz = projZ - enemy.position.z;
+          const collisionDist = projRadius + enemy.radius;
+
+          if (dx * dx + dz * dz <= collisionDist * collisionDist) {
+            const died = enemy.takeDamage(proj.damage);
+            if (died && onEnemyKilled) {
+              onEnemyKilled(enemy);
+            }
+            if (onProjectileHit) {
+              onProjectileHit(proj);
+            }
+            break; // Projectile consumed on impact
+          }
         }
       }
     }
