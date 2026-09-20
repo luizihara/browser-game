@@ -3,8 +3,11 @@ import { IS_DEV } from '../utils/debug';
 
 export class HUD {
   private element: HTMLDivElement | null = null;
+  private xpBarContainer: HTMLDivElement | null = null;
+  private xpFill: HTMLDivElement | null = null;
   private hpLabel: HTMLSpanElement | null = null;
   private hpFill: HTMLDivElement | null = null;
+  private levelBadge: HTMLSpanElement | null = null;
   private killsText: HTMLSpanElement | null = null;
   private timerText: HTMLSpanElement | null = null;
   private debugFpsValue: HTMLSpanElement | null = null;
@@ -14,6 +17,16 @@ export class HUD {
   public mount(parent: HTMLElement): void {
     if (this.element) return;
 
+    // 1. Horizontal XP Bar across top of viewport
+    this.xpBarContainer = document.createElement('div');
+    this.xpBarContainer.className = 'hud-xp-bar-container';
+
+    this.xpFill = document.createElement('div');
+    this.xpFill.className = 'hud-xp-bar-fill';
+    this.xpBarContainer.appendChild(this.xpFill);
+    parent.appendChild(this.xpBarContainer);
+
+    // 2. HUD Main Container
     this.element = document.createElement('div');
     this.element.className = 'hud-container';
 
@@ -38,9 +51,13 @@ export class HUD {
     hpContainer.appendChild(this.hpLabel);
     hpContainer.appendChild(hpBar);
 
-    // Center Stats Group (Kills + Timer)
+    // Center Stats Group (Level + Kills + Timer)
     const statsGroup = document.createElement('div');
     statsGroup.className = 'hud-stats-group';
+
+    this.levelBadge = document.createElement('span');
+    this.levelBadge.className = 'hud-level-badge';
+    this.levelBadge.textContent = 'LVL 1';
 
     const killsContainer = document.createElement('div');
     killsContainer.className = 'hud-kills-container';
@@ -56,6 +73,7 @@ export class HUD {
     this.timerText.textContent = '00:00';
     timerContainer.appendChild(this.timerText);
 
+    statsGroup.appendChild(this.levelBadge);
     statsGroup.appendChild(killsContainer);
     statsGroup.appendChild(timerContainer);
 
@@ -111,6 +129,15 @@ export class HUD {
     }
   }
 
+  public updateXp(ratio: number, level: number): void {
+    if (this.xpFill) {
+      this.xpFill.style.width = `${Math.min(100, Math.max(0, ratio * 100))}%`;
+    }
+    if (this.levelBadge) {
+      this.levelBadge.textContent = `LVL ${level}`;
+    }
+  }
+
   public updateKills(count: number): void {
     if (this.killsText) {
       this.killsText.textContent = `KILLS: ${count}`;
@@ -141,12 +168,18 @@ export class HUD {
   }
 
   public unmount(): void {
+    if (this.xpBarContainer && this.xpBarContainer.parentElement) {
+      this.xpBarContainer.parentElement.removeChild(this.xpBarContainer);
+    }
     if (this.element && this.element.parentElement) {
       this.element.parentElement.removeChild(this.element);
     }
+    this.xpBarContainer = null;
+    this.xpFill = null;
     this.element = null;
     this.hpLabel = null;
     this.hpFill = null;
+    this.levelBadge = null;
     this.killsText = null;
     this.timerText = null;
     this.debugFpsValue = null;
