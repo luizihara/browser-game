@@ -23,6 +23,7 @@ import { InputAction } from '../systems/InputSystem';
 import { formatTime } from '../utils/math';
 import { FpsTracker, IS_DEV } from '../utils/debug';
 import { PLAYER_CONFIG } from '../config/playerConfig';
+import type { Enemy } from '../entities/enemy/Enemy';
 import type { UpgradeId } from '../config/upgradeConfig';
 
 export class GameScene extends BaseScene {
@@ -67,7 +68,7 @@ export class GameScene extends BaseScene {
     this.enemySpawner = new EnemySpawner(this.entityManager, null, null);
     this.enemyMovementSystem = new EnemyMovementSystem(null, null);
     this.combatSystem = new CombatSystem(null);
-    this.weaponSystem = new WeaponSystem(this.entityManager);
+    this.weaponSystem = new WeaponSystem(this.entityManager, this.threeScene);
     this.experienceSystem = new ExperienceSystem(this.entityManager);
     this.upgradeSystem = new UpgradeSystem();
     this.directorSystem = new DirectorSystem();
@@ -108,6 +109,7 @@ export class GameScene extends BaseScene {
     this.enemyMovementSystem.setTarget(this.player);
     this.enemyMovementSystem.setBounds(bounds);
     this.combatSystem.setPlayer(this.player);
+    this.weaponSystem.setScene(this.threeScene);
 
     if (IS_DEV && !this.sandboxSpawner) {
       this.sandboxSpawner = new SandboxSpawner(this.entityManager, bounds);
@@ -187,7 +189,8 @@ export class GameScene extends BaseScene {
       this.weaponSystem.update(
         deltaTime,
         this.player,
-        this.enemySpawner.getEnemies()
+        this.enemySpawner.getEnemies(),
+        (killedEnemy) => this.onEnemyDefeated(killedEnemy)
       );
     }
 
@@ -204,18 +207,7 @@ export class GameScene extends BaseScene {
     this.combatSystem.update(
       this.enemySpawner.getEnemies(),
       this.weaponSystem.getActiveProjectiles(),
-      (killedEnemy) => {
-        this.killCount++;
-        this.hud.updateKills(this.killCount);
-        // Spawn XP gem with the dead enemy's tier and amount
-        this.experienceSystem.spawnGem(
-          killedEnemy.position.x,
-          killedEnemy.position.z,
-          killedEnemy.gemTier,
-          killedEnemy.xpReward
-        );
-        this.enemySpawner.removeEnemy(killedEnemy);
-      },
+      (killedEnemy) => this.onEnemyDefeated(killedEnemy),
       (hitProjectile) => {
         this.weaponSystem.removeProjectile(hitProjectile);
       }
@@ -253,9 +245,22 @@ export class GameScene extends BaseScene {
     }
   }
 
+  private onEnemyDefeated(killedEnemy: Enemy): void {
+    this.killCount++;
+    this.hud.updateKills(this.killCount);
+    // Spawn XP gem with the dead enemy's tier and amount
+    this.experienceSystem.spawnGem(
+      killedEnemy.position.x,
+      killedEnemy.position.z,
+      killedEnemy.gemTier,
+      killedEnemy.xpReward
+    );
+    this.enemySpawner.removeEnemy(killedEnemy);
+  }
+
   private triggerLevelUp(level: number): void {
     this.isLevelingUp = true;
-    const choices = this.upgradeSystem.getRandomUpgrades(3);
+    const choices = this.upgradeSystem.getRandomUpgrades(3, this.weaponSystem);
     this.levelUpMenu.mount(this.context.uiRoot, level, choices);
   }
 
