@@ -9,15 +9,15 @@ Este documento serve como referência técnica e guia de conduta para qualquer a
 O projeto é um jogo 3D para navegador do gênero **survivor / bullet heaven** (inspirado na mecânica de jogabilidade de *Vampire Survivors*), implementado com **Three.js**, **TypeScript** e **Vite**.
 
 O jogo conta com:
-- Jogador em 3D movimentando-se em arena fechada com câmera suave;
-- Inimigos múltiplos simultâneos na tela se movendo em perseguição ao jogador;
-- Spawner progressivo por tempo e sistema de combate por contato com *i-frames*;
+- Jogador em 3D movimentando-se em arena fechada com câmera suave e colisão perimetral;
+- Inimigos múltiplos simultâneos na tela se movendo em perseguição ao jogador com spawner progressivo;
+- Sistema de combate com ataques automáticos, detecção do alvo mais próximo, projéteis 3D, *i-frames* no jogador e eliminação de inimigos com pontuação de abates;
 - Fluxo de Game Over com estatística de tempo sobrevivido e reinício de partida.
 
 Futuramente o jogo terá:
-- Armas com disparo e ataques automáticos (Milestone 4 — Combat);
 - Coleta de experiência, evolução de níveis e escolha de upgrades (Milestone 5 — Survivor Loop);
-- Curva progressiva de dificuldade por tempo (Director).
+- Curva progressiva de dificuldade por tempo (Director);
+- Modelos 3D, texturas, shaders e direção de arte detalhada (Milestone 9 — Polish & Art).
 
 Portanto, **toda decisão técnica tomada no presente deve permitir essa escala sem exigir reescritas completas**.
 
@@ -27,10 +27,11 @@ Portanto, **toda decisão técnica tomada no presente deve permitir essa escala 
 
 1. **Responsabilidade Única (Single Responsibility Principle)**:
    - Cada classe tem uma única razão para mudar.
-   - Entidades (`Player`, `SandboxDummy`, `Enemy`) representam dados e malhas 3D.
+   - Entidades (`Player`, `Enemy`, `Projectile`, `SandboxDummy`) representam dados e malhas 3D.
    - `EntityManager` gerencia a coleção, ciclo de vida e renderização de entidades.
    - Controladores (`PlayerController`) interpretam comandos e aplicam cinemática.
-   - Sistemas de Inimigos (`EnemyMovementSystem`, `EnemySpawner`, `CombatSystem`) cuidam de tarefas isoladas de IA, geração e colisões.
+   - Sistemas (`EnemyMovementSystem`, `EnemySpawner`, `CombatSystem`, `WeaponSystem`) cuidam de tarefas isoladas de IA, combate e projéteis.
+   - Armas (`Weapon`, `ProjectileWeapon`) contêm regras de busca de alvo e disparo.
    - O mundo (`World`, `ArenaBounds`) delimita o espaço e iluminação.
    - Cenas (`GameScene`) orquestram seus atores.
    - `Game.ts` atua apenas como coordenador geral.
@@ -38,9 +39,10 @@ Portanto, **toda decisão técnica tomada no presente deve permitir essa escala 
 2. **Desacoplamento de Input**:
    - Nenhuma entidade deve escutar diretamente eventos de DOM/Window (`keydown`, `keyup`, etc.).
    - O `InputSystem` mapeia teclas físicas para `InputAction` conceituais.
+   - O ataque é **100% automático**; o jogador apenas se movimenta.
 
 3. **Tempo e Delta Time Estrito**:
-   - Toda alteração cinemática (movimento, rotação, cooldown, timers) **obrigatoriamente** multiplica por `deltaTime`.
+   - Toda alteração cinemática (movimento, rotação, cooldown, timers, tempo de vida de tiros) **obrigatoriamente** multiplica por `deltaTime`.
    - Nunca utilizar valores fixos por frame (ex: `pos += 0.1` é terminantemente proibido).
    - O tempo é centralizado em `src/core/Time.ts` com proteção de teto (`GAME_CONFIG.maxDeltaTime`).
 
@@ -49,7 +51,7 @@ Portanto, **toda decisão técnica tomada no presente deve permitir essa escala 
    - Não crie novas instâncias de `THREE.Vector3`, matrizes ou objetos descartáveis dentro do loop.
    - Guarde variáveis auxiliares como propriedades privadas reutilizáveis na classe.
    - O `EntityManager` realiza iterações indexadas padrão e remoções O(1) via swap-and-pop.
-   - `EnemyMovementSystem` e `CombatSystem` calculam distâncias e direções puramente com escalares primitivos (`dx`, `dz`), sem instanciar vetores temporários.
+   - `EnemyMovementSystem`, `CombatSystem` e `ProjectileWeapon` calculam distâncias puramente com escalares primitivos (`dx`, `dz`), sem instanciar vetores temporários.
 
 5. **Interface desacoplada (HTML/CSS Overlays)**:
    - Toda UI (menus, HUD, pause, game over) reside em elementos DOM sobre o canvas (`#ui-root`).
@@ -65,13 +67,14 @@ src/
 ├── camera/      # Câmera e controladores de acompanhamento
 ├── config/      # Constantes de configuração centralizadas (sem magic numbers)
 ├── core/        # Game, GameLoop, Renderer, Time
-├── entities/    # Classes base, EntityManager e entidades (Player, Enemy, SandboxDummy)
+├── entities/    # Classes base, EntityManager e entidades (Player, Enemy, Projectile, SandboxDummy)
 ├── loaders/     # Carregamento assíncrono e cache de assets
 ├── scenes/      # Scene interface, SceneManager e cenas do jogo
 ├── styles/      # Arquivos CSS modulares (global, hud, menu)
-├── systems/     # Sistemas independentes (InputSystem, EnemyMovementSystem, EnemySpawner, CombatSystem)
+├── systems/     # Sistemas independentes (InputSystem, EnemyMovementSystem, EnemySpawner, CombatSystem, WeaponSystem)
 ├── types/       # Tipagens e interfaces globais
-└── utils/       # Funções utilitárias (matemática, debug)
+├── utils/       # Funções utilitárias (matemática, debug)
+└── weapons/     # Interface Weapon e implementações (ProjectileWeapon, etc.)
 ```
 
 ---

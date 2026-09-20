@@ -52,10 +52,11 @@ Um jogo 3D para navegador do gênero **survivor / bullet heaven** (inspirado no 
 | **S** / **Seta para Baixo** | Movimenta para Baixo (Sul no plano XZ) | Jogo |
 | **A** / **Seta para a Esquerda**| Movimenta para a Esquerda (Oeste no plano XZ) | Jogo |
 | **D** / **Seta para a Direita** | Movimenta para a Direita (Leste no plano XZ) | Jogo |
+| **Ataque** | **Automático**: A arma mira e dispara automaticamente no inimigo mais próximo | Gameplay |
 | **ESC** | Pausa / Despausa o jogo | Jogo / Pause |
 | **E** | Spawna lote de 5 inimigos perseguidores | DEV Mode |
 | **B** | Spawna lote de 20 entidades de teste (*Sandbox Dummies*) | DEV Mode |
-| **C** | Limpa todos os inimigos e entidades de teste ativas | DEV Mode |
+| **C** | Limpa todos os inimigos, tiros e entidades de teste da arena | DEV Mode |
 
 *Nota: O movimento diagonal é normalizado por vetor, garantindo que o personagem se desloque na mesma velocidade em qualquer direção.*
 
@@ -71,14 +72,14 @@ O projeto segue princípios de responsabilidade única (SRP) e baixo acoplamento
 4. **Input System (`src/systems/InputSystem.ts`)**: Camada de abstração que mapeia códigos de teclas para ações conceituais (`MoveUp`, `MoveDown`, `MoveLeft`, `MoveRight`, `Pause`, `DebugSpawn`, `DebugClear`, `DebugSpawnEnemy`), desacoplando o teclado das entidades.
 5. **Gerenciador de Entidades (`src/entities/EntityManager.ts`)**: Gerencia o ciclo de vida e atualização sequencial de todas as entidades ativas sem alocação de lixo no loop e com remoção O(1) via swap-and-pop.
 6. **Limites da Arena (`src/world/ArenaBounds.ts`)**: Paredes tridimensionais perimetrais com contenção matemática (`clampPosition`), contendo o jogador e entidades sem a sobrecarga de uma engine física externa.
-7. **Player & Controller (`src/entities/player/`)**: O `Player` é uma entidade Three.js pura com modelo 3D (cápsula + visor direcional). O `PlayerController` interpreta os comandos do `InputSystem`, normaliza direções e aplica `speed * deltaTime` reutilizando vetores em memória (Zero Garbage Collection). Possui sistema de dano com *i-frames* (0.5s) e flash visual.
+7. **Player & Controller (`src/entities/player/`)**: O `Player` é uma entidade Three.js pura com modelo 3D (cápsula + visor direcional). O `PlayerController` interpreta os comandos do `InputSystem`, normaliza direções e aplica `speed * deltaTime` com Zero Garbage Collection. Possui sistema de dano com *i-frames* (0.5s) e flash visual.
 8. **Inimigos & Perseguição (`src/entities/enemy/`, `src/systems/`)**: Inimigos com modelo 3D sombreado perseguem o jogador continuamente via `EnemyMovementSystem` com matemática vetorial normalizada Zero-GC.
-9. **Spawner Progressivo (`src/systems/EnemySpawner.ts`)**: Inimigos são gerados em um anel externo fora da visão da câmera com taxa de aparição acelerada com o passar do tempo de sobrevivência.
-10. **Combate & Game Over (`src/systems/CombatSystem.ts`, `src/ui/GameOverMenu.ts`)**: Detecção circular de dano de contato entre inimigos e jogador. Ao esgotar o HP, a tela de Game Over é acionada exibindo o tempo total sobrevivido e permitindo reinício instantâneo ou retorno ao menu principal.
-11. **Câmera Isométrica Suave (`src/camera/`)**: `GameCamera` encapsula uma `PerspectiveCamera` com ângulo top-down/isométrico. O `CameraController` realiza acompanhamento suave amortecido (`lerp` exponencial independente de taxa de quadros).
-12. **Cenário (`src/world/`)**: Chão com grade indicadora de deslocamento espacial e iluminação balanceada (HemisphereLight + DirectionalLight gerando sombras dinâmicas).
-13. **Gerenciador de Cenas (`src/scenes/`)**: Ciclo de vida desacoplado (`init`, `enter`, `update`, `render`, `resize`, `exit`, `dispose`).
-14. **UI desacoplada (`src/ui/`, `src/styles/`)**: Menus, HUD e Game Over renderizados sobre o canvas em HTML/CSS com overlays posicionados via CSS puro.
+9. **Armas & Ataques Automáticos (`src/weapons/`, `src/systems/WeaponSystem.ts`)**: Armas desacopladas que encontram o inimigo mais próximo no raio de alcance e disparam projéteis 3D com tempo de recarga (*cooldown*).
+10. **Combate & Colisão (`src/systems/CombatSystem.ts`)**: Detecção circular de dano entre:
+    - **Inimigos vs Jogador**: Aplica dano ao tocar no Player respeitando os *i-frames*.
+    - **Projéteis vs Inimigos**: Aplica dano aos inimigos, remove os projéteis no impacto e elimina os inimigos com vida zerada, incrementando o contador de abates.
+11. **Spawner Progressivo (`src/systems/EnemySpawner.ts`)**: Inimigos são gerados em um anel externo fora da visão da câmera com taxa de aparição acelerada com base no tempo de sobrevivência.
+12. **Interface e Menus (`src/ui/`, `src/styles/`)**: Menus, HUD (HP, Kills, Timer e Debug DEV) e tela de Game Over renderizados sobre o canvas em HTML/CSS isolados da GPU.
 
 ---
 
@@ -96,6 +97,7 @@ src/
 │   ├── graphicsConfig.ts
 │   ├── playerConfig.ts
 │   ├── sandboxConfig.ts
+│   ├── weaponConfig.ts
 │   └── worldConfig.ts
 ├── core/
 │   ├── Game.ts
@@ -110,6 +112,8 @@ src/
 │   ├── player/
 │   │   ├── Player.ts
 │   │   └── PlayerController.ts
+│   ├── projectile/
+│   │   └── Projectile.ts
 │   └── sandbox/
 │       └── SandboxDummy.ts
 ├── loaders/
@@ -129,12 +133,16 @@ src/
 │   ├── EnemyMovementSystem.ts
 │   ├── EnemySpawner.ts
 │   ├── InputSystem.ts
-│   └── SandboxSpawner.ts
+│   ├── SandboxSpawner.ts
+│   └── WeaponSystem.ts
 ├── types/
 │   └── index.ts
-└── utils/
-    ├── debug.ts
-    └── math.ts
+├── utils/
+│   ├── debug.ts
+│   └── math.ts
+└── weapons/
+    ├── ProjectileWeapon.ts
+    └── Weapon.ts
 ```
 
 ---
@@ -168,3 +176,11 @@ src/
 - [x] Sistema de combate com dano de contato, período de invulnerabilidade (0.5s *i-frames*) e flash visual no jogador
 - [x] Barra de HP diminuindo em tempo real no HUD
 - [x] Tela e fluxo de **Game Over** exibindo tempo de sobrevivência com botões `[ TRY AGAIN ]` e `[ MAIN MENU ]`
+
+### Milestone 4 — COMBAT (Concluída)
+- [x] Entidade `Projectile` 3D emissiva com trajetória vetorial e expiração
+- [x] Arquitetura de armas desacopladas (`Weapon`, `WeaponSystem`)
+- [x] Algoritmo de mira automática no inimigo vivo mais próximo (`findClosestEnemy`)
+- [x] Colisão de projéteis contra inimigos, aplicação de dano e eliminação de inimigos abatidos
+- [x] Contador de abates (`KILLS: N`) integrado em destaque na barra superior do HUD
+- [x] Reinício de partida zerando projéteis e abates
