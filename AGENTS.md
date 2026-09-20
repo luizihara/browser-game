@@ -26,7 +26,8 @@ O jogo conta com:
 - Drops especiais 3D de arena (`PickupItem`, `PickupSystem`) com Baús de Tesouro (`TreasureChestModal`), Poções de Vida, Ímã Cósmico e Bomba Sacra;
 - Seleção de Personagens e 4 Heróis Únicos (`CharacterSelectMenu`, `characterConfig.ts`, `CharacterBuilder.ts`): Sir Roderick (Cavaleiro), Elara (Maga), Kage (Ladino) e Aurelius (Templário), cada qual com modelo 3D low-poly próprio, arma inicial exclusiva, passivas e desbloqueio por ouro persistente no `MetaManager`;
 - Super-Armas Evoluídas e Sinergias (`evolutionConfig.ts`, `WeaponSystem.ts`, `UpgradeSystem.ts`): 4 armas evoluídas lendárias (*Holy Astral Beam, Aegis Citadel, Solar Supernova, Thousand Shadow Blades*) combinando armas Lv 5 com passivas adquiridas, disponíveis no modal de Level Up e Baús;
-- Números de Dano Flutuantes Zero-GC e Acertos Críticos (`DamageNumberSystem.ts`, `CombatSystem.ts`): Feedback visual de combate com projeção 3D para tela, cores temáticas por elemento/arma, tipografia de acertos críticos com exclamação (*CRIT!*) e alternância nas Configurações.
+- Números de Dano Flutuantes Zero-GC e Acertos Críticos (`DamageNumberSystem.ts`, `CombatSystem.ts`): Feedback visual de combate com projeção 3D para tela, cores temáticas por elemento/arma, tipografia de acertos críticos com exclamação (*CRIT!*) e alternância nas Configurações;
+- Confrontos Épicos com Chefes, Decais de Telégrafo de Perigo e Radar Minimap (`bossConfig.ts`, `Boss.ts`, `TelegraphSystem.ts`, `RadarSystem.ts`, `HUD.ts`): Mid-Boss *Gorgonath the Earthbreaker* (150s) e Final Boss *Malakor the Shadow Overlord* (260s) com IA de máquina de estados, imunidade a knockback, telégrafos de solo pré-alocados para impactos circulares e investidas retangulares, barra de vida de chefe no HUD e minimapa radar com rastreador fora de tela.
 
 Portanto, **toda decisão técnica tomada no presente deve permitir essa escala sem exigir reescritas completas**.
 

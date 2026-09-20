@@ -84,6 +84,10 @@ export class PickupSystem implements Disposable {
     this.entityManager.remove(item);
   }
 
+  public getPickups(): readonly PickupItem[] {
+    return this.activePickups;
+  }
+
   public clear(): void {
     for (let i = 0; i < this.activePickups.length; i++) {
       this.entityManager.remove(this.activePickups[i]);

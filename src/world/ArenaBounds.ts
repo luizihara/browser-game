@@ -81,6 +81,18 @@ export class ArenaBounds implements Disposable {
     });
   }
 
+  public get halfWidth(): number {
+    return WORLD_CONFIG.arenaWidth / 2;
+  }
+
+  public get halfDepth(): number {
+    return WORLD_CONFIG.arenaDepth / 2;
+  }
+
+  public get halfSize(): number {
+    return Math.max(this.halfWidth, this.halfDepth);
+  }
+
   public clampPosition(position: THREE.Vector3, radius: number): void {
     const halfW = WORLD_CONFIG.arenaWidth / 2;
     const halfD = WORLD_CONFIG.arenaDepth / 2;

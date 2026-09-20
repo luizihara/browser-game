@@ -1,4 +1,5 @@
 import type { EnemyType } from './enemyConfig';
+import type { BossId } from './bossConfig';
 
 export interface WaveEvent {
   id: string;
@@ -6,9 +7,10 @@ export interface WaveEvent {
   title: string;
   subtitle: string;
   isElite?: boolean;
-  spawnType: 'ring' | 'pack' | 'elite';
+  spawnType: 'ring' | 'pack' | 'elite' | 'boss';
   enemyType: EnemyType;
   count: number;
+  bossId?: BossId;
 }
 
 export interface PhaseProbability {
@@ -83,8 +85,19 @@ export const DIRECTOR_CONFIG = {
       count: 1,
     },
     {
+      id: 'boss_gorgonath',
+      triggerTime: 150,
+      title: '🌋 GORGONATH AWAKENS!',
+      subtitle: 'The Earthbreaker rises from the molten depths!',
+      isElite: true,
+      spawnType: 'boss',
+      enemyType: 'elite',
+      bossId: 'gorgonath',
+      count: 1,
+    },
+    {
       id: 'siege_1',
-      triggerTime: 160,
+      triggerTime: 180,
       title: '⚠️ RING OF DOOM!',
       subtitle: 'Brutes and skitterers surrounding you',
       isElite: false,
@@ -103,14 +116,15 @@ export const DIRECTOR_CONFIG = {
       count: 2,
     },
     {
-      id: 'final_boss',
+      id: 'boss_malakor',
       triggerTime: 260,
-      title: '💀 FINAL OVERLORDS!',
-      subtitle: 'Survive the ultimate titan vanguard!',
+      title: '💀 MALAKOR DESCENDS!',
+      subtitle: 'The Shadow Overlord arrives with netherflame!',
       isElite: true,
-      spawnType: 'elite',
+      spawnType: 'boss',
       enemyType: 'elite',
-      count: 3,
+      bossId: 'malakor',
+      count: 1,
     },
   ] as WaveEvent[],
 

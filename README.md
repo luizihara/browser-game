@@ -307,5 +307,21 @@ src/
   - Tipografia de alto impacto com cores dinâmicas: Ciano (Magia), Dourado (*CRIT!* e Dano Sagrado), Púrpura (Lâminas), Vermelho (Dano recebido pelo Herói) e Verde esmeralda (Cura de poções `+30 HP`).
   - Alternância rápida para ligar/desligar Números de Dano no Menu de Opções (`SettingsMenu.ts`).
 
+### Milestone 14 — EPIC BOSS ENCOUNTERS, TELEGRAPH DECALS, BOSS HEALTH BAR & RADAR MINIMAP (Concluída)
+- [x] **Chefes Épicos Artesanais (`bossConfig.ts`, `Boss.ts`)**:
+  - 🌋 **Gorgonath, the Earthbreaker** (Mid-Boss aos 150s): Colosso de rocha vulcânica e magma com 2400 HP, golpe de impacto circular sísmico (*Earth Shatter*) e investida retangular devastadora (*Titan Charge*).
+  - 💀 **Malakor, the Shadow Overlord** (Final Boss aos 260s): Senhor das chamas do vazio com 4800 HP, asas de fogo estelares, chifres de obsidiana, rajada radial de fogo infernal (*Radial Hellfire*) e anel de destruição cósmica (*Cataclysm Ring*).
+  - Máquina de estados de IA desacoplada (`chase` $\rightarrow$ `telegraphing` $\rightarrow$ `executing` $\rightarrow$ `recovery`) e imunidade total a efeitos de empurrão / crowd-control.
+- [x] **Sistema de Telegraphs no Chão Zero-GC (`TelegraphSystem.ts`)**:
+  - Decais tridimensionais planos pré-alocados no chão (`RingGeometry`, `CircleGeometry`, `PlaneGeometry`) sem alocação dinâmica.
+  - Preenchimento progressivo e pulso de perigo avermelhado indicando o tempo de carga e área de impacto exata das habilidades dos chefes antes da detonação.
+- [x] **Barra de Vida de Chefe no HUD (`HUD.ts`, `hud.css`)**:
+  - Exibição imponente na parte superior da tela com nome estilizado, subtítulo titânico, badge `[BOSS]` e trilha de vida com preenchimento em gradiente vermelho-dourado e contagem numérica de HP.
+- [x] **Minimapa Radar & Rastreadores de Ameaça Fora de Tela (`RadarSystem.ts`, `hud.css`)**:
+  - Radar circular estilizado de 140px no canto inferior direito exibindo posição do herói, limites da arena, inimigos elites, baús/poções e pulso luminoso do chefe ativo.
+  - Indicadores flutuantes na borda da tela com distância em metros (`💀 35m`) apontando para o chefe quando ele está fora do campo de visão da câmera.
+- [x] **Recompensas Lendárias de Derrota**:
+  - Derrotar um chefe concede explosão massiva de partículas, Baú de Tesouro garantido, gemas douradas de 1000 XP e drop de arena.
+
 
 

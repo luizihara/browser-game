@@ -22,27 +22,30 @@ export class Enemy extends Entity {
   public xpReward: number;
   public gemTier: GemTier;
 
-  private visualSetup: EnemyVisualSetup;
-  private haloMesh: THREE.Mesh | null = null;
-  private bodyMesh: THREE.Mesh;
-  private baseMaterial: THREE.MeshToonMaterial;
-  private originalColor: number;
-  private flashTimer: number = 0;
-  private wobbleTimer: number = 0;
+  protected visualSetup?: EnemyVisualSetup;
+  protected haloMesh: THREE.Mesh | null = null;
+  protected bodyMesh: THREE.Mesh | null = null;
+  protected baseMaterial: THREE.MeshToonMaterial | null = null;
+  protected originalColor: number;
+  protected flashTimer: number = 0;
+  protected wobbleTimer: number = 0;
 
   constructor(
     x: number = 0,
     z: number = 0,
     type: EnemyType = 'basic',
-    multipliers?: EnemyStatMultipliers
+    multipliers?: EnemyStatMultipliers,
+    customGroup?: THREE.Group
   ) {
-    const visual = EnemyVisualBuilder.buildEnemy(type);
-    super(visual.rootGroup);
+    const visual = customGroup ? null : EnemyVisualBuilder.buildEnemy(type);
+    super(customGroup ?? visual!.rootGroup);
 
-    this.visualSetup = visual;
-    this.bodyMesh = visual.bodyMesh;
-    this.haloMesh = visual.haloMesh;
-    this.baseMaterial = visual.baseMaterial;
+    if (visual) {
+      this.visualSetup = visual;
+      this.bodyMesh = visual.bodyMesh;
+      this.haloMesh = visual.haloMesh;
+      this.baseMaterial = visual.baseMaterial;
+    }
 
     const cfg = ENEMY_CONFIG[type];
     const hpMult = multipliers?.hp ?? 1.0;
@@ -70,7 +73,8 @@ export class Enemy extends Entity {
     this.wobbleTimer += deltaTime;
 
     // 1. Archetype-specific procedural motion personality
-    const model = this.visualSetup.modelGroup;
+    if (this.visualSetup) {
+      const model = this.visualSetup.modelGroup;
     switch (this.type) {
       case 'basic': // Stalker: rapid lateral imp swagger
         model.rotation.z = Math.sin(this.wobbleTimer * 12.0) * 0.08;
@@ -89,6 +93,7 @@ export class Enemy extends Entity {
           this.haloMesh.rotation.z += deltaTime * 2.5;
         }
         break;
+      }
     }
 
     // 2. Individual hit flash countdown
@@ -96,7 +101,9 @@ export class Enemy extends Entity {
       this.flashTimer -= deltaTime;
       if (this.flashTimer <= 0) {
         this.flashTimer = 0;
-        this.bodyMesh.material = this.baseMaterial;
+        if (this.bodyMesh && this.baseMaterial) {
+          this.bodyMesh.material = this.baseMaterial;
+        }
       }
     }
   }
@@ -106,7 +113,9 @@ export class Enemy extends Entity {
 
     this.hp -= amount;
     this.flashTimer = FX_CONFIG.hitFlash.duration;
-    this.bodyMesh.material = EnemyVisualBuilder.getFlashMaterial();
+    if (this.bodyMesh) {
+      this.bodyMesh.material = EnemyVisualBuilder.getFlashMaterial();
+    }
 
     if (this.hp <= 0) {
       this.hp = 0;
@@ -129,7 +138,7 @@ export class Enemy extends Entity {
   }
 
   public override dispose(): void {
-    if (this.flashTimer > 0) {
+    if (this.flashTimer > 0 && this.bodyMesh && this.baseMaterial) {
       this.flashTimer = 0;
       this.bodyMesh.material = this.baseMaterial;
     }

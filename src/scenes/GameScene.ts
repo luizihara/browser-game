@@ -36,6 +36,10 @@ import type { PickupItem } from '../entities/pickup/PickupItem';
 import { TreasureChestModal } from '../ui/TreasureChestModal';
 import { EXPERIENCE_CONFIG } from '../config/experienceConfig';
 import { CHARACTER_CONFIG } from '../config/characterConfig';
+import { Boss } from '../entities/boss/Boss';
+import type { BossId } from '../config/bossConfig';
+import { TelegraphSystem } from '../systems/TelegraphSystem';
+import { RadarSystem } from '../systems/RadarSystem';
 import { DamageNumberSystem, type DamageNumberType } from '../fx/DamageNumberSystem';
 
 export class GameScene extends BaseScene {
@@ -56,6 +60,10 @@ export class GameScene extends BaseScene {
   private directorSystem: DirectorSystem;
   private particleSystem: ParticleSystem;
   private damageNumberSystem: DamageNumberSystem = new DamageNumberSystem();
+  private telegraphSystem: TelegraphSystem = new TelegraphSystem();
+  private radarSystem: RadarSystem = new RadarSystem();
+  private activeBoss: Boss | null = null;
+  private combatEnemies: Enemy[] = [];
   private soundManager: SoundManager;
   private player: Player | null = null;
   private playerController: PlayerController | null = null;
@@ -178,6 +186,8 @@ export class GameScene extends BaseScene {
 
     this.hud.mount(this.context.uiRoot);
     this.damageNumberSystem.mount(this.context.uiRoot);
+    this.telegraphSystem.setScene(this.threeScene);
+    this.radarSystem.mount(this.context.uiRoot);
     this.hud.updateTime(formatTime(this.runTime));
     this.hud.updateKills(this.killCount);
 
@@ -226,6 +236,8 @@ export class GameScene extends BaseScene {
       if (this.context.inputSystem.isActionJustPressed(InputAction.DebugClear)) {
         this.sandboxSpawner?.clearDummies();
         this.enemySpawner.clear();
+        this.removeActiveBoss();
+        this.telegraphSystem.clear();
         this.weaponSystem.clear();
         this.experienceSystem.clear();
         this.pickupSystem.clear();
@@ -259,12 +271,103 @@ export class GameScene extends BaseScene {
       this.cameraController.update(deltaTime);
     }
 
+    this.telegraphSystem.update(deltaTime);
+
+    // Update Boss AI, attacks and danger telegraphs
+    if (this.activeBoss && !this.activeBoss.isDead && this.player) {
+      this.activeBoss.updateAI(
+        deltaTime,
+        this.player,
+        this.telegraphSystem,
+        (x, y, z, damage, radius) => {
+          this.soundManager.playBombExplosion();
+          this.cameraController.addTrauma(0.55);
+          this.particleSystem.emitDeathExplosion(x, y + 0.1, z, 0xf97316);
+          if (this.player && this.player.hp > 0) {
+            const pdx = this.player.position.x - x;
+            const pdz = this.player.position.z - z;
+            if (pdx * pdx + pdz * pdz <= radius * radius) {
+              const took = this.player.takeDamage(damage);
+              if (took) {
+                this.soundManager.playHit();
+                this.damageNumberSystem.spawn(
+                  this.player.position.x,
+                  this.player.position.y + 0.8,
+                  this.player.position.z,
+                  damage,
+                  'hero'
+                );
+              }
+            }
+          }
+        },
+        (x, _y, z) => {
+          this.soundManager.playShoot();
+          this.cameraController.addTrauma(0.4);
+          for (let i = 0; i < 8; i++) {
+            const angle = (i * Math.PI * 2) / 8;
+            const hx = x + Math.cos(angle) * 3.5;
+            const hz = z + Math.sin(angle) * 3.5;
+            this.particleSystem.emitHitSparks(hx, 0.5, hz, 0xef4444);
+          }
+          if (this.player && this.player.hp > 0) {
+            const pdx = this.player.position.x - x;
+            const pdz = this.player.position.z - z;
+            if (pdx * pdx + pdz * pdz <= 5.0 * 5.0) {
+              const took = this.player.takeDamage(25);
+              if (took) {
+                this.soundManager.playHit();
+                this.damageNumberSystem.spawn(
+                  this.player.position.x,
+                  this.player.position.y + 0.8,
+                  this.player.position.z,
+                  25,
+                  'hero'
+                );
+              }
+            }
+          }
+        }
+      );
+
+      // Contact damage against player
+      if (this.player.hp > 0 && !this.activeBoss.isDead) {
+        const bDist = this.activeBoss.radius + this.player.radius;
+        const bdx = this.player.position.x - this.activeBoss.position.x;
+        const bdz = this.player.position.z - this.activeBoss.position.z;
+        if (bdx * bdx + bdz * bdz <= bDist * bDist) {
+          const took = this.player.takeDamage(this.activeBoss.contactDamage);
+          if (took) {
+            this.soundManager.playHit();
+            this.cameraController.addTrauma(0.3);
+            this.damageNumberSystem.spawn(
+              this.player.position.x,
+              this.player.position.y + 0.8,
+              this.player.position.z,
+              this.activeBoss.contactDamage,
+              'hero'
+            );
+          }
+        }
+      }
+    }
+
+    // Assemble combat targets (Normal enemies + Boss)
+    this.combatEnemies.length = 0;
+    const spawnerEnemies = this.enemySpawner.getEnemies();
+    for (let i = 0; i < spawnerEnemies.length; i++) {
+      this.combatEnemies.push(spawnerEnemies[i]);
+    }
+    if (this.activeBoss && !this.activeBoss.isDead) {
+      this.combatEnemies.push(this.activeBoss);
+    }
+
     // Update Weapons & Automatic Attacks
     if (this.player) {
       this.weaponSystem.update(
         deltaTime,
         this.player,
-        this.enemySpawner.getEnemies(),
+        this.combatEnemies,
         (killedEnemy) => this.onEnemyDefeated(killedEnemy),
         (_enemy, hitX, hitY, hitZ, weaponId, dmg) => {
           this.soundManager.playHit();
@@ -290,11 +393,18 @@ export class GameScene extends BaseScene {
     }
 
     // Director: Timeline, scaling multipliers, and scripted wave events
-    this.directorSystem.update(deltaTime, this.enemySpawner, (event) => {
-      this.hud.showWaveAlert(event.title, event.subtitle, event.isElite);
-      this.soundManager.playWaveAlert();
-      this.cameraController.addTrauma(0.4);
-    });
+    this.directorSystem.update(
+      deltaTime,
+      this.enemySpawner,
+      (event) => {
+        this.hud.showWaveAlert(event.title, event.subtitle, event.isElite);
+        this.soundManager.playWaveAlert();
+        this.cameraController.addTrauma(0.4);
+      },
+      (bossId) => {
+        this.spawnBoss(bossId);
+      }
+    );
 
     // Update Enemies & Spawner with Director scaling
     this.enemySpawner.update(deltaTime, this.directorSystem);
@@ -302,7 +412,7 @@ export class GameScene extends BaseScene {
 
     // Combat: Player vs Enemies & Projectiles vs Enemies
     this.combatSystem.update(
-      this.enemySpawner.getEnemies(),
+      this.combatEnemies,
       this.weaponSystem.getActiveProjectiles(),
       (killedEnemy) => this.onEnemyDefeated(killedEnemy),
       (hitProjectile) => {
@@ -345,6 +455,10 @@ export class GameScene extends BaseScene {
         this.damageNumberSystem.spawn(hitX, hitY, hitZ, d, type, isCrit ?? false);
       }
     );
+
+    if (this.activeBoss) {
+      this.hud.updateBossHp(this.activeBoss.hp, this.activeBoss.maxHp);
+    }
 
     // Update Experience & Pickups
     if (this.player) {
@@ -390,9 +504,25 @@ export class GameScene extends BaseScene {
         );
       }
     }
+
+    // Update Radar Minimap & Threat Tracking
+    this.radarSystem.update(
+      this.player,
+      this.activeBoss,
+      this.enemySpawner.getEnemies(),
+      this.pickupSystem.getPickups(),
+      this.world?.getBounds() ?? null,
+      this.gameCamera.getThreeCamera(),
+      window.innerWidth,
+      window.innerHeight
+    );
   }
 
   private onEnemyDefeated(killedEnemy: Enemy): void {
+    if (this.activeBoss && killedEnemy === this.activeBoss) {
+      this.onBossDefeated(this.activeBoss);
+      return;
+    }
     this.killCount++;
     this.hud.updateKills(this.killCount);
     this.soundManager.playEnemyDeath();
@@ -416,6 +546,56 @@ export class GameScene extends BaseScene {
       this.pickupSystem.trySpawnRandomDrop(killedEnemy.position.x, killedEnemy.position.z);
     }
     this.enemySpawner.removeEnemy(killedEnemy);
+  }
+
+  private spawnBoss(bossId: BossId): void {
+    if (this.activeBoss) {
+      this.removeActiveBoss();
+    }
+    const angle = Math.random() * Math.PI * 2;
+    const spawnDist = 20;
+    const px = this.player ? this.player.position.x : 0;
+    const pz = this.player ? this.player.position.z : 0;
+    const bx = px + Math.cos(angle) * spawnDist;
+    const bz = pz + Math.sin(angle) * spawnDist;
+
+    this.activeBoss = new Boss(bossId, bx, bz);
+    this.entityManager.add(this.activeBoss);
+
+    this.hud.showBossBar(this.activeBoss.config.name, this.activeBoss.hp, this.activeBoss.maxHp);
+    this.soundManager.playWaveAlert();
+    this.cameraController.addTrauma(0.6);
+  }
+
+  private onBossDefeated(boss: Boss): void {
+    this.killCount++;
+    this.hud.updateKills(this.killCount);
+    this.hud.hideBossBar();
+    this.soundManager.playEnemyDeath();
+    this.cameraController.addTrauma(0.8);
+
+    this.particleSystem.emitDeathExplosion(
+      boss.position.x,
+      boss.position.y,
+      boss.position.z,
+      boss.getColor()
+    );
+
+    // Boss rewards: Guaranteed Legendary Chest + Gold Gem + arena drop
+    this.pickupSystem.spawnChest(boss.position.x, boss.position.z);
+    this.experienceSystem.spawnGem(boss.position.x + 1.2, boss.position.z, 'gold', 1000);
+    this.pickupSystem.trySpawnRandomDrop(boss.position.x - 1.2, boss.position.z);
+
+    this.removeActiveBoss();
+  }
+
+  private removeActiveBoss(): void {
+    if (this.activeBoss) {
+      this.entityManager.remove(this.activeBoss);
+      this.activeBoss.dispose();
+      this.activeBoss = null;
+      this.hud.hideBossBar();
+    }
   }
 
   private triggerLevelUp(level: number): void {
@@ -677,6 +857,9 @@ export class GameScene extends BaseScene {
     }
 
     this.enemySpawner.clear();
+    this.removeActiveBoss();
+    this.telegraphSystem.clear();
+    this.radarSystem.clear();
     this.weaponSystem.clear();
     this.pickupSystem.clear();
     this.particleSystem.clear();
@@ -738,6 +921,9 @@ export class GameScene extends BaseScene {
     this.chestModal.unmount();
     this.hud.unmount();
     this.damageNumberSystem.clear();
+    this.removeActiveBoss();
+    this.telegraphSystem.clear();
+    this.radarSystem.clear();
     this.isPaused = false;
     this.isGameOver = false;
     this.isVictory = false;
@@ -753,6 +939,9 @@ export class GameScene extends BaseScene {
     this.chestModal.unmount();
     this.hud.unmount();
     this.damageNumberSystem.dispose();
+    this.removeActiveBoss();
+    this.telegraphSystem.dispose();
+    this.radarSystem.dispose();
     if (this.sandboxSpawner) {
       this.sandboxSpawner.dispose();
       this.sandboxSpawner = null;

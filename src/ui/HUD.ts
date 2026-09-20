@@ -17,6 +17,10 @@ export class HUD {
   private debugFpsValue: HTMLSpanElement | null = null;
   private debugEntityValue: HTMLSpanElement | null = null;
   private debugPosValue: HTMLSpanElement | null = null;
+  private bossBarContainer: HTMLDivElement | null = null;
+  private bossNameText: HTMLSpanElement | null = null;
+  private bossHpFill: HTMLDivElement | null = null;
+  private bossHpText: HTMLSpanElement | null = null;
 
   public mount(parent: HTMLElement): void {
     if (this.element) return;
@@ -137,6 +141,42 @@ export class HUD {
     this.alertBanner.appendChild(this.alertSubtitle);
     this.element.appendChild(this.alertBanner);
 
+    // 4. Boss Health Bar (Centered in upper screen below stats)
+    this.bossBarContainer = document.createElement('div');
+    this.bossBarContainer.className = 'hud-boss-bar-container';
+    this.bossBarContainer.style.display = 'none';
+
+    const bossHeader = document.createElement('div');
+    bossHeader.className = 'hud-boss-header';
+
+    const bossBadge = document.createElement('span');
+    bossBadge.className = 'hud-boss-badge';
+    bossBadge.textContent = '💀 BOSS';
+
+    this.bossNameText = document.createElement('span');
+    this.bossNameText.className = 'hud-boss-name';
+    this.bossNameText.textContent = '';
+
+    bossHeader.appendChild(bossBadge);
+    bossHeader.appendChild(this.bossNameText);
+
+    const bossHpTrack = document.createElement('div');
+    bossHpTrack.className = 'hud-boss-hp-track';
+
+    this.bossHpFill = document.createElement('div');
+    this.bossHpFill.className = 'hud-boss-hp-fill';
+
+    this.bossHpText = document.createElement('span');
+    this.bossHpText.className = 'hud-boss-hp-text';
+    this.bossHpText.textContent = '';
+
+    bossHpTrack.appendChild(this.bossHpFill);
+    bossHpTrack.appendChild(this.bossHpText);
+
+    this.bossBarContainer.appendChild(bossHeader);
+    this.bossBarContainer.appendChild(bossHpTrack);
+    this.element.appendChild(this.bossBarContainer);
+
     parent.appendChild(this.element);
   }
 
@@ -222,6 +262,26 @@ export class HUD {
     }
   }
 
+  public showBossBar(name: string, hp: number, maxHp: number): void {
+    if (!this.bossBarContainer || !this.bossNameText || !this.bossHpFill || !this.bossHpText) return;
+    this.bossNameText.textContent = name;
+    this.updateBossHp(hp, maxHp);
+    this.bossBarContainer.style.display = 'flex';
+  }
+
+  public updateBossHp(hp: number, maxHp: number): void {
+    if (!this.bossHpFill || !this.bossHpText) return;
+    const ratio = Math.max(0, Math.min(1.0, hp / maxHp));
+    this.bossHpFill.style.width = `${(ratio * 100).toFixed(1)}%`;
+    this.bossHpText.textContent = `${Math.round(hp)} / ${maxHp}`;
+  }
+
+  public hideBossBar(): void {
+    if (this.bossBarContainer) {
+      this.bossBarContainer.style.display = 'none';
+    }
+  }
+
   public getRootElement(): HTMLDivElement | null {
     return this.element;
   }
@@ -251,5 +311,9 @@ export class HUD {
     this.debugFpsValue = null;
     this.debugEntityValue = null;
     this.debugPosValue = null;
+    this.bossBarContainer = null;
+    this.bossNameText = null;
+    this.bossHpFill = null;
+    this.bossHpText = null;
   }
 }

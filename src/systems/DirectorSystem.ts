@@ -3,6 +3,7 @@ import {
   type WaveEvent,
 } from '../config/directorConfig';
 import { ENEMY_CONFIG, type EnemyType } from '../config/enemyConfig';
+import type { BossId } from '../config/bossConfig';
 import type { EnemyStatMultipliers } from '../entities/enemy/Enemy';
 import type { EnemySpawner } from './EnemySpawner';
 
@@ -84,7 +85,8 @@ export class DirectorSystem {
   public update(
     deltaTime: number,
     spawner: EnemySpawner,
-    onWaveAlert?: (event: WaveEvent) => void
+    onWaveAlert?: (event: WaveEvent) => void,
+    onBossSpawn?: (bossId: BossId) => void
   ): void {
     this.runTime += deltaTime;
     const multipliers = this.getMultipliers();
@@ -95,7 +97,11 @@ export class DirectorSystem {
       const ev = events[i];
       if (this.runTime >= ev.triggerTime && !this.triggeredEventIds.has(ev.id)) {
         this.triggeredEventIds.add(ev.id);
-        this.executeEvent(ev, spawner, multipliers);
+        if (ev.bossId && onBossSpawn) {
+          onBossSpawn(ev.bossId);
+        } else {
+          this.executeEvent(ev, spawner, multipliers);
+        }
         if (onWaveAlert) {
           onWaveAlert(ev);
         }
@@ -140,6 +146,9 @@ export class DirectorSystem {
         break;
       case 'elite':
         spawner.spawnElite(ev.count, multipliers);
+        break;
+      case 'boss':
+        // Handled via onBossSpawn callback
         break;
     }
   }
