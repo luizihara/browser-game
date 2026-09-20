@@ -21,6 +21,14 @@ export const PALETTE = {
     treeFoliageB: 0x40916c,
     rockDark: 0x495057,
     rockLight: 0x6c757d,
+    grassBlade: 0x52b788,
+    flowerGold: 0xfbbf24,
+    flowerBlue: 0x38bdf8,
+    flowerPink: 0xf472b6,
+    mushroomCap: 0x00f2fe,
+    mushroomStem: 0xf1f5f9,
+    pavingStone: 0x64748b,
+    pavingStoneTrim: 0x94a3b8,
   },
 
   // Lighting

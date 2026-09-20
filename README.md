@@ -84,8 +84,10 @@ src/
 │   ├── fxConfig.ts
 │   ├── gameConfig.ts
 │   ├── graphicsConfig.ts
+│   ├── metaConfig.ts
 │   ├── playerConfig.ts
 │   ├── sandboxConfig.ts
+│   ├── settingsConfig.ts
 │   ├── upgradeConfig.ts
 │   ├── weaponConfig.ts
 │   └── worldConfig.ts
@@ -138,7 +140,9 @@ src/
 │   ├── GameOverMenu.ts
 │   ├── HUD.ts
 │   ├── LevelUpMenu.ts
-│   └── PauseMenu.ts
+│   ├── PauseMenu.ts
+│   ├── SettingsMenu.ts
+│   └── VictoryMenu.ts
 ├── utils/
 │   ├── debug.ts
 │   └── math.ts
@@ -243,3 +247,13 @@ src/
 - [x] Redesenho expressivo dos 4 arquétipos de inimigos (*Stalker, Skitterer, Brute, Goliath Elite*) com silhuetas fortes e animações de marcha/wobble
 - [x] Sistema de hit-flash individual para inimigos atingidos sem interferir nos outros monstros do mesmo arquétipo
 - [x] Polimento da UI e Menus com cantos arredondados, botões 3D com profundidade e estética cartoon coesa
+
+### Milestone 10 — ENDGAME, VICTORY & META PROGRESSION (Concluída)
+- [x] **Física de Separação e Colisão de Corpos**: Círculos de contenção impedem que herói e monstros ocupem o mesmo espaço físico; separação de multidão Zero-GC entre inimigos evitando empilhamento e permitindo fluxo orgânico de enxames.
+- [x] **Orientação Angular Precisa**: O herói e os monstros agora caminham e encaram perfeitamente a direção do vetor de deslocamento em 360°.
+- [x] **Enriquecimento Visual do Mapa**: Tufos de grama 3D estilizada, flores silvestres coloridas, cogumelos bioluminescentes, paralelepípedos centrais e ruínas antigas instanciadas via `THREE.InstancedMesh` com zero GC e draw calls consolidadas.
+- [x] **Atalhos Rápidos de Teclado**: Seleção instantânea de cartas de Level Up através das teclas numéricas `1`, `2` e `3`.
+- [x] **Menu de Opções / Configurações**: Acessível via Main Menu e Pause com ajuste contínuo de volume Master e SFX, intensidade do screen shake (Completo, Reduzido, Desligado) e alternância do dano hit-flash com persistência em `localStorage`.
+- [x] **Condição de Vitória (Endgame)**: Sobrevivência até o tempo estipulado (`victoryTime = 300s`) com onda final de clímax e confronto épico.
+- [x] **Tela de Vitória**: Resumo completo com tempo sobrevivido, inimigos eliminados, dano total, nível alcançado, ouro obtido e tabela detalhada de dano causado por cada arma com porcentagens de contribuição.
+- [x] **Meta-Progressão e Registro de Recordes (`MetaManager`)**: Rastreamento persistente do melhor tempo de sobrevivência, maior nível, recorde de abates, total de partidas e acumulação de ouro salvo em `localStorage`, visível no Menu Principal.

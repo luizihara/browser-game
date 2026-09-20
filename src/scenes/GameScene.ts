@@ -19,6 +19,10 @@ import { HUD } from '../ui/HUD';
 import { PauseMenu } from '../ui/PauseMenu';
 import { GameOverMenu } from '../ui/GameOverMenu';
 import { LevelUpMenu } from '../ui/LevelUpMenu';
+import { VictoryMenu, type WeaponDamageStat } from '../ui/VictoryMenu';
+import { MetaManager } from '../config/metaConfig';
+import { DIRECTOR_CONFIG } from '../config/directorConfig';
+import type { WeaponId } from '../config/weaponConfig';
 import { InputAction } from '../systems/InputSystem';
 import { formatTime } from '../utils/math';
 import { FpsTracker, IS_DEV } from '../utils/debug';
@@ -52,11 +56,20 @@ export class GameScene extends BaseScene {
   private pauseMenu: PauseMenu;
   private gameOverMenu: GameOverMenu;
   private levelUpMenu: LevelUpMenu;
+  private victoryMenu: VictoryMenu;
   private isPaused: boolean = false;
   private isGameOver: boolean = false;
   private isLevelingUp: boolean = false;
+  private isVictory: boolean = false;
   private runTime: number = 0;
   private killCount: number = 0;
+  private totalDamageDealt: number = 0;
+  private weaponDamageDealt: Record<WeaponId, number> = {
+    wand: 0,
+    orbital: 0,
+    aura: 0,
+    dagger: 0,
+  };
   private fpsTracker: FpsTracker;
 
   constructor(context: SceneContext, renderer: Renderer) {
@@ -90,6 +103,10 @@ export class GameScene extends BaseScene {
     );
 
     this.levelUpMenu = new LevelUpMenu((upgradeId) => this.chooseUpgrade(upgradeId));
+    this.victoryMenu = new VictoryMenu(
+      () => this.restart(),
+      () => this.goToMainMenu()
+    );
   }
 
   public override enter(): void {
@@ -145,7 +162,7 @@ export class GameScene extends BaseScene {
   }
 
   public override update(deltaTime: number): void {
-    if (this.isLevelingUp || this.isGameOver) {
+    if (this.isLevelingUp || this.isGameOver || this.isVictory) {
       this.particleSystem.update(deltaTime);
       this.cameraController.update(deltaTime);
       return;
@@ -184,6 +201,12 @@ export class GameScene extends BaseScene {
     this.runTime += deltaTime;
     this.hud.updateTime(formatTime(this.runTime));
 
+    // Check Victory condition (Stage clear at victoryTime)
+    if (this.runTime >= DIRECTOR_CONFIG.victoryTime && !this.isVictory && !this.isGameOver) {
+      this.triggerVictory();
+      return;
+    }
+
     // Update active entities (Player, Dummies, Projectiles, XpGems)
     this.entityManager.update(deltaTime);
     this.particleSystem.update(deltaTime);
@@ -202,9 +225,13 @@ export class GameScene extends BaseScene {
         this.player,
         this.enemySpawner.getEnemies(),
         (killedEnemy) => this.onEnemyDefeated(killedEnemy),
-        (_enemy, hitX, hitY, hitZ) => {
+        (_enemy, hitX, hitY, hitZ, weaponId, dmg) => {
           this.soundManager.playHit();
           this.particleSystem.emitHitSparks(hitX, hitY, hitZ);
+          if (weaponId && dmg) {
+            this.totalDamageDealt += dmg;
+            this.weaponDamageDealt[weaponId] = (this.weaponDamageDealt[weaponId] || 0) + dmg;
+          }
         },
         () => {
           this.soundManager.playShoot();
@@ -234,7 +261,7 @@ export class GameScene extends BaseScene {
       () => {
         this.cameraController.addTrauma(0.25);
       },
-      (_enemy, hitX, hitY, hitZ, projectile) => {
+      (_enemy, hitX, hitY, hitZ, projectile, weaponId, dmg) => {
         this.soundManager.playHit();
         this.particleSystem.emitHitSparks(
           hitX,
@@ -242,6 +269,10 @@ export class GameScene extends BaseScene {
           hitZ,
           projectile?.color
         );
+        const wId = weaponId ?? projectile?.weaponId ?? 'wand';
+        const d = dmg ?? projectile?.damage ?? 10;
+        this.totalDamageDealt += d;
+        this.weaponDamageDealt[wId] = (this.weaponDamageDealt[wId] || 0) + d;
       }
     );
 
@@ -335,18 +366,67 @@ export class GameScene extends BaseScene {
   private triggerGameOver(): void {
     this.isGameOver = true;
     this.soundManager.playGameOver();
+    const level = this.experienceSystem.getLevel();
+    const goldEarned = Math.floor(this.killCount * 0.5 + this.runTime * 0.2 + level * 5);
+    MetaManager.getInstance().submitRun(
+      this.runTime,
+      level,
+      this.killCount,
+      goldEarned
+    );
     this.gameOverMenu.mount(this.context.uiRoot, formatTime(this.runTime));
   }
 
+  private triggerVictory(): void {
+    this.isVictory = true;
+    this.soundManager.playLevelUp();
+    this.cameraController.addTrauma(0.5);
+
+    const level = this.experienceSystem.getLevel();
+    const goldEarned = Math.floor(this.killCount * 1.0 + this.runTime * 0.5 + level * 20);
+    const isNewRecord = MetaManager.getInstance().submitRun(
+      this.runTime,
+      level,
+      this.killCount,
+      goldEarned
+    );
+
+    const weaponStats: WeaponDamageStat[] = (Object.keys(this.weaponDamageDealt) as WeaponId[])
+      .filter((id) => this.weaponDamageDealt[id] > 0)
+      .map((id) => ({
+        weaponId: id,
+        damage: this.weaponDamageDealt[id],
+      }));
+
+    this.victoryMenu.mount(this.context.uiRoot, {
+      runTime: formatTime(this.runTime),
+      killCount: this.killCount,
+      totalDamage: this.totalDamageDealt,
+      levelReached: level,
+      goldEarned,
+      weaponStats,
+      isNewRecord,
+    });
+  }
+
   public restart(): void {
+    this.victoryMenu.unmount();
     this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
     this.levelUpMenu.unmount();
     this.isGameOver = false;
+    this.isVictory = false;
     this.isPaused = false;
     this.isLevelingUp = false;
     this.runTime = 0;
     this.killCount = 0;
+    this.totalDamageDealt = 0;
+    this.weaponDamageDealt = {
+      wand: 0,
+      orbital: 0,
+      aura: 0,
+      dagger: 0,
+    };
 
     if (this.player) {
       this.upgradeSystem.reset(
@@ -381,7 +461,7 @@ export class GameScene extends BaseScene {
   }
 
   public pause(): void {
-    if (this.isPaused || this.isGameOver || this.isLevelingUp) return;
+    if (this.isPaused || this.isGameOver || this.isVictory || this.isLevelingUp) return;
     this.isPaused = true;
     this.pauseMenu.mount(this.context.uiRoot);
   }
@@ -394,11 +474,13 @@ export class GameScene extends BaseScene {
   }
 
   private goToMainMenu(): void {
+    this.victoryMenu.unmount();
     this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
     this.levelUpMenu.unmount();
     this.isPaused = false;
     this.isGameOver = false;
+    this.isVictory = false;
     this.isLevelingUp = false;
     this.context.switchScene('menu');
   }
@@ -412,16 +494,19 @@ export class GameScene extends BaseScene {
   }
 
   public override exit(): void {
+    this.victoryMenu.unmount();
     this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
     this.levelUpMenu.unmount();
     this.hud.unmount();
     this.isPaused = false;
     this.isGameOver = false;
+    this.isVictory = false;
     this.isLevelingUp = false;
   }
 
   public override dispose(): void {
+    this.victoryMenu.unmount();
     this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
     this.levelUpMenu.unmount();

@@ -93,7 +93,8 @@ export class DaggerWeapon implements Weapon {
         WEAPON_CONFIG.dagger.color,
         WEAPON_CONFIG.dagger.emissiveColor,
         WEAPON_CONFIG.dagger.emissiveIntensity,
-        true // isDagger geometry
+        true, // isDagger geometry
+        this.id
       );
 
       onSpawnProjectile(dagger);

@@ -1,5 +1,6 @@
 import type { Disposable } from '../types';
 import { AUDIO_CONFIG } from '../config/audioConfig';
+import { SettingsManager } from '../config/settingsConfig';
 
 export class SoundManager implements Disposable {
   private audioContext: AudioContext | null = null;
@@ -8,11 +9,17 @@ export class SoundManager implements Disposable {
   private muted: boolean = false;
   private lastPlayTimes: Record<string, number> = {};
   private boundUnlockAudio: () => void;
+  private unsubscribeSettings: (() => void) | null = null;
 
   constructor() {
     this.boundUnlockAudio = this.unlockAudio.bind(this);
     this.initContext();
     this.addUnlockListeners();
+
+    this.unsubscribeSettings = SettingsManager.getInstance().subscribe((settings) => {
+      this.setMasterVolume(settings.masterVolume);
+      this.setMuted(settings.muted);
+    });
   }
 
   private initContext(): void {
@@ -395,6 +402,10 @@ export class SoundManager implements Disposable {
   }
 
   public dispose(): void {
+    if (this.unsubscribeSettings) {
+      this.unsubscribeSettings();
+      this.unsubscribeSettings = null;
+    }
     this.removeUnlockListeners();
     if (this.masterGain) {
       this.masterGain.disconnect();

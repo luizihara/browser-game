@@ -102,7 +102,20 @@ export const DIRECTOR_CONFIG = {
       enemyType: 'elite',
       count: 2,
     },
+    {
+      id: 'final_boss',
+      triggerTime: 260,
+      title: '💀 FINAL OVERLORDS!',
+      subtitle: 'Survive the ultimate titan vanguard!',
+      isElite: true,
+      spawnType: 'elite',
+      enemyType: 'elite',
+      count: 3,
+    },
   ] as WaveEvent[],
+
+  // Run Victory Condition
+  victoryTime: 300, // 5 minutes to clear stage and claim victory
 
   // Periodic recurring horde after all scheduled events pass
   recurringEventInterval: 60, // every 60s past last scheduled event

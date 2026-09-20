@@ -108,6 +108,10 @@ export class ExperienceSystem implements Disposable {
     };
   }
 
+  public getLevel(): number {
+    return this.currentLevel;
+  }
+
   public getPickupRange(): number {
     return this.pickupRange;
   }

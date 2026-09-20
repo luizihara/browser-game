@@ -96,7 +96,14 @@ export class AuraWeapon implements Weapon {
     enemies: readonly Enemy[],
     _onSpawnProjectile: (projectile: Projectile) => void,
     onEnemyKilled?: (enemy: Enemy) => void,
-    onEnemyHit?: (enemy: Enemy, hitX: number, hitY: number, hitZ: number) => void
+    onEnemyHit?: (
+      enemy: Enemy,
+      hitX: number,
+      hitY: number,
+      hitZ: number,
+      weaponId?: WeaponId,
+      damage?: number
+    ) => void
   ): void {
     if (!this.ringMesh && this.scene) {
       this.initVisual();
@@ -127,7 +134,7 @@ export class AuraWeapon implements Weapon {
         if (dx * dx + dz * dz <= radSq) {
           const died = enemy.takeDamage(damage);
           if (onEnemyHit) {
-            onEnemyHit(enemy, enemy.position.x, py, enemy.position.z);
+            onEnemyHit(enemy, enemy.position.x, py, enemy.position.z, this.id, damage);
           }
           if (died && onEnemyKilled) {
             onEnemyKilled(enemy);

@@ -50,8 +50,8 @@ export class PlayerController implements Updatable {
         this.player.speed * deltaTime
       );
 
-      // Rotate player mesh toward movement direction
-      const angle = Math.atan2(this.moveDirection.x, this.moveDirection.z);
+      // Rotate player mesh toward movement direction (model forward is -Z)
+      const angle = Math.atan2(this.moveDirection.x, -this.moveDirection.z);
       this.player.getMesh().rotation.y = angle;
     } else {
       this.moveDirection.set(0, 0, 0);

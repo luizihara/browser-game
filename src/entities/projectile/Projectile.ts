@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { Entity } from '../Entity';
-import { WEAPON_CONFIG } from '../../config/weaponConfig';
+import { WEAPON_CONFIG, type WeaponId } from '../../config/weaponConfig';
 
 export class Projectile extends Entity {
   public damage: number;
@@ -9,6 +9,7 @@ export class Projectile extends Entity {
   public lifetime: number;
   public isExpired: boolean = false;
   public readonly color: number;
+  public readonly weaponId: WeaponId;
   private dirX: number;
   private dirZ: number;
 
@@ -25,7 +26,8 @@ export class Projectile extends Entity {
     color: number = WEAPON_CONFIG.wand.color,
     emissiveColor: number = WEAPON_CONFIG.wand.emissiveColor,
     emissiveIntensity: number = WEAPON_CONFIG.wand.emissiveIntensity,
-    isDagger: boolean = false
+    isDagger: boolean = false,
+    weaponId: WeaponId = 'wand'
   ) {
     let geo: THREE.BufferGeometry;
     if (isDagger) {
@@ -53,6 +55,7 @@ export class Projectile extends Entity {
     this.radius = radius;
     this.lifetime = lifetime;
     this.color = color;
+    this.weaponId = weaponId;
     this.dirX = dirX;
     this.dirZ = dirZ;
 

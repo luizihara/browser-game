@@ -18,8 +18,10 @@ O jogo conta com:
 - Efeitos sonoros procedurais nativos via Web Audio API (disparos, impactos, mortes, gemas, level up, alertas de onda, game over);
 - Sistema de partículas Zero-GC (`ParticleSystem`) com shaders GLSL e pooling de buffer para faíscas de impacto, explosões radiais e fonte de level up;
 - Hit-flash em inimigos ao sofrerem dano e trauma-based screen shake na câmera (`CameraController`);
-- Direção de arte estilizada Low-Poly Toon com cel-shading discreto de 3 bandas (`ToonMaterialFactory`, `VISUAL_DIRECTION.md`), iluminação atmosférica suave, cenário com props instanciados (`PropBuilder`), herói Chibi com passada procedural e 4 arquétipos de monstros com silhuetas caricatas bem definidas;
-- Fluxo de Game Over com estatística de tempo sobrevivido e reinício de partida.
+- Física de separação de corpos rígidos e crowd separation Zero-GC em `EnemyMovementSystem`, prevenindo sobreposição de corpos entre o jogador e as hordas;
+- Direção de arte estilizada Low-Poly Toon com cel-shading discreto de 3 bandas (`ToonMaterialFactory`, `VISUAL_DIRECTION.md`), iluminação atmosférica suave, cenário com props instanciados ricos em detalhes (`PropBuilder`), herói Chibi com passada procedural e 4 arquétipos de monstros com silhuetas caricatas bem definidas;
+- Menu de Configurações (`SettingsMenu`, `settingsConfig.ts`) com controle de áudio, intensidade de trauma e flash de dano;
+- Fluxo de Game Over e Vitória de Run (`VictoryMenu`, `metaConfig.ts`) com detalhamento de DPS por arma, recordes persistentes e acumulação de ouro.
 
 Portanto, **toda decisão técnica tomada no presente deve permitir essa escala sem exigir reescritas completas**.
 
@@ -78,7 +80,7 @@ src/
 ├── styles/      # Arquivos CSS modulares (global, hud, menu, level-up)
 ├── systems/     # Sistemas independentes (InputSystem, EnemyMovementSystem, EnemySpawner, DirectorSystem, CombatSystem, WeaponSystem, ExperienceSystem, UpgradeSystem)
 ├── types/       # Tipagens e interfaces globais
-├── ui/          # Overlays DOM (HUD, PauseMenu, GameOverMenu, LevelUpMenu)
+├── ui/          # Overlays DOM (HUD, PauseMenu, GameOverMenu, LevelUpMenu, SettingsMenu, VictoryMenu)
 ├── utils/       # Funções utilitárias (matemática, debug)
 └── weapons/     # Interface Weapon e implementações (ProjectileWeapon, OrbitalWeapon, AuraWeapon, DaggerWeapon)
 ```

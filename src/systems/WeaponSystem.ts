@@ -125,7 +125,14 @@ export class WeaponSystem implements Disposable {
     player: Player,
     enemies: readonly Enemy[],
     onEnemyKilled?: (enemy: Enemy) => void,
-    onEnemyHit?: (enemy: Enemy, hitX: number, hitY: number, hitZ: number) => void,
+    onEnemyHit?: (
+      enemy: Enemy,
+      hitX: number,
+      hitY: number,
+      hitZ: number,
+      weaponId?: WeaponId,
+      damage?: number
+    ) => void,
     onWeaponFired?: () => void
   ): void {
     if (player.hp <= 0) return;

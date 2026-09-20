@@ -111,7 +111,14 @@ export class OrbitalWeapon implements Weapon {
     enemies: readonly Enemy[],
     _onSpawnProjectile: (projectile: Projectile) => void,
     onEnemyKilled?: (enemy: Enemy) => void,
-    onEnemyHit?: (enemy: Enemy, hitX: number, hitY: number, hitZ: number) => void
+    onEnemyHit?: (
+      enemy: Enemy,
+      hitX: number,
+      hitY: number,
+      hitZ: number,
+      weaponId?: WeaponId,
+      damage?: number
+    ) => void
   ): void {
     if (this.orbMeshes.length === 0) {
       this.rebuildOrbs();
@@ -168,7 +175,7 @@ export class OrbitalWeapon implements Weapon {
           this.enemyHitTimers.set(enemy, hitCooldown);
 
           if (onEnemyHit) {
-            onEnemyHit(enemy, ox, py, oz);
+            onEnemyHit(enemy, ox, py, oz, this.id, damage);
           }
 
           if (died && onEnemyKilled) {

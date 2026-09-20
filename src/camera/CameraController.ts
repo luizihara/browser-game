@@ -3,6 +3,8 @@ import type { GameCamera } from './GameCamera';
 import { CAMERA_CONFIG } from '../config/cameraConfig';
 import type { Updatable } from '../types';
 
+import { SettingsManager } from '../config/settingsConfig';
+
 export class CameraController implements Updatable {
   private gameCamera: GameCamera;
   private target: THREE.Vector3 | null = null;
@@ -29,7 +31,10 @@ export class CameraController implements Updatable {
   }
 
   public addTrauma(amount: number): void {
-    this.trauma = Math.min(1.0, this.trauma + Math.max(0, amount));
+    const shakeLevel = SettingsManager.getInstance().getSettings().screenShake;
+    if (shakeLevel === 'off') return;
+    const mult = shakeLevel === 'reduced' ? 0.5 : 1.0;
+    this.trauma = Math.min(1.0, this.trauma + Math.max(0, amount * mult));
   }
 
   public getTrauma(): number {

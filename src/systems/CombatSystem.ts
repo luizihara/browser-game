@@ -1,6 +1,7 @@
 import type { Player } from '../entities/player/Player';
 import type { Enemy } from '../entities/enemy/Enemy';
 import type { Projectile } from '../entities/projectile/Projectile';
+import type { WeaponId } from '../config/weaponConfig';
 
 export class CombatSystem {
   private player: Player | null = null;
@@ -24,7 +25,9 @@ export class CombatSystem {
       hitX: number,
       hitY: number,
       hitZ: number,
-      projectile?: Projectile
+      projectile?: Projectile,
+      weaponId?: WeaponId,
+      damage?: number
     ) => void
   ): void {
     // 1. Player contact damage check
@@ -74,7 +77,7 @@ export class CombatSystem {
           if (dx * dx + dz * dz <= collisionDist * collisionDist) {
             const died = enemy.takeDamage(proj.damage);
             if (onEnemyHit) {
-              onEnemyHit(enemy, projX, proj.position.y, projZ, proj);
+              onEnemyHit(enemy, projX, proj.position.y, projZ, proj, proj.weaponId, proj.damage);
             }
             if (died && onEnemyKilled) {
               onEnemyKilled(enemy);
