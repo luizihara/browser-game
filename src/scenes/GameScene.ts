@@ -9,6 +9,7 @@ import { SandboxSpawner } from '../systems/SandboxSpawner';
 import { EnemySpawner } from '../systems/EnemySpawner';
 import { EnemyMovementSystem } from '../systems/EnemyMovementSystem';
 import { CombatSystem } from '../systems/CombatSystem';
+import { WeaponSystem } from '../systems/WeaponSystem';
 import { GameCamera } from '../camera/GameCamera';
 import { CameraController } from '../camera/CameraController';
 import { HUD } from '../ui/HUD';
@@ -31,6 +32,7 @@ export class GameScene extends BaseScene {
   private enemySpawner: EnemySpawner;
   private enemyMovementSystem: EnemyMovementSystem;
   private combatSystem: CombatSystem;
+  private weaponSystem: WeaponSystem;
   private player: Player | null = null;
   private playerController: PlayerController | null = null;
   private hud: HUD;
@@ -39,6 +41,7 @@ export class GameScene extends BaseScene {
   private isPaused: boolean = false;
   private isGameOver: boolean = false;
   private runTime: number = 0;
+  private killCount: number = 0;
   private fpsTracker: FpsTracker;
 
   constructor(context: SceneContext, renderer: Renderer) {
@@ -54,6 +57,7 @@ export class GameScene extends BaseScene {
     this.enemySpawner = new EnemySpawner(this.entityManager, null, null);
     this.enemyMovementSystem = new EnemyMovementSystem(null, null);
     this.combatSystem = new CombatSystem(null);
+    this.weaponSystem = new WeaponSystem(this.entityManager);
 
     this.pauseMenu = new PauseMenu(
       () => this.resume(),
@@ -97,8 +101,12 @@ export class GameScene extends BaseScene {
     this.isPaused = false;
     this.isGameOver = false;
     this.runTime = 0;
+    this.killCount = 0;
+
     this.hud.mount(this.context.uiRoot);
     this.hud.updateTime(formatTime(this.runTime));
+    this.hud.updateKills(this.killCount);
+
     if (this.player) {
       this.hud.updateHp(this.player.hp, this.player.maxHp);
     }
@@ -133,13 +141,14 @@ export class GameScene extends BaseScene {
       if (this.context.inputSystem.isActionJustPressed(InputAction.DebugClear)) {
         this.sandboxSpawner?.clearDummies();
         this.enemySpawner.clear();
+        this.weaponSystem.clear();
       }
     }
 
     this.runTime += deltaTime;
     this.hud.updateTime(formatTime(this.runTime));
 
-    // Update active entities (includes Player and any SandboxDummies)
+    // Update active entities (Player, Dummies, Projectiles)
     this.entityManager.update(deltaTime);
 
     if (this.playerController) {
@@ -149,10 +158,32 @@ export class GameScene extends BaseScene {
       this.cameraController.update(deltaTime);
     }
 
-    // Update Enemies & Combat
+    // Update Weapons & Automatic Attacks
+    if (this.player) {
+      this.weaponSystem.update(
+        deltaTime,
+        this.player,
+        this.enemySpawner.getEnemies()
+      );
+    }
+
+    // Update Enemies
     this.enemySpawner.update(deltaTime, this.runTime);
     this.enemyMovementSystem.update(this.enemySpawner.getEnemies(), deltaTime);
-    this.combatSystem.update(this.enemySpawner.getEnemies());
+
+    // Combat: Player vs Enemies & Projectiles vs Enemies
+    this.combatSystem.update(
+      this.enemySpawner.getEnemies(),
+      this.weaponSystem.getActiveProjectiles(),
+      (killedEnemy) => {
+        this.killCount++;
+        this.hud.updateKills(this.killCount);
+        this.enemySpawner.removeEnemy(killedEnemy);
+      },
+      (hitProjectile) => {
+        this.weaponSystem.removeProjectile(hitProjectile);
+      }
+    );
 
     // Check Player Status & Update HUD
     if (this.player) {
@@ -187,6 +218,7 @@ export class GameScene extends BaseScene {
     this.isGameOver = false;
     this.isPaused = false;
     this.runTime = 0;
+    this.killCount = 0;
 
     if (this.player) {
       this.player.resetHp();
@@ -200,8 +232,11 @@ export class GameScene extends BaseScene {
     }
 
     this.enemySpawner.clear();
+    this.weaponSystem.clear();
     this.sandboxSpawner?.clearDummies();
+
     this.hud.updateTime(formatTime(this.runTime));
+    this.hud.updateKills(this.killCount);
     this.context.inputSystem.reset();
   }
 
@@ -250,6 +285,7 @@ export class GameScene extends BaseScene {
       this.sandboxSpawner.dispose();
       this.sandboxSpawner = null;
     }
+    this.weaponSystem.dispose();
     this.enemySpawner.dispose();
     this.entityManager.dispose();
     this.player = null;
@@ -258,6 +294,14 @@ export class GameScene extends BaseScene {
       this.world.dispose();
       this.world = null;
     }
+  }
+
+  public getKillCount(): number {
+    return this.killCount;
+  }
+
+  public getWeaponSystem(): WeaponSystem {
+    return this.weaponSystem;
   }
 
   public getEnemySpawner(): EnemySpawner {

@@ -5,6 +5,7 @@ export class HUD {
   private element: HTMLDivElement | null = null;
   private hpLabel: HTMLSpanElement | null = null;
   private hpFill: HTMLDivElement | null = null;
+  private killsText: HTMLSpanElement | null = null;
   private timerText: HTMLSpanElement | null = null;
   private debugFpsValue: HTMLSpanElement | null = null;
   private debugEntityValue: HTMLSpanElement | null = null;
@@ -37,17 +38,29 @@ export class HUD {
     hpContainer.appendChild(this.hpLabel);
     hpContainer.appendChild(hpBar);
 
-    // Timer Block
+    // Center Stats Group (Kills + Timer)
+    const statsGroup = document.createElement('div');
+    statsGroup.className = 'hud-stats-group';
+
+    const killsContainer = document.createElement('div');
+    killsContainer.className = 'hud-kills-container';
+    this.killsText = document.createElement('span');
+    this.killsText.className = 'hud-kills-text';
+    this.killsText.textContent = 'KILLS: 0';
+    killsContainer.appendChild(this.killsText);
+
     const timerContainer = document.createElement('div');
     timerContainer.className = 'hud-timer-container';
-
     this.timerText = document.createElement('span');
     this.timerText.className = 'hud-timer-text';
     this.timerText.textContent = '00:00';
     timerContainer.appendChild(this.timerText);
 
+    statsGroup.appendChild(killsContainer);
+    statsGroup.appendChild(timerContainer);
+
     topBar.appendChild(hpContainer);
-    topBar.appendChild(timerContainer);
+    topBar.appendChild(statsGroup);
 
     // Dev Debug Block
     if (IS_DEV) {
@@ -98,6 +111,12 @@ export class HUD {
     }
   }
 
+  public updateKills(count: number): void {
+    if (this.killsText) {
+      this.killsText.textContent = `KILLS: ${count}`;
+    }
+  }
+
   public updateTime(formattedTime: string): void {
     if (this.timerText) {
       this.timerText.textContent = formattedTime;
@@ -128,6 +147,7 @@ export class HUD {
     this.element = null;
     this.hpLabel = null;
     this.hpFill = null;
+    this.killsText = null;
     this.timerText = null;
     this.debugFpsValue = null;
     this.debugEntityValue = null;
