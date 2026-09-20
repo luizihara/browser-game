@@ -21,6 +21,21 @@ export class WeaponSystem implements Disposable {
     this.weapons.push(weapon);
   }
 
+  public applyStatModifiers(
+    damageMult: number,
+    cooldownMult: number,
+    projSpeedMult: number
+  ): void {
+    for (let i = 0; i < this.weapons.length; i++) {
+      const w = this.weapons[i];
+      if (w instanceof ProjectileWeapon) {
+        w.damageMultiplier = damageMult;
+        w.cooldownMultiplier = cooldownMult;
+        w.projectileSpeedMultiplier = projSpeedMult;
+      }
+    }
+  }
+
   public update(
     deltaTime: number,
     player: Player,

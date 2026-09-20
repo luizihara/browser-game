@@ -7,6 +7,9 @@ import { WEAPON_CONFIG } from '../config/weaponConfig';
 export class ProjectileWeapon implements Weapon {
   public readonly name: string = WEAPON_CONFIG.wand.name;
   private cooldownTimer: number = 0;
+  public damageMultiplier: number = 1.0;
+  public cooldownMultiplier: number = 1.0;
+  public projectileSpeedMultiplier: number = 1.0;
 
   public update(
     deltaTime: number,
@@ -31,20 +34,23 @@ export class ProjectileWeapon implements Weapon {
       const dirX = dx * invDist;
       const dirZ = dz * invDist;
 
+      const damage = Math.round(WEAPON_CONFIG.wand.damage * this.damageMultiplier);
+      const speed = WEAPON_CONFIG.wand.projectileSpeed * this.projectileSpeedMultiplier;
+
       const projectile = new Projectile(
         px,
         player.position.y,
         pz,
         dirX,
         dirZ,
-        WEAPON_CONFIG.wand.damage,
-        WEAPON_CONFIG.wand.projectileSpeed,
+        damage,
+        speed,
         WEAPON_CONFIG.wand.projectileRadius,
         WEAPON_CONFIG.wand.projectileLifetime
       );
 
       onSpawnProjectile(projectile);
-      this.cooldownTimer = WEAPON_CONFIG.wand.cooldown;
+      this.cooldownTimer = WEAPON_CONFIG.wand.cooldown * this.cooldownMultiplier;
     }
   }
 
@@ -77,5 +83,8 @@ export class ProjectileWeapon implements Weapon {
 
   public reset(): void {
     this.cooldownTimer = 0;
+    this.damageMultiplier = 1.0;
+    this.cooldownMultiplier = 1.0;
+    this.projectileSpeedMultiplier = 1.0;
   }
 }
