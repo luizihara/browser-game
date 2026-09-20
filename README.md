@@ -52,6 +52,11 @@ O projeto segue princípios de responsabilidade única (SRP) e baixo acoplamento
     - Sistema de partículas Zero-GC pré-alocado utilizando um único `THREE.Points` com `BufferGeometry` e shaders GLSL customizados (blending aditivo, atenuação por distância e bordas suaves).
     - Emissão de faíscas de impacto, explosões radiais coloridas conforme a cor do inimigo e fonte espiral de partículas para celebração de level up.
     - Hit-flash em inimigos ao levarem dano e amortecimento de câmera com modelo de trauma decaído linearmente ($intensity = trauma^2$) por pseudo-ruído trigonométrico.
+15. **Direção Visual Low-Poly Toon (`src/art/`, `VISUAL_DIRECTION.md`)**:
+    - Estética cartoon com cel-shading discreto em 3 bandas (`MeshToonMaterial` procedural com `ToonMaterialFactory`), garantindo alto contraste e zero ruído de textura realista.
+    - Compartilhamento de materiais em GPU memory e instanciamento de vegetação/rochas periféricas via `THREE.InstancedMesh` (`PropBuilder.ts`).
+    - Player estilizado Chibi Hero com capa, capacete, visor brilhante e animação de passada (*bobbing*).
+    - 4 arquétipos de inimigos com silhuetas caricatas bem definidas e movimentação com wobble procedural.
 
 ---
 
@@ -59,6 +64,12 @@ O projeto segue princípios de responsabilidade única (SRP) e baixo acoplamento
 
 ```
 src/
+├── art/
+│   ├── CharacterBuilder.ts
+│   ├── EnemyVisualBuilder.ts
+│   ├── Palette.ts
+│   ├── PropBuilder.ts
+│   └── ToonMaterialFactory.ts
 ├── audio/
 │   └── SoundManager.ts
 ├── camera/
@@ -218,3 +229,17 @@ src/
 - [x] Hit-flash nos inimigos ao sofrerem dano com restauração em 0.08s sem alocações
 - [x] Screen shake com modelo de trauma na câmera (`CameraController.addTrauma`), decaído quadraticamente e alimentado por dano no jogador, ondas de horda e chegada de elites
 - [x] Limpeza e reinicialização completa dos efeitos visuais e áudio ao reiniciar a partida
+
+### Milestone 9 — POLISH & ART (Concluída)
+- [x] Especificação e aprovação da direção de arte mestre em [`VISUAL_DIRECTION.md`](VISUAL_DIRECTION.md) (*Low-Poly Cartoon / Toon Shading*)
+- [x] Fábrica de materiais toon (`ToonMaterialFactory`) com rampa de gradiente de 3 bandas procedural e cache de materiais compartilhados
+- [x] Paleta cromática centralizada (`Palette.ts`) com hierarquia visual rígida (cenário pastel $\rightarrow$ inimigos contrastantes $\rightarrow$ herói vibrante)
+- [x] Iluminação toon atmosférica com `HemisphereLight` (céu suave / chão quente) e sol direcional em 45° com shadow bias para eliminar shadow acne
+- [x] Piso estilizado da arena com gradiente de cores por vértice (`Ground.ts`) simulando clareira verdejante e contorno perimetral limpo
+- [x] Muretas e pilares de ruínas antigas nos limites da arena (`ArenaBounds.ts`) preservando a contenção física exata
+- [x] Ambientação com vegetação low-poly e rochas instanciadas (`PropBuilder.ts`, `THREE.InstancedMesh`) com custo mínimo de draw calls
+- [x] Redesenho carismático do Player (*Chibi Knight-Mage*) com capacete, visor ciano emissivo, ombreiras, capa e cajado de mago (`CharacterBuilder.ts`)
+- [x] Animação procedural de passada (*bobbing* vertical e balanço) e respiração em idle calculadas com zero alocações
+- [x] Redesenho expressivo dos 4 arquétipos de inimigos (*Stalker, Skitterer, Brute, Goliath Elite*) com silhuetas fortes e animações de marcha/wobble
+- [x] Sistema de hit-flash individual para inimigos atingidos sem interferir nos outros monstros do mesmo arquétipo
+- [x] Polimento da UI e Menus com cantos arredondados, botões 3D com profundidade e estética cartoon coesa

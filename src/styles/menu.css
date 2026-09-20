@@ -8,200 +8,203 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: rgba(13, 15, 18, 0.92);
+  background-color: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(10px);
   color: #ffffff;
   z-index: 20;
   transition: opacity 0.3s ease;
 }
 
 .screen-title {
-  font-size: 3rem;
-  font-weight: 800;
-  letter-spacing: 0.15em;
+  font-size: 3.2rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   margin-bottom: 2rem;
-  background: linear-gradient(135deg, #ff4e50, #f9d423);
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 4px 20px rgba(255, 78, 80, 0.3);
+  text-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
 }
 
 .game-over-title {
-  font-size: 3.5rem;
+  font-size: 3.6rem;
   font-weight: 900;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #e53e3e, #ff4e50);
+  background: linear-gradient(135deg, #ef4444, #f87171);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 4px 25px rgba(229, 62, 62, 0.6);
+  text-shadow: 0 4px 25px rgba(239, 68, 68, 0.6);
 }
 
 .levelup-title {
-  font-size: 3rem;
+  font-size: 3.2rem;
   font-weight: 900;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #38a169, #48bb78, #38b2ac);
+  background: linear-gradient(135deg, #10b981, #34d399, #38bdf8);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 4px 25px rgba(72, 187, 120, 0.6);
+  text-shadow: 0 4px 25px rgba(16, 185, 129, 0.6);
 }
 
 .survival-stat {
-  font-size: 1.35rem;
-  font-weight: 600;
-  color: #cbd5e0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #e2e8f0;
   margin-bottom: 2rem;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .levelup-subtitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #cbd5e0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #e2e8f0;
   margin-bottom: 2rem;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 /* Level Up Upgrade Cards */
 .levelup-container {
   display: flex;
-  gap: 1.5rem;
+  gap: 1.6rem;
   justify-content: center;
   align-items: stretch;
-  max-width: 900px;
-  width: 90%;
+  max-width: 950px;
+  width: 92%;
 }
 
 .upgrade-card {
   flex: 1;
-  background: rgba(26, 32, 44, 0.95);
-  border: 2px solid rgba(74, 85, 104, 0.6);
-  border-radius: 12px;
-  padding: 1.75rem 1.25rem;
+  background: rgba(30, 41, 59, 0.95);
+  border: 2px solid rgba(148, 163, 184, 0.35);
+  border-radius: 16px;
+  padding: 1.85rem 1.35rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s ease,
+              box-shadow 0.2s ease;
 }
 
 .upgrade-card:hover {
-  transform: translateY(-6px);
-  border-color: #48bb78;
-  box-shadow: 0 12px 30px rgba(72, 187, 120, 0.35);
+  transform: translateY(-8px) scale(1.02);
+  border-color: #34d399;
+  box-shadow: 0 16px 35px rgba(52, 211, 153, 0.35);
 }
 
 .upgrade-badge {
   display: inline-block;
-  padding: 0.25rem 0.65rem;
-  border-radius: 4px;
-  font-size: 0.72rem;
-  font-weight: 800;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.85rem;
 }
 
 .badge-new_weapon {
-  background: rgba(234, 179, 8, 0.2);
+  background: rgba(245, 158, 11, 0.25);
   color: #fde047;
-  border: 1px solid rgba(234, 179, 8, 0.55);
+  border: 1px solid rgba(245, 158, 11, 0.6);
 }
 
 .badge-weapon_upgrade {
-  background: rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.25);
   color: #93c5fd;
-  border: 1px solid rgba(59, 130, 246, 0.55);
+  border: 1px solid rgba(59, 130, 246, 0.6);
 }
 
 .badge-passive {
-  background: rgba(34, 197, 94, 0.2);
+  background: rgba(16, 185, 129, 0.25);
   color: #86efac;
-  border: 1px solid rgba(34, 197, 94, 0.55);
+  border: 1px solid rgba(16, 185, 129, 0.6);
 }
 
 .upgrade-icon {
-  font-size: 2.75rem;
+  font-size: 3rem;
   margin-bottom: 1rem;
 }
 
 .upgrade-title {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #edf2f7;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #f8fafc;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .upgrade-description {
-  font-size: 0.95rem;
-  color: #a0aec0;
-  line-height: 1.4;
+  font-size: 0.98rem;
+  color: #cbd5e1;
+  line-height: 1.45;
 }
 
 .loading-text {
-  font-size: 1.25rem;
-  color: #a0aec0;
+  font-size: 1.3rem;
+  color: #cbd5e1;
   letter-spacing: 0.1em;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .progress-bar-container {
-  width: 300px;
-  height: 6px;
-  background: #1a202c;
-  border-radius: 3px;
+  width: 320px;
+  height: 8px;
+  background: #1e293b;
+  border-radius: 4px;
   overflow: hidden;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
 .progress-bar-fill {
   width: 0%;
   height: 100%;
-  background: linear-gradient(90deg, #ff4e50, #f9d423);
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
   transition: width 0.2s ease;
 }
 
 .menu-button {
-  padding: 0.85rem 2.5rem;
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  padding: 0.95rem 2.8rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   color: #ffffff;
-  background: linear-gradient(135deg, #e53e3e, #dd6b20);
+  background: linear-gradient(135deg, #ef4444, #f97316);
   border: none;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(229, 62, 62, 0.4);
+  box-shadow: 0 5px 0 #b91c1c, 0 8px 20px rgba(239, 68, 68, 0.4);
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-  margin: 0.5rem 0;
+  margin: 0.6rem 0;
 }
 
 .menu-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(229, 62, 62, 0.6);
+  box-shadow: 0 7px 0 #b91c1c, 0 10px 25px rgba(239, 68, 68, 0.6);
   filter: brightness(1.1);
 }
 
 .menu-button:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 10px rgba(229, 62, 62, 0.4);
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #b91c1c, 0 4px 10px rgba(239, 68, 68, 0.4);
 }
 
 .menu-button.secondary {
-  background: #2d3748;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  background: #334155;
+  box-shadow: 0 5px 0 #1e293b, 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
 .menu-button.secondary:hover {
-  background: #4a5568;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  background: #475569;
+  box-shadow: 0 7px 0 #1e293b, 0 10px 25px rgba(0, 0, 0, 0.5);
 }

@@ -23,12 +23,13 @@ export class Lighting implements Disposable {
       WORLD_CONFIG.directionalPosition.z
     );
     this.directionalLight.castShadow = true;
-    this.directionalLight.shadow.mapSize.width = 1024;
-    this.directionalLight.shadow.mapSize.height = 1024;
+    this.directionalLight.shadow.mapSize.width = 2048;
+    this.directionalLight.shadow.mapSize.height = 2048;
     this.directionalLight.shadow.camera.near = 0.5;
-    this.directionalLight.shadow.camera.far = 150;
+    this.directionalLight.shadow.camera.far = 120;
+    this.directionalLight.shadow.bias = -0.0005;
 
-    const d = 30;
+    const d = 40;
     this.directionalLight.shadow.camera.left = -d;
     this.directionalLight.shadow.camera.right = d;
     this.directionalLight.shadow.camera.top = d;

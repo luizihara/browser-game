@@ -18,10 +18,8 @@ O jogo conta com:
 - Efeitos sonoros procedurais nativos via Web Audio API (disparos, impactos, mortes, gemas, level up, alertas de onda, game over);
 - Sistema de partículas Zero-GC (`ParticleSystem`) com shaders GLSL e pooling de buffer para faíscas de impacto, explosões radiais e fonte de level up;
 - Hit-flash em inimigos ao sofrerem dano e trauma-based screen shake na câmera (`CameraController`);
+- Direção de arte estilizada Low-Poly Toon com cel-shading discreto de 3 bandas (`ToonMaterialFactory`, `VISUAL_DIRECTION.md`), iluminação atmosférica suave, cenário com props instanciados (`PropBuilder`), herói Chibi com passada procedural e 4 arquétipos de monstros com silhuetas caricatas bem definidas;
 - Fluxo de Game Over com estatística de tempo sobrevivido e reinício de partida.
-
-Futuramente o jogo terá:
-- Modelos 3D, texturas, shaders e direção de arte detalhada (Milestone 9 — Polish & Art).
 
 Portanto, **toda decisão técnica tomada no presente deve permitir essa escala sem exigir reescritas completas**.
 
@@ -68,6 +66,7 @@ Portanto, **toda decisão técnica tomada no presente deve permitir essa escala 
 
 ```
 src/
+├── art/         # Construtores de arte estilizada, paleta e ToonMaterialFactory
 ├── audio/       # Gerenciador de áudio procedural e sintetizador Web Audio API
 ├── camera/      # Câmera e controladores de acompanhamento com screen shake
 ├── config/      # Constantes de configuração centralizadas (sem magic numbers)

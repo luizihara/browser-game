@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { Entity } from '../Entity';
 import { PLAYER_CONFIG } from '../../config/playerConfig';
+import { CharacterBuilder, type PlayerVisualComponents } from '../../art/CharacterBuilder';
+import { PALETTE } from '../../art/Palette';
 
 export class Player extends Entity {
   public speed: number = PLAYER_CONFIG.speed;
@@ -8,49 +10,29 @@ export class Player extends Entity {
   public maxHp: number = PLAYER_CONFIG.maxHp;
   public radius: number = PLAYER_CONFIG.radius;
   private invulnerableTimer: number = 0;
-  private bodyMaterial: THREE.MeshStandardMaterial;
+
+  // Visual components & animation state
+  private visualComponents: PlayerVisualComponents;
+  private walkTimer: number = 0;
+  private idleTimer: number = 0;
+  private lastX: number = 0;
+  private lastZ: number = 0;
+  private isFlashing: boolean = false;
 
   constructor() {
-    const group = new THREE.Group();
+    const visual = CharacterBuilder.buildPlayerHero();
+    super(visual.rootGroup);
 
-    // Body: Capsule
-    const cylinderHeight = Math.max(0.1, PLAYER_CONFIG.height - PLAYER_CONFIG.radius * 2);
-    const bodyGeo = new THREE.CapsuleGeometry(PLAYER_CONFIG.radius, cylinderHeight, 16, 16);
-    const bodyMat = new THREE.MeshStandardMaterial({
-      color: PLAYER_CONFIG.color,
-      roughness: 0.3,
-      metalness: 0.2,
-    });
-    const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
-    bodyMesh.castShadow = true;
-    bodyMesh.receiveShadow = true;
-    group.add(bodyMesh);
-
-    // Visor/Direction indicator to show facing orientation
-    const visorGeo = new THREE.BoxGeometry(
-      PLAYER_CONFIG.visorSize.width,
-      PLAYER_CONFIG.visorSize.height,
-      PLAYER_CONFIG.visorSize.depth
-    );
-    const visorMat = new THREE.MeshStandardMaterial({
-      color: PLAYER_CONFIG.accentColor,
-      roughness: 0.2,
-      metalness: 0.8,
-    });
-    const visorMesh = new THREE.Mesh(visorGeo, visorMat);
-    visorMesh.position.set(0, PLAYER_CONFIG.visorOffsetY, -PLAYER_CONFIG.radius);
-    visorMesh.castShadow = true;
-    group.add(visorMesh);
-
-    super(group);
-
-    this.bodyMaterial = bodyMat;
+    this.visualComponents = visual;
 
     this.position.set(
       PLAYER_CONFIG.initialPosition.x,
       PLAYER_CONFIG.initialPosition.y,
       PLAYER_CONFIG.initialPosition.z
     );
+
+    this.lastX = this.position.x;
+    this.lastZ = this.position.z;
   }
 
   public takeDamage(amount: number): boolean {
@@ -71,35 +53,67 @@ export class Player extends Entity {
   public resetHp(): void {
     this.hp = this.maxHp;
     this.invulnerableTimer = 0;
-    this.bodyMaterial.color.setHex(PLAYER_CONFIG.color);
+    this.setFlash(false);
+  }
+
+  private setFlash(flash: boolean): void {
+    if (this.isFlashing === flash) return;
+    this.isFlashing = flash;
+
+    const mats = this.visualComponents.materialsToFlash;
+    const colors = this.visualComponents.originalColors;
+    const flashColor = PALETTE.vfx.hitFlash;
+
+    for (let i = 0; i < mats.length; i++) {
+      mats[i]!.color.setHex(flash ? flashColor : colors[i]!);
+    }
   }
 
   public override update(deltaTime: number): void {
+    // 1. Invulnerability and damage flash
     if (this.invulnerableTimer > 0) {
       this.invulnerableTimer -= deltaTime;
 
-      // Visual flash effect during i-frames
       const flash = Math.floor(this.invulnerableTimer * 16) % 2 === 0;
-      this.bodyMaterial.color.setHex(
-        flash ? PLAYER_CONFIG.damageFlashColor : PLAYER_CONFIG.color
-      );
+      this.setFlash(flash);
 
       if (this.invulnerableTimer <= 0) {
         this.invulnerableTimer = 0;
-        this.bodyMaterial.color.setHex(PLAYER_CONFIG.color);
+        this.setFlash(false);
       }
     }
+
+    // 2. Procedural walk bobbing & breathing
+    const dx = this.position.x - this.lastX;
+    const dz = this.position.z - this.lastZ;
+    const movedSq = dx * dx + dz * dz;
+    const isMoving = movedSq > 0.000001;
+
+    this.lastX = this.position.x;
+    this.lastZ = this.position.z;
+
+    const model = this.visualComponents.modelGroup;
+
+    if (isMoving) {
+      this.walkTimer += deltaTime * 14.0;
+      // Walking bob: bounce up on each step with subtle lateral sway
+      model.position.y = Math.abs(Math.sin(this.walkTimer)) * 0.06;
+      model.rotation.z = Math.sin(this.walkTimer) * 0.035;
+    } else {
+      this.idleTimer += deltaTime * 2.5;
+      // Idle breathing: soft vertical float
+      model.position.y = Math.sin(this.idleTimer) * 0.02;
+      model.rotation.z = 0;
+    }
+
+    // 3. Staff gem idle spin
+    this.visualComponents.staffGemMesh.rotation.y += deltaTime * 2.0;
   }
 
   public override dispose(): void {
     this.mesh.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         child.geometry.dispose();
-        if (Array.isArray(child.material)) {
-          child.material.forEach((m) => m.dispose());
-        } else {
-          child.material.dispose();
-        }
       }
     });
   }

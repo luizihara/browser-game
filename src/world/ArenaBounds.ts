@@ -1,24 +1,23 @@
 import * as THREE from 'three';
 import { WORLD_CONFIG } from '../config/worldConfig';
+import { PALETTE } from '../art/Palette';
+import { ToonMaterialFactory } from '../art/ToonMaterialFactory';
 import { clamp } from '../utils/math';
 import type { Disposable } from '../types';
 
 export class ArenaBounds implements Disposable {
   private group: THREE.Group;
-  private wallMaterial: THREE.MeshStandardMaterial;
+  private wallMaterial: THREE.MeshToonMaterial;
+  private pillarMaterial: THREE.MeshToonMaterial;
 
   constructor() {
     this.group = new THREE.Group();
 
-    this.wallMaterial = new THREE.MeshStandardMaterial({
-      color: WORLD_CONFIG.wallColor,
-      emissive: WORLD_CONFIG.wallEmissive,
-      emissiveIntensity: WORLD_CONFIG.wallEmissiveIntensity,
-      roughness: 0.5,
-      metalness: 0.3,
-    });
+    this.wallMaterial = ToonMaterialFactory.getMaterial(PALETTE.environment.wallStone);
+    this.pillarMaterial = ToonMaterialFactory.getMaterial(PALETTE.environment.wallTop);
 
     this.createWalls();
+    this.createCornerPillars();
   }
 
   private createWalls(): void {
@@ -57,6 +56,29 @@ export class ArenaBounds implements Disposable {
     eastWall.castShadow = true;
     eastWall.receiveShadow = true;
     this.group.add(eastWall);
+  }
+
+  private createCornerPillars(): void {
+    const halfW = WORLD_CONFIG.arenaWidth / 2;
+    const halfD = WORLD_CONFIG.arenaDepth / 2;
+    const pillarH = WORLD_CONFIG.wallHeight * 1.5;
+    const pillarGeo = new THREE.CylinderGeometry(0.7, 0.85, pillarH, 6);
+    pillarGeo.translate(0, pillarH / 2, 0);
+
+    const corners = [
+      { x: -halfW, z: -halfD },
+      { x: halfW, z: -halfD },
+      { x: -halfW, z: halfD },
+      { x: halfW, z: halfD },
+    ];
+
+    corners.forEach((c) => {
+      const pillar = new THREE.Mesh(pillarGeo, this.pillarMaterial);
+      pillar.position.set(c.x, 0, c.z);
+      pillar.castShadow = true;
+      pillar.receiveShadow = true;
+      this.group.add(pillar);
+    });
   }
 
   public clampPosition(position: THREE.Vector3, radius: number): void {
@@ -98,6 +120,6 @@ export class ArenaBounds implements Disposable {
         child.geometry.dispose();
       }
     });
-    this.wallMaterial.dispose();
+    this.group.clear();
   }
 }
