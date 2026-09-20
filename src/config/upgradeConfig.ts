@@ -1,0 +1,53 @@
+export const UPGRADE_CONFIG = {
+  might: {
+    id: 'might',
+    name: 'Might',
+    description: 'Increases projectile damage by +25%.',
+    icon: '⚔️',
+    multiplier: 1.25,
+  },
+  swiftness: {
+    id: 'swiftness',
+    name: 'Swiftness',
+    description: 'Increases player movement speed by +15%.',
+    icon: '👟',
+    multiplier: 1.15,
+  },
+  haste: {
+    id: 'haste',
+    name: 'Haste',
+    description: 'Reduces weapon attack cooldown by -15%.',
+    icon: '⚡',
+    multiplier: 0.85,
+  },
+  vitality: {
+    id: 'vitality',
+    name: 'Vitality',
+    description: 'Increases max HP by +25 and heals for 25 HP.',
+    icon: '❤️',
+    bonusHp: 25,
+  },
+  magnet: {
+    id: 'magnet',
+    name: 'Magnet',
+    description: 'Increases XP gem collection range by +35%.',
+    icon: '🧲',
+    multiplier: 1.35,
+  },
+  aerodynamics: {
+    id: 'aerodynamics',
+    name: 'Aerodynamics',
+    description: 'Increases projectile travel speed by +25%.',
+    icon: '🏹',
+    multiplier: 1.25,
+  },
+} as const;
+
+export type UpgradeId = keyof typeof UPGRADE_CONFIG;
+
+export interface UpgradeDefinition {
+  readonly id: UpgradeId;
+  readonly name: string;
+  readonly description: string;
+  readonly icon: string;
+}
