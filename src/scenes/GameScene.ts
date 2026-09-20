@@ -12,6 +12,7 @@ import { CombatSystem } from '../systems/CombatSystem';
 import { WeaponSystem } from '../systems/WeaponSystem';
 import { ExperienceSystem } from '../systems/ExperienceSystem';
 import { UpgradeSystem } from '../systems/UpgradeSystem';
+import { DirectorSystem } from '../systems/DirectorSystem';
 import { GameCamera } from '../camera/GameCamera';
 import { CameraController } from '../camera/CameraController';
 import { HUD } from '../ui/HUD';
@@ -39,6 +40,7 @@ export class GameScene extends BaseScene {
   private weaponSystem: WeaponSystem;
   private experienceSystem: ExperienceSystem;
   private upgradeSystem: UpgradeSystem;
+  private directorSystem: DirectorSystem;
   private player: Player | null = null;
   private playerController: PlayerController | null = null;
   private hud: HUD;
@@ -68,6 +70,7 @@ export class GameScene extends BaseScene {
     this.weaponSystem = new WeaponSystem(this.entityManager);
     this.experienceSystem = new ExperienceSystem(this.entityManager);
     this.upgradeSystem = new UpgradeSystem();
+    this.directorSystem = new DirectorSystem();
 
     this.pauseMenu = new PauseMenu(
       () => this.resume(),
@@ -118,6 +121,7 @@ export class GameScene extends BaseScene {
 
     this.experienceSystem.reset();
     this.upgradeSystem.reset(this.player!, this.weaponSystem, this.experienceSystem);
+    this.directorSystem.reset();
 
     this.hud.mount(this.context.uiRoot);
     this.hud.updateTime(formatTime(this.runTime));
@@ -187,8 +191,13 @@ export class GameScene extends BaseScene {
       );
     }
 
-    // Update Enemies
-    this.enemySpawner.update(deltaTime, this.runTime);
+    // Director: Timeline, scaling multipliers, and scripted wave events
+    this.directorSystem.update(deltaTime, this.enemySpawner, (event) => {
+      this.hud.showWaveAlert(event.title, event.subtitle, event.isElite);
+    });
+
+    // Update Enemies & Spawner with Director scaling
+    this.enemySpawner.update(deltaTime, this.directorSystem);
     this.enemyMovementSystem.update(this.enemySpawner.getEnemies(), deltaTime);
 
     // Combat: Player vs Enemies & Projectiles vs Enemies
@@ -198,8 +207,13 @@ export class GameScene extends BaseScene {
       (killedEnemy) => {
         this.killCount++;
         this.hud.updateKills(this.killCount);
-        // Spawn XP gem at dead enemy position
-        this.experienceSystem.spawnGem(killedEnemy.position.x, killedEnemy.position.z);
+        // Spawn XP gem with the dead enemy's tier and amount
+        this.experienceSystem.spawnGem(
+          killedEnemy.position.x,
+          killedEnemy.position.z,
+          killedEnemy.gemTier,
+          killedEnemy.xpReward
+        );
         this.enemySpawner.removeEnemy(killedEnemy);
       },
       (hitProjectile) => {
@@ -292,6 +306,7 @@ export class GameScene extends BaseScene {
     this.enemySpawner.clear();
     this.weaponSystem.clear();
     this.experienceSystem.reset();
+    this.directorSystem.reset();
     this.sandboxSpawner?.clearDummies();
 
     this.hud.updateTime(formatTime(this.runTime));
@@ -362,6 +377,10 @@ export class GameScene extends BaseScene {
       this.world.dispose();
       this.world = null;
     }
+  }
+
+  public getDirectorSystem(): DirectorSystem {
+    return this.directorSystem;
   }
 
   public getExperienceSystem(): ExperienceSystem {
