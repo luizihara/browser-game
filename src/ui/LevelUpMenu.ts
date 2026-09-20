@@ -37,6 +37,10 @@ export class LevelUpMenu {
       card.className = 'upgrade-card';
       card.onclick = () => this.onSelectCallback(choice.id);
 
+      const badge = document.createElement('span');
+      badge.className = `upgrade-badge badge-${choice.category}`;
+      badge.textContent = choice.categoryLabel;
+
       const icon = document.createElement('div');
       icon.className = 'upgrade-icon';
       icon.textContent = choice.icon;
@@ -49,6 +53,7 @@ export class LevelUpMenu {
       desc.className = 'upgrade-description';
       desc.textContent = choice.description;
 
+      card.appendChild(badge);
       card.appendChild(icon);
       card.appendChild(cardTitle);
       card.appendChild(desc);

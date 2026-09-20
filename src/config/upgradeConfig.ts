@@ -1,8 +1,10 @@
+import type { WeaponId } from './weaponConfig';
+
 export const UPGRADE_CONFIG = {
   might: {
     id: 'might',
     name: 'Might',
-    description: 'Increases projectile damage by +25%.',
+    description: 'Increases all weapon damage by +25%.',
     icon: '⚔️',
     multiplier: 1.25,
   },
@@ -16,7 +18,7 @@ export const UPGRADE_CONFIG = {
   haste: {
     id: 'haste',
     name: 'Haste',
-    description: 'Reduces weapon attack cooldown by -15%.',
+    description: 'Reduces all weapon attack cooldowns by -15%.',
     icon: '⚡',
     multiplier: 0.85,
   },
@@ -37,17 +39,22 @@ export const UPGRADE_CONFIG = {
   aerodynamics: {
     id: 'aerodynamics',
     name: 'Aerodynamics',
-    description: 'Increases projectile travel speed by +25%.',
+    description: 'Increases projectile and orbital speed by +25%.',
     icon: '🏹',
     multiplier: 1.25,
   },
 } as const;
 
-export type UpgradeId = keyof typeof UPGRADE_CONFIG;
+export type PassiveUpgradeId = keyof typeof UPGRADE_CONFIG;
+export type UpgradeId = string;
+export type UpgradeCategory = 'new_weapon' | 'weapon_upgrade' | 'passive';
 
 export interface UpgradeDefinition {
   readonly id: UpgradeId;
   readonly name: string;
   readonly description: string;
   readonly icon: string;
+  readonly category: UpgradeCategory;
+  readonly categoryLabel: string;
+  readonly weaponId?: WeaponId;
 }
