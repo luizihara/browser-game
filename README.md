@@ -78,6 +78,7 @@ src/
 ├── config/
 │   ├── audioConfig.ts
 │   ├── cameraConfig.ts
+│   ├── characterConfig.ts
 │   ├── directorConfig.ts
 │   ├── enemyConfig.ts
 │   ├── experienceConfig.ts
@@ -140,6 +141,7 @@ src/
 ├── types/
 │   └── index.ts
 ├── ui/
+│   ├── CharacterSelectMenu.ts
 │   ├── GameOverMenu.ts
 │   ├── HUD.ts
 │   ├── LevelUpMenu.ts
@@ -273,4 +275,16 @@ src/
   - 💣 **Bomba Sacra (Holy Bomb)**: Detona uma explosão de 250 de dano limpando os inimigos da tela com screen shake.
 - [x] **Modal de Recompensa de Baú (`TreasureChestModal.ts`)**: Pausa temporária triunfante com fanfarra de áudio procedural, concessão de bônus de ouro imediato e +1 upgrade instantâneo aleatório de armas ou passivas.
 - [x] **Novos Efeitos Sonoros Procedurais (`SoundManager.ts`)**: Síntese nativa Web Audio API para abertura de baús, poção de cura, sucção magnética e explosão de bomba sagrada.
+
+### Milestone 12 — CHARACTER SELECTION & HERO ROSTER (Concluída)
+- [x] **Elenco de 4 Heróis Únicos (`src/config/characterConfig.ts`)**:
+  - 🛡️ **Sir Roderick (O Cavaleiro Sagrado)**: Robusto e inabalável. Arma inicial: *Radiant Aura* (Lv 1). Passiva: +30 Max HP, +2 Armadura, -5% Velocidade.
+  - 🧙‍♀️ **Elara (A Arquimaga Astral)**: Mestra das artes arcanas. Arma inicial: *Magic Wand* (Lv 1). Passiva: +20% Dano de Magia, -15% Cooldown de Feitiços, -20 Max HP.
+  - 🗡️ **Kage (O Andarilho das Sombras)**: Veloz e letal. Arma inicial: *Dagger Throw* (Lv 1). Passiva: +25% Velocidade de Movimento, +35% Velocidade de Projéteis, +10% Dano, -10 Max HP.
+  - ⚖️ **Aurelius (O Templário Protetor)**: Guardião celestial. Arma inicial: *Guardian Orbs* (Lv 1). Passiva: +15 Max HP, +1 Armadura, +30% Raio de Coleta Magnética.
+- [x] **Modelos 3D Procedurais Estilizados (`CharacterBuilder.ts`, `Palette.ts`)**: Cada herói possui geometria Low-Poly Toon exclusiva (Elmo de cavaleiro com visor, Chapéu pontudo de maga e cetro de gema, Máscara ninja com capuz e adagas nas costas, Coroa de espinhos dourada e couraça sacerdotal com orbes flutuantes).
+- [x] **Menu de Seleção de Personagens (`CharacterSelectMenu.ts`, `menu.css`)**: Modal visual moderno aberto pelo botão `[ START GAME ]` no Menu Principal com cards dos 4 heróis, badges da arma inicial, descrição de passivas, status de bloqueio e botão de compra por ouro acumulado.
+- [x] **Persistência de Personagens e Desbloqueio com Ouro (`MetaManager.ts`, `metaConfig.ts`)**: Suporte a heróis desbloqueáveis com ouro (Sir Roderick gratuito, Elara 250🪙, Kage 500🪙, Aurelius 800🪙), persistidos com segurança no `localStorage`.
+- [x] **Integração Completa na Partida (`Player.ts`, `GameScene.ts`, `UpgradeSystem.ts`, `WeaponSystem.ts`)**: Modificadores de classe aplicados no instanciamento e no restart, troca de malha 3D instantânea e arma inicial atribuída de acordo com o herói escolhido.
+
 

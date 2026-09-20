@@ -3,6 +3,7 @@ import {
   getUpgradeCost,
   type MetaUpgradeId,
 } from './metaUpgradeConfig';
+import { CHARACTER_CONFIG, type CharacterId } from './characterConfig';
 
 export interface PlayerRecords {
   bestTime: number; // in seconds
@@ -11,6 +12,8 @@ export interface PlayerRecords {
   totalGold: number;
   totalRuns: number;
   upgrades: Record<MetaUpgradeId, number>;
+  selectedCharacter: CharacterId;
+  unlockedCharacters: CharacterId[];
 }
 
 const STORAGE_KEY = 'survivor_player_records';
@@ -33,6 +36,8 @@ const DEFAULT_RECORDS: PlayerRecords = {
   totalGold: 0,
   totalRuns: 0,
   upgrades: { ...DEFAULT_UPGRADES },
+  selectedCharacter: 'knight',
+  unlockedCharacters: ['knight', 'mage'],
 };
 
 export class MetaManager {
@@ -62,6 +67,8 @@ export class MetaManager {
             ...DEFAULT_UPGRADES,
             ...(parsed.upgrades || {}),
           },
+          selectedCharacter: parsed.selectedCharacter || 'knight',
+          unlockedCharacters: parsed.unlockedCharacters || ['knight', 'mage'],
         };
       }
     } catch {
@@ -70,6 +77,7 @@ export class MetaManager {
     return {
       ...DEFAULT_RECORDS,
       upgrades: { ...DEFAULT_UPGRADES },
+      unlockedCharacters: ['knight', 'mage'],
     };
   }
 
@@ -139,6 +147,37 @@ export class MetaManager {
     this.records.totalGold += totalRefund;
     this.saveRecords();
     return totalRefund;
+  }
+
+  public getSelectedCharacter(): CharacterId {
+    return this.records.selectedCharacter;
+  }
+
+  public setSelectedCharacter(id: CharacterId): void {
+    if (this.isCharacterUnlocked(id)) {
+      this.records.selectedCharacter = id;
+      this.saveRecords();
+    }
+  }
+
+  public isCharacterUnlocked(id: CharacterId): boolean {
+    return this.records.unlockedCharacters.includes(id);
+  }
+
+  public unlockCharacter(id: CharacterId): boolean {
+    if (this.isCharacterUnlocked(id)) return true;
+
+    const def = CHARACTER_CONFIG[id];
+    if (!def || def.unlockCondition.type !== 'gold') return false;
+
+    const cost = def.unlockCondition.cost ?? 0;
+    if (this.records.totalGold < cost) return false;
+
+    this.records.totalGold -= cost;
+    this.records.unlockedCharacters.push(id);
+    this.records.selectedCharacter = id;
+    this.saveRecords();
+    return true;
   }
 
   public submitRun(runTime: number, level: number, kills: number, gold: number): boolean {

@@ -3,6 +3,7 @@ import { Entity } from '../Entity';
 import { PLAYER_CONFIG } from '../../config/playerConfig';
 import { CharacterBuilder, type PlayerVisualComponents } from '../../art/CharacterBuilder';
 import { PALETTE } from '../../art/Palette';
+import type { CharacterId } from '../../config/characterConfig';
 
 export class Player extends Entity {
   public speed: number = PLAYER_CONFIG.speed;
@@ -10,6 +11,7 @@ export class Player extends Entity {
   public maxHp: number = PLAYER_CONFIG.maxHp;
   public radius: number = PLAYER_CONFIG.radius;
   public armor: number = 0;
+  public characterId: CharacterId = 'knight';
   private invulnerableTimer: number = 0;
 
   // Visual components & animation state
@@ -20,11 +22,13 @@ export class Player extends Entity {
   private lastZ: number = 0;
   private isFlashing: boolean = false;
 
-  constructor() {
-    const visual = CharacterBuilder.buildPlayerHero();
-    super(visual.rootGroup);
+  constructor(characterId: CharacterId = 'knight') {
+    const parentGroup = new THREE.Group();
+    super(parentGroup);
 
-    this.visualComponents = visual;
+    this.characterId = characterId;
+    this.visualComponents = CharacterBuilder.buildPlayerHero(characterId);
+    this.mesh.add(this.visualComponents.rootGroup);
 
     this.position.set(
       PLAYER_CONFIG.initialPosition.x,
@@ -34,6 +38,14 @@ export class Player extends Entity {
 
     this.lastX = this.position.x;
     this.lastZ = this.position.z;
+  }
+
+  public setCharacter(characterId: CharacterId): void {
+    if (this.characterId === characterId) return;
+    this.characterId = characterId;
+    this.mesh.remove(this.visualComponents.rootGroup);
+    this.visualComponents = CharacterBuilder.buildPlayerHero(characterId);
+    this.mesh.add(this.visualComponents.rootGroup);
   }
 
   public takeDamage(amount: number): boolean {

@@ -47,6 +47,23 @@ export const PALETTE = {
     bootsLeather: 0x4a2810,
     staffWood: 0x6e473b,
     staffGem: 0x38ef7d,
+    // Knight
+    knightSteel: 0x94a3b8,
+    knightPlume: 0xef4444,
+    knightShield: 0x3b82f6,
+    // Mage
+    mageRobe: 0x7c3aed,
+    mageHat: 0x4c1d95,
+    mageGlow: 0x38bdf8,
+    // Rogue
+    rogueDark: 0x1e293b,
+    rogueCowl: 0x0f172a,
+    rogueEyes: 0x10b981,
+    rogueScarf: 0x059669,
+    // Templar
+    templarGold: 0xf59e0b,
+    templarSun: 0xfbbf24,
+    templarGlow: 0xffedd5,
   },
 
   // Enemies & Archetypes

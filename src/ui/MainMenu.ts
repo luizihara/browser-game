@@ -1,6 +1,7 @@
 import { GAME_CONFIG } from '../config/gameConfig';
 import { SettingsMenu } from './SettingsMenu';
 import { MetaShopMenu } from './MetaShopMenu';
+import { CharacterSelectMenu } from './CharacterSelectMenu';
 import { MetaManager } from '../config/metaConfig';
 import { formatTime } from '../utils/math';
 import '../styles/menu.css';
@@ -10,9 +11,11 @@ export class MainMenu {
   private onStartCallback: () => void;
   private settingsMenu: SettingsMenu;
   private metaShopMenu: MetaShopMenu;
+  private characterSelectMenu: CharacterSelectMenu;
 
   constructor(onStart: () => void) {
     this.onStartCallback = onStart;
+
     this.settingsMenu = new SettingsMenu(() => {
       this.settingsMenu.unmount();
       if (this.element) {
@@ -27,6 +30,20 @@ export class MainMenu {
         this.refreshRecords();
       }
     });
+
+    this.characterSelectMenu = new CharacterSelectMenu(
+      () => {
+        this.characterSelectMenu.unmount();
+        this.onStartCallback();
+      },
+      () => {
+        this.characterSelectMenu.unmount();
+        if (this.element) {
+          this.element.style.display = 'flex';
+          this.refreshRecords();
+        }
+      }
+    );
   }
 
   public mount(parent: HTMLElement): void {
@@ -42,7 +59,12 @@ export class MainMenu {
     const startBtn = document.createElement('button');
     startBtn.className = 'menu-button';
     startBtn.textContent = 'START GAME';
-    startBtn.onclick = () => this.onStartCallback();
+    startBtn.onclick = () => {
+      if (this.element) {
+        this.element.style.display = 'none';
+      }
+      this.characterSelectMenu.mount(parent);
+    };
 
     const shopBtn = document.createElement('button');
     shopBtn.className = 'menu-button';
@@ -99,6 +121,7 @@ export class MainMenu {
   public unmount(): void {
     this.settingsMenu.unmount();
     this.metaShopMenu.unmount();
+    this.characterSelectMenu.unmount();
     if (this.element && this.element.parentElement) {
       this.element.parentElement.removeChild(this.element);
     }

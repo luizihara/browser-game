@@ -203,7 +203,7 @@ export class WeaponSystem implements Disposable {
     }
   }
 
-  public resetToDefault(): void {
+  public resetToDefault(startingWeaponId: WeaponId = 'wand'): void {
     // Clean all projectiles
     for (let i = 0; i < this.activeProjectiles.length; i++) {
       this.entityManager.remove(this.activeProjectiles[i]);
@@ -216,13 +216,12 @@ export class WeaponSystem implements Disposable {
     }
     this.weapons.length = 0;
 
-    // Re-create default starting weapon
+    // Re-create starting weapon
     this.damageMultiplier = 1.0;
     this.cooldownMultiplier = 1.0;
     this.projectileSpeedMultiplier = 1.0;
 
-    const startingWand = new ProjectileWeapon();
-    this.addWeapon(startingWand);
+    this.unlockWeapon(startingWeaponId);
   }
 
   public dispose(): void {

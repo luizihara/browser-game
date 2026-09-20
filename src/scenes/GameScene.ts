@@ -35,6 +35,7 @@ import { PickupSystem } from '../systems/PickupSystem';
 import type { PickupItem } from '../entities/pickup/PickupItem';
 import { TreasureChestModal } from '../ui/TreasureChestModal';
 import { EXPERIENCE_CONFIG } from '../config/experienceConfig';
+import { CHARACTER_CONFIG } from '../config/characterConfig';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -119,11 +120,14 @@ export class GameScene extends BaseScene {
   }
 
   public override enter(): void {
+    const selectedCharId = MetaManager.getInstance().getSelectedCharacter();
+    const charDef = CHARACTER_CONFIG[selectedCharId] ?? CHARACTER_CONFIG.knight;
+
     if (!this.world) {
       this.world = new World(this.threeScene);
     }
     if (!this.player) {
-      this.player = new Player();
+      this.player = new Player(selectedCharId);
       this.entityManager.add(this.player);
       this.playerController = new PlayerController(
         this.player,
@@ -131,8 +135,11 @@ export class GameScene extends BaseScene {
         this.world.getBounds()
       );
       this.cameraController.setTarget(this.player.position, true);
-    } else if (this.playerController && this.world) {
-      this.playerController.setBounds(this.world.getBounds());
+    } else {
+      this.player.setCharacter(selectedCharId);
+      if (this.playerController && this.world) {
+        this.playerController.setBounds(this.world.getBounds());
+      }
     }
 
     const bounds = this.world.getBounds();
@@ -158,7 +165,12 @@ export class GameScene extends BaseScene {
 
     this.pickupSystem.clear();
     this.experienceSystem.reset();
-    this.upgradeSystem.reset(this.player!, this.weaponSystem, this.experienceSystem);
+    this.upgradeSystem.reset(
+      this.player!,
+      this.weaponSystem,
+      this.experienceSystem,
+      charDef.startingWeapon
+    );
     this.directorSystem.reset();
     this.applyPermanentMetaUpgrades();
 
@@ -439,28 +451,33 @@ export class GameScene extends BaseScene {
   private applyPermanentMetaUpgrades(): void {
     if (!this.player) return;
     const meta = MetaManager.getInstance();
+    const selectedCharId = meta.getSelectedCharacter();
+    const charDef = CHARACTER_CONFIG[selectedCharId] ?? CHARACTER_CONFIG.knight;
+    const stats = charDef.statModifiers;
 
-    // Vitality: +Max HP
-    this.player.maxHp = PLAYER_CONFIG.maxHp + meta.getStatBonus('vitality');
+    // Vitality: +Max HP with class offset
+    this.player.maxHp = Math.max(20, PLAYER_CONFIG.maxHp + stats.maxHpOffset + meta.getStatBonus('vitality'));
     this.player.resetHp();
 
-    // Armor: flat damage reduction
-    this.player.armor = meta.getStatBonus('armor');
+    // Armor: flat damage reduction with class offset
+    this.player.armor = stats.armorOffset + meta.getStatBonus('armor');
 
-    // Swiftness: +move speed
-    this.player.speed = PLAYER_CONFIG.speed * (1.0 + meta.getStatBonus('swiftness'));
+    // Swiftness: +move speed with class multiplier
+    this.player.speed = PLAYER_CONFIG.speed * stats.speedMultiplier * (1.0 + meta.getStatBonus('swiftness'));
 
-    // Might & Haste: damage and cooldown
-    this.upgradeSystem.damageMultiplier = 1.0 + meta.getStatBonus('might');
-    this.upgradeSystem.cooldownMultiplier = Math.max(0.2, 1.0 - meta.getStatBonus('haste'));
+    // Might, Haste & Projectile Speed: damage, cooldown and speed with class multipliers
+    this.upgradeSystem.damageMultiplier = stats.damageMultiplier * (1.0 + meta.getStatBonus('might'));
+    this.upgradeSystem.cooldownMultiplier = stats.cooldownMultiplier * Math.max(0.2, 1.0 - meta.getStatBonus('haste'));
+    this.upgradeSystem.projectileSpeedMultiplier = stats.projectileSpeedMultiplier;
     this.weaponSystem.applyStatModifiers(
       this.upgradeSystem.damageMultiplier,
       this.upgradeSystem.cooldownMultiplier,
       this.upgradeSystem.projectileSpeedMultiplier
     );
 
-    // Magnetism: +pickup range
-    const baseRange = EXPERIENCE_CONFIG.basePickupRange * (1.0 + meta.getStatBonus('magnetism'));
+    // Magnetism: +pickup range with class multiplier
+    const baseRange =
+      EXPERIENCE_CONFIG.basePickupRange * stats.pickupRangeMultiplier * (1.0 + meta.getStatBonus('magnetism'));
     this.experienceSystem.setPickupRange(baseRange);
     this.pickupSystem.setPickupRange(baseRange);
 
@@ -578,11 +595,16 @@ export class GameScene extends BaseScene {
       dagger: 0,
     };
 
+    const selectedCharId = MetaManager.getInstance().getSelectedCharacter();
+    const charDef = CHARACTER_CONFIG[selectedCharId] ?? CHARACTER_CONFIG.knight;
+
     if (this.player) {
+      this.player.setCharacter(selectedCharId);
       this.upgradeSystem.reset(
         this.player,
         this.weaponSystem,
-        this.experienceSystem
+        this.experienceSystem,
+        charDef.startingWeapon
       );
       this.applyPermanentMetaUpgrades();
       this.player.position.set(

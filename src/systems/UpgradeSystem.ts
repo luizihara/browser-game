@@ -155,7 +155,8 @@ export class UpgradeSystem {
   public reset(
     player: Player,
     weaponSystem: WeaponSystem,
-    expSystem: ExperienceSystem
+    expSystem: ExperienceSystem,
+    startingWeaponId: WeaponId = 'wand'
   ): void {
     this.damageMultiplier = 1.0;
     this.speedMultiplier = 1.0;
@@ -167,7 +168,7 @@ export class UpgradeSystem {
     player.maxHp = PLAYER_CONFIG.maxHp;
     player.resetHp();
 
-    weaponSystem.resetToDefault();
+    weaponSystem.resetToDefault(startingWeaponId);
     expSystem.reset();
   }
 }
