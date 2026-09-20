@@ -1,46 +1,6 @@
-# Survivor 3D
+# 3D Browser Survivor Game
 
-Um jogo 3D para navegador do gênero **survivor / bullet heaven** (inspirado no conceito de jogabilidade de *Vampire Survivors*), desenvolvido com tecnologias web modernas focando em alto desempenho, arquitetura limpa e escalabilidade para centenas de entidades simultâneas.
-
----
-
-## 🛠️ Stack Tecnológica
-
-- **Linguagem**: TypeScript (Strict Mode)
-- **Engine Gráfica**: Three.js (WebGLRenderer, Sombras Suaves PCF, Shading PBR)
-- **Build Tool / Bundler**: Vite (Template Vanilla-TS)
-- **Interface (UI)**: HTML5 & CSS3 nativos (isolados da renderização WebGL)
-
----
-
-## 🚀 Instalação e Execução
-
-### Pré-requisitos
-- Node.js (versão 18+ ou LTS recomendada)
-- NPM (versão 9+)
-
-### Comandos
-
-1. **Instalação de Dependências**:
-   ```bash
-   npm install
-   ```
-
-2. **Executar em Modo de Desenvolvimento**:
-   ```bash
-   npm run dev
-   ```
-   Acesse a URL indicada (geralmente `http://localhost:5173`) no navegador.
-
-3. **Compilação e Verificação de Tipos (Build de Produção)**:
-   ```bash
-   npm run build
-   ```
-
-4. **Visualizar o Build de Produção**:
-   ```bash
-   npm run preview
-   ```
+Jogo 3D para navegador do gênero **survivor / bullet heaven** (inspirado na jogabilidade clássica de *Vampire Survivors*), construído com **Three.js**, **TypeScript** e **Vite**.
 
 ---
 
@@ -50,7 +10,7 @@ Um jogo 3D para navegador do gênero **survivor / bullet heaven** (inspirado no 
 | :--- | :--- | :--- |
 | **Movimentação** | **W, A, S, D** ou **Setas do Teclado** | Gameplay |
 | **Ataque** | **100% Automático**: A arma mira e dispara automaticamente no inimigo mais próximo | Gameplay |
-| **Coleta de XP** | Aproxime-se dos cristais verdes deixados pelos inimigos para atraí-los magneticamente | Gameplay |
+| **Coleta de XP** | Aproxime-se dos cristais deixados pelos inimigos para atraí-los magneticamente | Gameplay |
 | **Level Up** | Ao preencher a barra de XP, escolha 1 entre 3 cartas de upgrades sorteadas | Modal de Evolução |
 | **Pause** | Tecla **ESC** | Jogo / Pause |
 | **Spawn Inimigos** | Tecla **E** (spawna 5 inimigos em volta do jogador) | DEV Mode |
@@ -61,7 +21,7 @@ Um jogo 3D para navegador do gênero **survivor / bullet heaven** (inspirado no 
 
 ---
 
-## 🏛️ Visão Arquitetural
+## 🏗️ Princípios de Design e Arquitetura
 
 O projeto segue princípios de responsabilidade única (SRP) e baixo acoplamento:
 
@@ -72,13 +32,17 @@ O projeto segue princípios de responsabilidade única (SRP) e baixo acoplamento
 5. **Gerenciador de Entidades (`src/entities/EntityManager.ts`)**: Gerencia o ciclo de vida e atualização sequencial de todas as entidades ativas sem alocação de lixo no loop e com remoção O(1) via swap-and-pop.
 6. **Limites da Arena (`src/world/ArenaBounds.ts`)**: Paredes tridimensionais perimetrais com contenção matemática (`clampPosition`), contendo o jogador e entidades sem a sobrecarga de uma engine física externa.
 7. **Player & Controller (`src/entities/player/`)**: Entidade 3D com modelo e orientação dinâmica. O `PlayerController` interpreta o input e aplica movimentação com Zero-GC. Suporte a dano com *i-frames* (0.5s) e flash visual.
-8. **Inimigos & Perseguição (`src/entities/enemy/`, `src/systems/`)**: Inimigos com modelo sombreado perseguem o jogador continuamente via `EnemyMovementSystem` com matemática vetorial normalizada Zero-GC.
-9. **Armas & Combate (`src/weapons/`, `src/systems/WeaponSystem.ts`, `src/systems/CombatSystem.ts`)**: Armas modulares com auto-targeting que disparam projéteis 3D. O `CombatSystem` gerencia danos, colisão de tiros, eliminação de inimigos e acionamento de drop de XP.
+8. **Inimigos & Arquétipos (`src/entities/enemy/`, `src/systems/`)**: 4 arquétipos distintos em primitivas 3D (*Stalker, Skitterer, Brute, Goliath Elite*) que perseguem o jogador continuamente via `EnemyMovementSystem` com Zero-GC.
+9. **Armas & Combate (`src/weapons/`, `src/systems/WeaponSystem.ts`, `src/systems/CombatSystem.ts`)**: Armas modulares com auto-targeting que disparam projéteis 3D. O `CombatSystem` gerencia danos, colisão de tiros, eliminação de inimigos e acionamento de drop de XP proporcional ao inimigo.
 10. **Survivor Loop & Progressão (`src/systems/ExperienceSystem.ts`, `src/systems/UpgradeSystem.ts`)**:
-    - **Gemas de XP (`XpGem.ts`)**: Cristais 3D octaédricos com efeito magnético de atração.
+    - **Gemas de XP Multi-Tier (`XpGem.ts`)**: Cristais 3D octaédricos em 3 raridades (Verde 5 XP, Azul 25 XP, Dourada 100 XP) com efeito magnético de atração.
     - **Barra de Nível**: Progressão com curva exponencial de experiência.
     - **Pool de Upgrades**: Sorteio de 3 cards aleatórios com bônus acumulativos (*Might, Swiftness, Haste, Vitality, Magnet, Aerodynamics*).
-11. **Interface Desacoplada (`src/ui/`, `src/styles/`)**: Menus, HUD (barra de XP horizontal superior, Badge de Nível, HP, Kills, Timer e Debug) e overlays de Pause, Level Up e Game Over em HTML/CSS isolados da GPU.
+11. **Diretor de Jogo & Ondas (`src/systems/DirectorSystem.ts`, `src/config/directorConfig.ts`)**:
+    - Curva progressiva de dificuldade por tempo (multiplicadores de HP, dano, velocidade e cadência de spawn).
+    - Eventos de onda programados (enxames rápidos, cerco em anel e titãs elites com auréola dourada).
+    - Banner de alerta visual animado no topo da tela informando a chegada de hordas e elites.
+12. **Interface Desacoplada (`src/ui/`, `src/styles/`)**: Menus, HUD (barra de XP horizontal superior, Badge de Nível, HP, Kills, Timer, Alertas de Onda e Debug) e overlays de Pause, Level Up e Game Over em HTML/CSS isolados da GPU.
 
 ---
 
@@ -91,6 +55,7 @@ src/
 │   └── GameCamera.ts
 ├── config/
 │   ├── cameraConfig.ts
+│   ├── directorConfig.ts
 │   ├── enemyConfig.ts
 │   ├── experienceConfig.ts
 │   ├── gameConfig.ts
@@ -133,6 +98,7 @@ src/
 │   └── menu.css
 ├── systems/
 │   ├── CombatSystem.ts
+│   ├── DirectorSystem.ts
 │   ├── EnemyMovementSystem.ts
 │   ├── EnemySpawner.ts
 │   ├── ExperienceSystem.ts
@@ -142,6 +108,11 @@ src/
 │   └── WeaponSystem.ts
 ├── types/
 │   └── index.ts
+├── ui/
+│   ├── GameOverMenu.ts
+│   ├── HUD.ts
+│   ├── LevelUpMenu.ts
+│   └── PauseMenu.ts
 ├── utils/
 │   ├── debug.ts
 │   └── math.ts
@@ -198,3 +169,12 @@ src/
 - [x] Modal de **Level Up** pausando a partida e sorteando 3 cards de upgrades únicos
 - [x] Pool de 6 upgrades com modificadores dinâmicos (*Might, Swiftness, Haste, Vitality, Magnet, Aerodynamics*)
 - [x] Reinício limpo de partida resetando nível, gemas e atributos base
+
+### Milestone 6 — DIRECTOR (Concluída)
+- [x] Curva progressiva de dificuldade por tempo com multiplicadores graduais de vida, dano e velocidade dos inimigos
+- [x] 4 arquétipos de inimigos distintos em primitivas 3D (*Stalker, Skitterer, Brute, Goliath Elite*)
+- [x] Inimigo Elite (Goliath) titânico com auréola dourada giratória e alta resistência
+- [x] Gemas de XP multi-tier (Verde 5 XP, Azul 25 XP, Dourada 100 XP) com cores e escalas proporcionais
+- [x] Formações de onda dinâmicas: enxames direcionados (*packs*) e cercos em anel (*ring surges*)
+- [x] Banner de alerta de eventos especiais sobreposto no HUD com pulso animado (`⚠️ HORDE SURGE!`, `💀 ELITE DETECTED!`)
+- [x] Sincronização limpa do Diretor com o ciclo de Pause, Level Up e reinício de partida

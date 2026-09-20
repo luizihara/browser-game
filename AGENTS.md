@@ -10,13 +10,15 @@ O projeto é um jogo 3D para navegador do gênero **survivor / bullet heaven** (
 
 O jogo conta com:
 - Jogador em 3D movimentando-se em arena fechada com câmera suave e colisão perimetral;
-- Inimigos múltiplos simultâneos na tela se movendo em perseguição ao jogador com spawner progressivo;
+- Inimigos múltiplos simultâneos com 4 arquétipos distintos em primitivas 3D (*Stalker, Skitterer, Brute, Goliath Elite*);
+- Curva progressiva de dificuldade por tempo e ondas gerenciadas por Diretor de Jogo (*DirectorSystem*);
+- Titãs Elites com auréola dourada e eventos periódicos de cerco/enxame com banner animado de alerta no HUD;
 - Sistema de combate com ataques automáticos, detecção do alvo mais próximo, projéteis 3D, *i-frames* no jogador e eliminação de inimigos com pontuação de abates;
-- Coleta de gemas de experiência (XP), curva exponencial de níveis, HUD de progresso e escolha de upgrades cumulativos via modal de Level Up (Milestone 5 — Survivor Loop);
+- Coleta de gemas de experiência multi-tier (Verde, Azul, Dourada), curva exponencial de níveis, HUD de progresso e escolha de upgrades cumulativos via modal de Level Up;
 - Fluxo de Game Over com estatística de tempo sobrevivido e reinício de partida.
 
 Futuramente o jogo terá:
-- Curva progressiva de dificuldade por tempo e ondas (Milestone 6 — Director);
+- Variedade expandida de armas secundárias e magias de área (Milestone 7 — Arsenal);
 - Modelos 3D, texturas, shaders e direção de arte detalhada (Milestone 9 — Polish & Art).
 
 Portanto, **toda decisão técnica tomada no presente deve permitir essa escala sem exigir reescritas completas**.
@@ -30,7 +32,7 @@ Portanto, **toda decisão técnica tomada no presente deve permitir essa escala 
    - Entidades (`Player`, `Enemy`, `Projectile`, `XpGem`, `SandboxDummy`) representam dados e malhas 3D.
    - `EntityManager` gerencia a coleção, ciclo de vida e renderização de entidades.
    - Controladores (`PlayerController`) interpretam comandos e aplicam cinemática.
-   - Sistemas (`EnemyMovementSystem`, `EnemySpawner`, `CombatSystem`, `WeaponSystem`, `ExperienceSystem`, `UpgradeSystem`) cuidam de tarefas isoladas de IA, combate, drops de XP e progressão.
+   - Sistemas (`EnemyMovementSystem`, `EnemySpawner`, `DirectorSystem`, `CombatSystem`, `WeaponSystem`, `ExperienceSystem`, `UpgradeSystem`) cuidam de tarefas isoladas de IA, dificuldade por tempo, combate, drops de XP e progressão.
    - Armas (`Weapon`, `ProjectileWeapon`) contêm regras de busca de alvo e disparo.
    - O mundo (`World`, `ArenaBounds`) delimita o espaço e iluminação.
    - Cenas (`GameScene`) orquestram seus atores.
@@ -51,10 +53,10 @@ Portanto, **toda decisão técnica tomada no presente deve permitir essa escala 
    - Não crie novas instâncias de `THREE.Vector3`, matrizes ou objetos descartáveis dentro do loop.
    - Guarde variáveis auxiliares como propriedades privadas reutilizáveis na classe.
    - O `EntityManager` realiza iterações indexadas padrão e remoções O(1) via swap-and-pop.
-   - `EnemyMovementSystem`, `CombatSystem`, `ProjectileWeapon` e `ExperienceSystem` calculam distâncias puramente com escalares primitivos (`dx`, `dz`), sem instanciar vetores temporários.
+   - `EnemyMovementSystem`, `CombatSystem`, `ProjectileWeapon`, `DirectorSystem` e `ExperienceSystem` calculam distâncias e probabilidades puramente com escalares primitivos, sem instanciar vetores temporários.
 
 5. **Interface desacoplada (HTML/CSS Overlays)**:
-   - Toda UI (menus, HUD, pause, level up, game over) reside em elementos DOM sobre o canvas (`#ui-root`).
+   - Toda UI (menus, HUD, banners de alerta, pause, level up, game over) reside em elementos DOM sobre o canvas (`#ui-root`).
    - Não renderize texto ou interface 2D no canvas WebGL a menos que seja um elemento intra-mundo.
    - Atualize nós do DOM existentes (`textContent`, `style.width`), nunca recrie o DOM a cada frame.
 
@@ -71,7 +73,7 @@ src/
 ├── loaders/     # Carregamento assíncrono e cache de assets
 ├── scenes/      # Scene interface, SceneManager e cenas do jogo
 ├── styles/      # Arquivos CSS modulares (global, hud, menu, level-up)
-├── systems/     # Sistemas independentes (InputSystem, EnemyMovementSystem, EnemySpawner, CombatSystem, WeaponSystem, ExperienceSystem, UpgradeSystem)
+├── systems/     # Sistemas independentes (InputSystem, EnemyMovementSystem, EnemySpawner, DirectorSystem, CombatSystem, WeaponSystem, ExperienceSystem, UpgradeSystem)
 ├── types/       # Tipagens e interfaces globais
 ├── ui/          # Overlays DOM (HUD, PauseMenu, GameOverMenu, LevelUpMenu)
 ├── utils/       # Funções utilitárias (matemática, debug)
