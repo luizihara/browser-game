@@ -44,19 +44,18 @@ Um jogo 3D para navegador do gênero **survivor / bullet heaven** (inspirado no 
 
 ---
 
-## 🎮 Controles
+## 🎮 Controles e Gameplay
 
-| Tecla / Ação | Função | Contexto |
+| Ação | Controle / Mecânica | Contexto |
 | :--- | :--- | :--- |
-| **W** / **Seta para Cima** | Movimenta para Cima (Norte no plano XZ) | Jogo |
-| **S** / **Seta para Baixo** | Movimenta para Baixo (Sul no plano XZ) | Jogo |
-| **A** / **Seta para a Esquerda**| Movimenta para a Esquerda (Oeste no plano XZ) | Jogo |
-| **D** / **Seta para a Direita** | Movimenta para a Direita (Leste no plano XZ) | Jogo |
-| **Ataque** | **Automático**: A arma mira e dispara automaticamente no inimigo mais próximo | Gameplay |
-| **ESC** | Pausa / Despausa o jogo | Jogo / Pause |
-| **E** | Spawna lote de 5 inimigos perseguidores | DEV Mode |
-| **B** | Spawna lote de 20 entidades de teste (*Sandbox Dummies*) | DEV Mode |
-| **C** | Limpa todos os inimigos, tiros e entidades de teste da arena | DEV Mode |
+| **Movimentação** | **W, A, S, D** ou **Setas do Teclado** | Gameplay |
+| **Ataque** | **100% Automático**: A arma mira e dispara automaticamente no inimigo mais próximo | Gameplay |
+| **Coleta de XP** | Aproxime-se dos cristais verdes deixados pelos inimigos para atraí-los magneticamente | Gameplay |
+| **Level Up** | Ao preencher a barra de XP, escolha 1 entre 3 cartas de upgrades sorteadas | Modal de Evolução |
+| **Pause** | Tecla **ESC** | Jogo / Pause |
+| **Spawn Inimigos** | Tecla **E** (spawna 5 inimigos em volta do jogador) | DEV Mode |
+| **Spawn Dummies** | Tecla **B** (spawna 20 dummies de teste) | DEV Mode |
+| **Limpeza Geral** | Tecla **C** (limpa inimigos, tiros, gemas e dummies da arena) | DEV Mode |
 
 *Nota: O movimento diagonal é normalizado por vetor, garantindo que o personagem se desloque na mesma velocidade em qualquer direção.*
 
@@ -69,17 +68,17 @@ O projeto segue princípios de responsabilidade única (SRP) e baixo acoplamento
 1. **Main Entry (`src/main.ts`)**: Apenas instancia e inicializa o orquestrador `Game`. Não contém regras de negócio.
 2. **Game Core (`src/core/Game.ts`)**: Coordenador mestre da aplicação. Gerencia o ciclo de vida, WebGLRenderer, GameLoop, SceneManager e redimensionamento de janela.
 3. **Time & Game Loop (`src/core/Time.ts`, `src/core/GameLoop.ts`)**: Separação estrita entre `update(deltaTime)` e `render()`. Utiliza `deltaTime` com teto de segurança (`MAX_DELTA_TIME = 0.1s`) para proteger contra congelamentos de aba.
-4. **Input System (`src/systems/InputSystem.ts`)**: Camada de abstração que mapeia códigos de teclas para ações conceituais (`MoveUp`, `MoveDown`, `MoveLeft`, `MoveRight`, `Pause`, `DebugSpawn`, `DebugClear`, `DebugSpawnEnemy`), desacoplando o teclado das entidades.
+4. **Input System (`src/systems/InputSystem.ts`)**: Mapeamento de teclas físicas para ações conceituais (`MoveUp`, `MoveDown`, `MoveLeft`, `MoveRight`, `Pause`, `DebugSpawn`, `DebugClear`, `DebugSpawnEnemy`), desacoplando o teclado das entidades.
 5. **Gerenciador de Entidades (`src/entities/EntityManager.ts`)**: Gerencia o ciclo de vida e atualização sequencial de todas as entidades ativas sem alocação de lixo no loop e com remoção O(1) via swap-and-pop.
 6. **Limites da Arena (`src/world/ArenaBounds.ts`)**: Paredes tridimensionais perimetrais com contenção matemática (`clampPosition`), contendo o jogador e entidades sem a sobrecarga de uma engine física externa.
-7. **Player & Controller (`src/entities/player/`)**: O `Player` é uma entidade Three.js pura com modelo 3D (cápsula + visor direcional). O `PlayerController` interpreta os comandos do `InputSystem`, normaliza direções e aplica `speed * deltaTime` com Zero Garbage Collection. Possui sistema de dano com *i-frames* (0.5s) e flash visual.
-8. **Inimigos & Perseguição (`src/entities/enemy/`, `src/systems/`)**: Inimigos com modelo 3D sombreado perseguem o jogador continuamente via `EnemyMovementSystem` com matemática vetorial normalizada Zero-GC.
-9. **Armas & Ataques Automáticos (`src/weapons/`, `src/systems/WeaponSystem.ts`)**: Armas desacopladas que encontram o inimigo mais próximo no raio de alcance e disparam projéteis 3D com tempo de recarga (*cooldown*).
-10. **Combate & Colisão (`src/systems/CombatSystem.ts`)**: Detecção circular de dano entre:
-    - **Inimigos vs Jogador**: Aplica dano ao tocar no Player respeitando os *i-frames*.
-    - **Projéteis vs Inimigos**: Aplica dano aos inimigos, remove os projéteis no impacto e elimina os inimigos com vida zerada, incrementando o contador de abates.
-11. **Spawner Progressivo (`src/systems/EnemySpawner.ts`)**: Inimigos são gerados em um anel externo fora da visão da câmera com taxa de aparição acelerada com base no tempo de sobrevivência.
-12. **Interface e Menus (`src/ui/`, `src/styles/`)**: Menus, HUD (HP, Kills, Timer e Debug DEV) e tela de Game Over renderizados sobre o canvas em HTML/CSS isolados da GPU.
+7. **Player & Controller (`src/entities/player/`)**: Entidade 3D com modelo e orientação dinâmica. O `PlayerController` interpreta o input e aplica movimentação com Zero-GC. Suporte a dano com *i-frames* (0.5s) e flash visual.
+8. **Inimigos & Perseguição (`src/entities/enemy/`, `src/systems/`)**: Inimigos com modelo sombreado perseguem o jogador continuamente via `EnemyMovementSystem` com matemática vetorial normalizada Zero-GC.
+9. **Armas & Combate (`src/weapons/`, `src/systems/WeaponSystem.ts`, `src/systems/CombatSystem.ts`)**: Armas modulares com auto-targeting que disparam projéteis 3D. O `CombatSystem` gerencia danos, colisão de tiros, eliminação de inimigos e acionamento de drop de XP.
+10. **Survivor Loop & Progressão (`src/systems/ExperienceSystem.ts`, `src/systems/UpgradeSystem.ts`)**:
+    - **Gemas de XP (`XpGem.ts`)**: Cristais 3D octaédricos com efeito magnético de atração.
+    - **Barra de Nível**: Progressão com curva exponencial de experiência.
+    - **Pool de Upgrades**: Sorteio de 3 cards aleatórios com bônus acumulativos (*Might, Swiftness, Haste, Vitality, Magnet, Aerodynamics*).
+11. **Interface Desacoplada (`src/ui/`, `src/styles/`)**: Menus, HUD (barra de XP horizontal superior, Badge de Nível, HP, Kills, Timer e Debug) e overlays de Pause, Level Up e Game Over em HTML/CSS isolados da GPU.
 
 ---
 
@@ -93,10 +92,12 @@ src/
 ├── config/
 │   ├── cameraConfig.ts
 │   ├── enemyConfig.ts
+│   ├── experienceConfig.ts
 │   ├── gameConfig.ts
 │   ├── graphicsConfig.ts
 │   ├── playerConfig.ts
 │   ├── sandboxConfig.ts
+│   ├── upgradeConfig.ts
 │   ├── weaponConfig.ts
 │   └── worldConfig.ts
 ├── core/
@@ -109,6 +110,8 @@ src/
 │   ├── EntityManager.ts
 │   ├── enemy/
 │   │   └── Enemy.ts
+│   ├── pickup/
+│   │   └── XpGem.ts
 │   ├── player/
 │   │   ├── Player.ts
 │   │   └── PlayerController.ts
@@ -132,8 +135,10 @@ src/
 │   ├── CombatSystem.ts
 │   ├── EnemyMovementSystem.ts
 │   ├── EnemySpawner.ts
+│   ├── ExperienceSystem.ts
 │   ├── InputSystem.ts
 │   ├── SandboxSpawner.ts
+│   ├── UpgradeSystem.ts
 │   └── WeaponSystem.ts
 ├── types/
 │   └── index.ts
@@ -184,3 +189,12 @@ src/
 - [x] Colisão de projéteis contra inimigos, aplicação de dano e eliminação de inimigos abatidos
 - [x] Contador de abates (`KILLS: N`) integrado em destaque na barra superior do HUD
 - [x] Reinício de partida zerando projéteis e abates
+
+### Milestone 5 — SURVIVOR LOOP (Concluída)
+- [x] Entidade `XpGem` 3D (octaedro verde esmeralda) dropada na morte dos inimigos
+- [x] Atração magnética por proximidade e coleta suave
+- [x] Barra horizontal de XP no topo do HUD e badge de nível (`LVL N`)
+- [x] Sistema de progressão com fórmula de XP exponencial
+- [x] Modal de **Level Up** pausando a partida e sorteando 3 cards de upgrades únicos
+- [x] Pool de 6 upgrades com modificadores dinâmicos (*Might, Swiftness, Haste, Vitality, Magnet, Aerodynamics*)
+- [x] Reinício limpo de partida resetando nível, gemas e atributos base
