@@ -124,18 +124,30 @@ export class WeaponSystem implements Disposable {
     deltaTime: number,
     player: Player,
     enemies: readonly Enemy[],
-    onEnemyKilled?: (enemy: Enemy) => void
+    onEnemyKilled?: (enemy: Enemy) => void,
+    onEnemyHit?: (enemy: Enemy, hitX: number, hitY: number, hitZ: number) => void,
+    onWeaponFired?: () => void
   ): void {
     if (player.hp <= 0) return;
 
     // Update all equipped weapons
     for (let i = 0; i < this.weapons.length; i++) {
+      let weaponFiredThisFrame = false;
       this.weapons[i].update(
         deltaTime,
         player,
         enemies,
-        (projectile) => this.spawnProjectile(projectile),
-        onEnemyKilled
+        (projectile) => {
+          this.spawnProjectile(projectile);
+          if (!weaponFiredThisFrame) {
+            weaponFiredThisFrame = true;
+            if (onWeaponFired) {
+              onWeaponFired();
+            }
+          }
+        },
+        onEnemyKilled,
+        onEnemyHit
       );
     }
 

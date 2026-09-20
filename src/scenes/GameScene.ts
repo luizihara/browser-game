@@ -25,6 +25,8 @@ import { FpsTracker, IS_DEV } from '../utils/debug';
 import { PLAYER_CONFIG } from '../config/playerConfig';
 import type { Enemy } from '../entities/enemy/Enemy';
 import type { UpgradeId } from '../config/upgradeConfig';
+import { ParticleSystem } from '../fx/ParticleSystem';
+import { SoundManager } from '../audio/SoundManager';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -42,6 +44,8 @@ export class GameScene extends BaseScene {
   private experienceSystem: ExperienceSystem;
   private upgradeSystem: UpgradeSystem;
   private directorSystem: DirectorSystem;
+  private particleSystem: ParticleSystem;
+  private soundManager: SoundManager;
   private player: Player | null = null;
   private playerController: PlayerController | null = null;
   private hud: HUD;
@@ -65,6 +69,8 @@ export class GameScene extends BaseScene {
     this.hud = new HUD();
     this.fpsTracker = new FpsTracker();
 
+    this.particleSystem = new ParticleSystem(this.threeScene);
+    this.soundManager = new SoundManager();
     this.enemySpawner = new EnemySpawner(this.entityManager, null, null);
     this.enemyMovementSystem = new EnemyMovementSystem(null, null);
     this.combatSystem = new CombatSystem(null);
@@ -110,6 +116,7 @@ export class GameScene extends BaseScene {
     this.enemyMovementSystem.setBounds(bounds);
     this.combatSystem.setPlayer(this.player);
     this.weaponSystem.setScene(this.threeScene);
+    this.particleSystem.setScene(this.threeScene);
 
     if (IS_DEV && !this.sandboxSpawner) {
       this.sandboxSpawner = new SandboxSpawner(this.entityManager, bounds);
@@ -139,6 +146,8 @@ export class GameScene extends BaseScene {
 
   public override update(deltaTime: number): void {
     if (this.isLevelingUp || this.isGameOver) {
+      this.particleSystem.update(deltaTime);
+      this.cameraController.update(deltaTime);
       return;
     }
 
@@ -168,6 +177,7 @@ export class GameScene extends BaseScene {
         this.enemySpawner.clear();
         this.weaponSystem.clear();
         this.experienceSystem.clear();
+        this.particleSystem.clear();
       }
     }
 
@@ -176,6 +186,7 @@ export class GameScene extends BaseScene {
 
     // Update active entities (Player, Dummies, Projectiles, XpGems)
     this.entityManager.update(deltaTime);
+    this.particleSystem.update(deltaTime);
 
     if (this.playerController) {
       this.playerController.update(deltaTime);
@@ -190,13 +201,22 @@ export class GameScene extends BaseScene {
         deltaTime,
         this.player,
         this.enemySpawner.getEnemies(),
-        (killedEnemy) => this.onEnemyDefeated(killedEnemy)
+        (killedEnemy) => this.onEnemyDefeated(killedEnemy),
+        (_enemy, hitX, hitY, hitZ) => {
+          this.soundManager.playHit();
+          this.particleSystem.emitHitSparks(hitX, hitY, hitZ);
+        },
+        () => {
+          this.soundManager.playShoot();
+        }
       );
     }
 
     // Director: Timeline, scaling multipliers, and scripted wave events
     this.directorSystem.update(deltaTime, this.enemySpawner, (event) => {
       this.hud.showWaveAlert(event.title, event.subtitle, event.isElite);
+      this.soundManager.playWaveAlert();
+      this.cameraController.addTrauma(0.4);
     });
 
     // Update Enemies & Spawner with Director scaling
@@ -210,14 +230,33 @@ export class GameScene extends BaseScene {
       (killedEnemy) => this.onEnemyDefeated(killedEnemy),
       (hitProjectile) => {
         this.weaponSystem.removeProjectile(hitProjectile);
+      },
+      () => {
+        this.cameraController.addTrauma(0.25);
+      },
+      (_enemy, hitX, hitY, hitZ, projectile) => {
+        this.soundManager.playHit();
+        this.particleSystem.emitHitSparks(
+          hitX,
+          hitY,
+          hitZ,
+          projectile?.color
+        );
       }
     );
 
     // Update Experience & Pickups
     if (this.player) {
-      this.experienceSystem.update(deltaTime, this.player, (newLevel) => {
-        this.triggerLevelUp(newLevel);
-      });
+      this.experienceSystem.update(
+        deltaTime,
+        this.player,
+        (newLevel) => {
+          this.triggerLevelUp(newLevel);
+        },
+        () => {
+          this.soundManager.playGemPickup();
+        }
+      );
 
       const xpProg = this.experienceSystem.getProgress();
       this.hud.updateXp(xpProg.ratio, xpProg.level);
@@ -248,6 +287,13 @@ export class GameScene extends BaseScene {
   private onEnemyDefeated(killedEnemy: Enemy): void {
     this.killCount++;
     this.hud.updateKills(this.killCount);
+    this.soundManager.playEnemyDeath();
+    this.particleSystem.emitDeathExplosion(
+      killedEnemy.position.x,
+      killedEnemy.position.y,
+      killedEnemy.position.z,
+      killedEnemy.getColor()
+    );
     // Spawn XP gem with the dead enemy's tier and amount
     this.experienceSystem.spawnGem(
       killedEnemy.position.x,
@@ -260,6 +306,14 @@ export class GameScene extends BaseScene {
 
   private triggerLevelUp(level: number): void {
     this.isLevelingUp = true;
+    this.soundManager.playLevelUp();
+    if (this.player) {
+      this.particleSystem.emitLevelUpBurst(
+        this.player.position.x,
+        this.player.position.y,
+        this.player.position.z
+      );
+    }
     const choices = this.upgradeSystem.getRandomUpgrades(3, this.weaponSystem);
     this.levelUpMenu.mount(this.context.uiRoot, level, choices);
   }
@@ -280,6 +334,7 @@ export class GameScene extends BaseScene {
 
   private triggerGameOver(): void {
     this.isGameOver = true;
+    this.soundManager.playGameOver();
     this.gameOverMenu.mount(this.context.uiRoot, formatTime(this.runTime));
   }
 
@@ -305,11 +360,14 @@ export class GameScene extends BaseScene {
         PLAYER_CONFIG.initialPosition.z
       );
       this.cameraController.setTarget(this.player.position, true);
+      this.cameraController.resetTrauma();
       this.hud.updateHp(this.player.hp, this.player.maxHp);
     }
 
     this.enemySpawner.clear();
     this.weaponSystem.clear();
+    this.particleSystem.clear();
+    this.cameraController.resetTrauma();
     this.experienceSystem.reset();
     this.directorSystem.reset();
     this.sandboxSpawner?.clearDummies();
@@ -372,6 +430,8 @@ export class GameScene extends BaseScene {
       this.sandboxSpawner.dispose();
       this.sandboxSpawner = null;
     }
+    this.particleSystem.dispose();
+    this.soundManager.dispose();
     this.weaponSystem.dispose();
     this.enemySpawner.dispose();
     this.experienceSystem.dispose();
@@ -458,5 +518,13 @@ export class GameScene extends BaseScene {
 
   public getGameCamera(): GameCamera {
     return this.gameCamera;
+  }
+
+  public getParticleSystem(): ParticleSystem {
+    return this.particleSystem;
+  }
+
+  public getSoundManager(): SoundManager {
+    return this.soundManager;
   }
 }

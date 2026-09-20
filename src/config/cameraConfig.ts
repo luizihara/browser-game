@@ -14,4 +14,9 @@ export const CAMERA_CONFIG = {
     z: 0,
   },
   smoothFactor: 8.0, // Used with deltaTime for frame-rate independent dampening
+  shake: {
+    decayRate: 1.4, // Linear decay per second
+    maxOffset: 0.8, // Maximum position displacement
+    frequency: 28.0, // Noise frequency
+  },
 } as const;

@@ -15,10 +15,12 @@ O jogo conta com:
 - Titãs Elites com auréola dourada e eventos periódicos de cerco/enxame com banner animado de alerta no HUD;
 - Arsenal expansivo com até 4 armas simultâneas (*Magic Wand, Guardian Orbs, Radiant Aura, Dagger Throw*) com 5 níveis de poder independentes;
 - Coleta de gemas de experiência multi-tier (Verde, Azul, Dourada), curva exponencial de níveis, HUD de progresso e escolha de upgrades dinâmicos (novas armas, upgrades de armas e passivas) via modal de Level Up;
+- Efeitos sonoros procedurais nativos via Web Audio API (disparos, impactos, mortes, gemas, level up, alertas de onda, game over);
+- Sistema de partículas Zero-GC (`ParticleSystem`) com shaders GLSL e pooling de buffer para faíscas de impacto, explosões radiais e fonte de level up;
+- Hit-flash em inimigos ao sofrerem dano e trauma-based screen shake na câmera (`CameraController`);
 - Fluxo de Game Over com estatística de tempo sobrevivido e reinício de partida.
 
 Futuramente o jogo terá:
-- Efeitos sonoros, trilha musical procedural e feedback audiovisual (Milestone 8 — Audio & FX);
 - Modelos 3D, texturas, shaders e direção de arte detalhada (Milestone 9 — Polish & Art).
 
 Portanto, **toda decisão técnica tomada no presente deve permitir essa escala sem exigir reescritas completas**.
@@ -66,10 +68,12 @@ Portanto, **toda decisão técnica tomada no presente deve permitir essa escala 
 
 ```
 src/
-├── camera/      # Câmera e controladores de acompanhamento
+├── audio/       # Gerenciador de áudio procedural e sintetizador Web Audio API
+├── camera/      # Câmera e controladores de acompanhamento com screen shake
 ├── config/      # Constantes de configuração centralizadas (sem magic numbers)
 ├── core/        # Game, GameLoop, Renderer, Time
 ├── entities/    # Classes base, EntityManager e entidades (Player, Enemy, Projectile, XpGem, SandboxDummy)
+├── fx/          # Sistema de partículas Zero-GC e shaders visuais
 ├── loaders/     # Carregamento assíncrono e cache de assets
 ├── scenes/      # Scene interface, SceneManager e cenas do jogo
 ├── styles/      # Arquivos CSS modulares (global, hud, menu, level-up)

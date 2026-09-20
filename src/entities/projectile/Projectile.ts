@@ -8,6 +8,7 @@ export class Projectile extends Entity {
   public radius: number;
   public lifetime: number;
   public isExpired: boolean = false;
+  public readonly color: number;
   private dirX: number;
   private dirZ: number;
 
@@ -51,6 +52,7 @@ export class Projectile extends Entity {
     this.speed = speed;
     this.radius = radius;
     this.lifetime = lifetime;
+    this.color = color;
     this.dirX = dirX;
     this.dirZ = dirZ;
 

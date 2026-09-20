@@ -38,7 +38,8 @@ export class ExperienceSystem implements Disposable {
   public update(
     deltaTime: number,
     player: Player,
-    onLevelUp: (newLevel: number) => void
+    onLevelUp: (newLevel: number) => void,
+    onGemCollected?: (gem: XpGem) => void
   ): void {
     if (player.hp <= 0) return;
 
@@ -63,6 +64,9 @@ export class ExperienceSystem implements Disposable {
         const collected = gem.attractTowards(px, py, pz, deltaTime);
         if (collected) {
           this.addXp(gem.amount, onLevelUp);
+          if (onGemCollected) {
+            onGemCollected(gem);
+          }
           this.removeGemAt(i);
         }
       }

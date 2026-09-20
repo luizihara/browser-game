@@ -44,6 +44,14 @@ O projeto segue princípios de responsabilidade única (SRP) e baixo acoplamento
     - Eventos de onda programados (enxames rápidos, cerco em anel e titãs elites com auréola dourada).
     - Banner de alerta visual animado no topo da tela informando a chegada de hordas e elites.
 12. **Interface Desacoplada (`src/ui/`, `src/styles/`)**: Menus, HUD (barra de XP superior, Badge de Nível, HP, Kills, Timer, Alertas de Onda e Debug) e overlays de Pause, Level Up (com badges categorizadas) e Game Over em HTML/CSS isolados da GPU.
+13. **Áudio Procedural Web Audio API (`src/audio/SoundManager.ts`, `src/config/audioConfig.ts`)**:
+    - Síntese de áudio 100% nativa no navegador sem download de arquivos de áudio externos (zero latência e zero footprint de rede).
+    - Efeitos sonoros para tiros, impactos de armas, morte de inimigos, coleta de gemas de XP, level up, alertas de horda/elite e game over.
+    - Desbloqueio e resume automático em gestos do usuário (`pointerdown`, `keydown`, `click`), respeitando as políticas de autoplay do navegador.
+14. **Sistema de Partículas & Screen Shake (`src/fx/ParticleSystem.ts`, `src/camera/CameraController.ts`)**:
+    - Sistema de partículas Zero-GC pré-alocado utilizando um único `THREE.Points` com `BufferGeometry` e shaders GLSL customizados (blending aditivo, atenuação por distância e bordas suaves).
+    - Emissão de faíscas de impacto, explosões radiais coloridas conforme a cor do inimigo e fonte espiral de partículas para celebração de level up.
+    - Hit-flash em inimigos ao levarem dano e amortecimento de câmera com modelo de trauma decaído linearmente ($intensity = trauma^2$) por pseudo-ruído trigonométrico.
 
 ---
 
@@ -51,14 +59,18 @@ O projeto segue princípios de responsabilidade única (SRP) e baixo acoplamento
 
 ```
 src/
+├── audio/
+│   └── SoundManager.ts
 ├── camera/
 │   ├── CameraController.ts
 │   └── GameCamera.ts
 ├── config/
+│   ├── audioConfig.ts
 │   ├── cameraConfig.ts
 │   ├── directorConfig.ts
 │   ├── enemyConfig.ts
 │   ├── experienceConfig.ts
+│   ├── fxConfig.ts
 │   ├── gameConfig.ts
 │   ├── graphicsConfig.ts
 │   ├── playerConfig.ts
@@ -85,6 +97,8 @@ src/
 │   │   └── Projectile.ts
 │   └── sandbox/
 │       └── SandboxDummy.ts
+├── fx/
+│   └── ParticleSystem.ts
 ├── loaders/
 │   └── AssetLoader.ts
 ├── scenes/
@@ -192,3 +206,15 @@ src/
 - [x] Lâminas direcionais (`DaggerWeapon`) disparadas em leque baseado na orientação do movimento
 - [x] Integração no modal de Level Up com badges visuais (`[NEW WEAPON]`, `[UPGRADE LVL X]`, `[PASSIVE]`)
 - [x] Reinício limpo no Game Over retornando o jogador à arma inicial de nível 1
+
+### Milestone 8 — AUDIO & FX (Concluída)
+- [x] Sintetizador de áudio procedural usando Web Audio API nativa (`SoundManager`) com zero dependências externas ou arquivos de áudio
+- [x] Efeitos sonoros procedurais para disparos, impactos de tiros/armas, eliminação de inimigos, coleta de gemas de XP, level up, alertas de horda e game over
+- [x] Gerenciamento de desbloqueio seguro do áudio (`AudioContext.resume()`) no primeiro gesto do usuário (`pointerdown`, `keydown`, `click`)
+- [x] Sistema de partículas Zero-GC pré-alocado (`ParticleSystem`) com `THREE.Points`, shaders GLSL customizados e blending aditivo
+- [x] Emissão de faíscas de impacto dinâmicas (`emitHitSparks`) com cor sincronizada ao projétil/arma
+- [x] Explosão radial de fragmentos na derrota dos inimigos (`emitDeathExplosion`) preservando a cor original do arquétipo
+- [x] Fonte espiral ascendente de partículas douradas e esmeraldas ao subir de nível (`emitLevelUpBurst`)
+- [x] Hit-flash nos inimigos ao sofrerem dano com restauração em 0.08s sem alocações
+- [x] Screen shake com modelo de trauma na câmera (`CameraController.addTrauma`), decaído quadraticamente e alimentado por dano no jogador, ondas de horda e chegada de elites
+- [x] Limpeza e reinicialização completa dos efeitos visuais e áudio ao reiniciar a partida

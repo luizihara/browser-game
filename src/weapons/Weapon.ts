@@ -25,7 +25,8 @@ export interface Weapon extends Disposable {
     player: Player,
     enemies: readonly Enemy[],
     onSpawnProjectile: (projectile: Projectile) => void,
-    onEnemyKilled?: (enemy: Enemy) => void
+    onEnemyKilled?: (enemy: Enemy) => void,
+    onEnemyHit?: (enemy: Enemy, hitX: number, hitY: number, hitZ: number) => void
   ): void;
 
   reset(): void;

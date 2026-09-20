@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Entity } from '../Entity';
 import { ENEMY_CONFIG, type EnemyType } from '../../config/enemyConfig';
 import type { GemTier } from '../../config/experienceConfig';
+import { FX_CONFIG } from '../../config/fxConfig';
 
 export interface EnemyStatMultipliers {
   hp?: number;
@@ -21,6 +22,9 @@ export class Enemy extends Entity {
   public gemTier: GemTier;
 
   private haloMesh: THREE.Mesh | null = null;
+  private bodyMaterial: THREE.MeshStandardMaterial;
+  private originalColor: number;
+  private flashTimer: number = 0;
 
   constructor(
     x: number = 0,
@@ -102,6 +106,9 @@ export class Enemy extends Entity {
 
     super(group);
 
+    this.bodyMaterial = bodyMat;
+    this.originalColor = cfg.color;
+
     this.type = type;
     this.maxHp = Math.round(cfg.maxHp * hpMult);
     this.hp = this.maxHp;
@@ -128,12 +135,23 @@ export class Enemy extends Entity {
     if (this.haloMesh) {
       this.haloMesh.rotation.z += deltaTime * 2.0;
     }
+
+    if (this.flashTimer > 0) {
+      this.flashTimer -= deltaTime;
+      if (this.flashTimer <= 0) {
+        this.flashTimer = 0;
+        this.bodyMaterial.color.setHex(this.originalColor);
+      }
+    }
   }
 
   public takeDamage(amount: number): boolean {
     if (this.isDead) return true;
 
     this.hp -= amount;
+    this.flashTimer = FX_CONFIG.hitFlash.duration;
+    this.bodyMaterial.color.setHex(FX_CONFIG.hitFlash.color);
+
     if (this.hp <= 0) {
       this.hp = 0;
       this.isDead = true;
@@ -142,7 +160,15 @@ export class Enemy extends Entity {
     return false;
   }
 
+  public getColor(): number {
+    return this.originalColor;
+  }
+
   public override dispose(): void {
+    if (this.flashTimer > 0) {
+      this.flashTimer = 0;
+      this.bodyMaterial.color.setHex(this.originalColor);
+    }
     this.mesh.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         child.geometry.dispose();

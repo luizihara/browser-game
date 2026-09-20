@@ -17,7 +17,15 @@ export class CombatSystem {
     enemies: readonly Enemy[],
     projectiles?: readonly Projectile[],
     onEnemyKilled?: (enemy: Enemy) => void,
-    onProjectileHit?: (projectile: Projectile) => void
+    onProjectileHit?: (projectile: Projectile) => void,
+    onPlayerDamaged?: (player: Player) => void,
+    onEnemyHit?: (
+      enemy: Enemy,
+      hitX: number,
+      hitY: number,
+      hitZ: number,
+      projectile?: Projectile
+    ) => void
   ): void {
     // 1. Player contact damage check
     if (this.player && this.player.hp > 0) {
@@ -36,6 +44,9 @@ export class CombatSystem {
         if (dx * dx + dz * dz <= minDist * minDist) {
           const tookDamage = this.player.takeDamage(enemy.damage);
           if (tookDamage) {
+            if (onPlayerDamaged) {
+              onPlayerDamaged(this.player);
+            }
             break;
           }
         }
@@ -62,6 +73,9 @@ export class CombatSystem {
 
           if (dx * dx + dz * dz <= collisionDist * collisionDist) {
             const died = enemy.takeDamage(proj.damage);
+            if (onEnemyHit) {
+              onEnemyHit(enemy, projX, proj.position.y, projZ, proj);
+            }
             if (died && onEnemyKilled) {
               onEnemyKilled(enemy);
             }

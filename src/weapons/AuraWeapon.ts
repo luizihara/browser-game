@@ -95,7 +95,8 @@ export class AuraWeapon implements Weapon {
     player: Player,
     enemies: readonly Enemy[],
     _onSpawnProjectile: (projectile: Projectile) => void,
-    onEnemyKilled?: (enemy: Enemy) => void
+    onEnemyKilled?: (enemy: Enemy) => void,
+    onEnemyHit?: (enemy: Enemy, hitX: number, hitY: number, hitZ: number) => void
   ): void {
     if (!this.ringMesh && this.scene) {
       this.initVisual();
@@ -112,6 +113,7 @@ export class AuraWeapon implements Weapon {
 
       // Deal damage to all enemies within radius
       const px = player.position.x;
+      const py = player.position.y;
       const pz = player.position.z;
       const damage = Math.round(cfg.damage * this.damageMultiplier);
       const radSq = this.currentWaveRadius * this.currentWaveRadius;
@@ -124,6 +126,9 @@ export class AuraWeapon implements Weapon {
         const dz = enemy.position.z - pz;
         if (dx * dx + dz * dz <= radSq) {
           const died = enemy.takeDamage(damage);
+          if (onEnemyHit) {
+            onEnemyHit(enemy, enemy.position.x, py, enemy.position.z);
+          }
           if (died && onEnemyKilled) {
             onEnemyKilled(enemy);
           }
