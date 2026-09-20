@@ -107,10 +107,14 @@ export class MainMenu {
       this.settingsMenu.mount(parent);
     };
 
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'main-menu-buttons';
+    buttonContainer.appendChild(startBtn);
+    buttonContainer.appendChild(shopBtn);
+    buttonContainer.appendChild(optionsBtn);
+
     this.element.appendChild(title);
-    this.element.appendChild(startBtn);
-    this.element.appendChild(shopBtn);
-    this.element.appendChild(optionsBtn);
+    this.element.appendChild(buttonContainer);
 
     this.refreshRecords();
 

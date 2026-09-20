@@ -222,6 +222,14 @@
   transition: width 0.2s ease;
 }
 
+.main-menu-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+}
+
 .menu-button {
   padding: 0.95rem 2.8rem;
   font-size: 1.3rem;
@@ -234,7 +242,18 @@
   cursor: pointer;
   box-shadow: 0 5px 0 #b91c1c, 0 8px 20px rgba(239, 68, 68, 0.4);
   transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-  margin: 0.6rem 0;
+  margin: 0.35rem 0;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.main-menu-buttons .menu-button,
+.overlay-screen > .menu-button {
+  width: 340px;
+  max-width: 90vw;
 }
 
 .menu-button:hover {
@@ -952,6 +971,11 @@
   align-items: center;
   width: 100%;
   gap: 1.5rem;
+}
+
+.char-footer .menu-button {
+  width: auto;
+  min-width: 180px;
 }
 
 /* ==========================================================================

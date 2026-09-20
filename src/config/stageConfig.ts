@@ -12,6 +12,8 @@ export interface StageVisualConfig {
   wallColor: number;
   pillarColor: number;
   ambientWeather: 'none' | 'embers' | 'snow';
+  fogColor: number;
+  fogDensity: number;
 }
 
 export interface StageModifiers {
@@ -52,13 +54,15 @@ export const STAGE_CONFIG: Record<StageId, StageConfig> = {
       groundTileA: 0x65a30d, // Sunlit meadow
       groundTileB: 0x365314, // Deep forest green
       sunColor: 0xffedd5, // Warm daytime sunlight
-      sunIntensity: 1.1,
+      sunIntensity: 1.15,
       skyColor: 0x93c5fd, // Soft azure sky
       groundLightColor: 0x3f6212, // Warm grass bounce
       hemisphereIntensity: 0.85,
       wallColor: 0x475569, // Ancient grey stone
       pillarColor: 0x334155, // Weathered slate
       ambientWeather: 'none',
+      fogColor: 0x142820,
+      fogDensity: 0.009,
     },
     modifiers: {
       enemyHpMult: 1.0,
@@ -84,13 +88,15 @@ export const STAGE_CONFIG: Record<StageId, StageConfig> = {
       groundTileA: 0x292524, // Volcanic basalt
       groundTileB: 0x7c2d12, // Smoldering ember crust
       sunColor: 0xf97316, // Fiery volcanic sunlight
-      sunIntensity: 1.25,
+      sunIntensity: 1.3,
       skyColor: 0x450a0a, // Blood red volcanic sky
       groundLightColor: 0xea580c, // Lava ground bounce
       hemisphereIntensity: 0.95,
       wallColor: 0x27272a, // Basalt block walls
       pillarColor: 0xc2410c, // Magma veined pillars
       ambientWeather: 'embers',
+      fogColor: 0x1a0606,
+      fogDensity: 0.012,
     },
     modifiers: {
       enemyHpMult: 1.1,
@@ -116,13 +122,15 @@ export const STAGE_CONFIG: Record<StageId, StageConfig> = {
       groundTileA: 0x0284c7, // Crystalline blue
       groundTileB: 0xe0f2fe, // Powder snow crust
       sunColor: 0xbae6fd, // Crisp arctic blue daylight
-      sunIntensity: 1.2,
+      sunIntensity: 1.25,
       skyColor: 0x1e293b, // Twilight night sky
       groundLightColor: 0x38bdf8, // Cyan ice glow
       hemisphereIntensity: 0.9,
       wallColor: 0x0369a1, // Frozen ice block walls
       pillarColor: 0x7dd3fc, // Glacial spire top
       ambientWeather: 'snow',
+      fogColor: 0x071e33,
+      fogDensity: 0.011,
     },
     modifiers: {
       enemyHpMult: 1.3, // +30% enemy HP

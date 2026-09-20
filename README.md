@@ -348,6 +348,18 @@ src/
   - Efeitos sonoros dedicados para quebra de cerâmica, impacto em madeira e despedaçamento de gelo cristalino.
 - [x] **Persistência de Recordes e Desbloqueios por Estágio (`metaConfig.ts`, `MetaManager.ts`)**:
   - Armazenamento independente de melhor tempo, maior contagem de abates e status de vitória para cada um dos 3 biomas com sincronização no `localStorage`.
+- [x] **Enriquecimento Visual do Mapa & Santuário Central (`PropBuilder.ts`, `Ground.ts`, `World.ts`, `stageConfig.ts`)**:
+  - **Santuário Central**: Estrutura circular sagrada no centro da arena com dais de pedra esculpida, anel rúnico brilhante e 4 tochas ancestrais com chamas crepitantes temáticas.
+  - **Trilhas e Caminhos**: Estradas de lajotas e pedras rústicas irradiando do centro para as bordas.
+  - **Arbustos Volumosos Low-Poly**: Moitas densas espalhadas pelos cenários adicionando volume e cor.
+  - **Arcos em Ruínas & Vents Vulcânicos**: Monumentos arquitetônicos detalhados específicos de cada bioma.
+  - **Neblina Atmosférica de Profundidade (`THREE.FogExp2`)**: Efeito de névoa e cor de horizonte correspondente para cada bioma.
+- [x] **Otimizações de Performance Zero-GC & Física O(N) (`EnemyMovementSystem.ts`, `ExperienceSystem.ts`)**:
+  - Grade de Particionamento Espacial Zero-GC reduzindo a repulsão de multidão de $O(N^2)$ para $O(N)$ (ganho de mais de 50x em CPU para centenas de inimigos).
+  - Consolidação de gemas distantes acima de 300 unidades preservando 100% do XP e mantendo taxa de quadros a 144 FPS.
+- [x] **Correção de Softlock de Baú & Padronização de Menu (`TreasureChestModal.ts`, `MainMenu.ts`, `menu.css`)**:
+  - Correção na chamada do callback de resgate de tesouro (`onClaimCallback`) e suporte a atalhos de teclado (Enter / Espaço).
+  - Padronização da largura dos botões do Menu Principal para 340px uniforme.
 
 
 

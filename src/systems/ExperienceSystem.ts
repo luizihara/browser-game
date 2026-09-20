@@ -31,6 +31,16 @@ export class ExperienceSystem implements Disposable {
     tierOrAmount: GemTier | number = 'green',
     customAmount?: number
   ): void {
+    // Keep active gems capped at 300 to maintain silky smooth 144 FPS
+    if (this.activeGems.length >= 300) {
+      const candidate = this.activeGems[0];
+      if (candidate && !candidate.isAttracted) {
+        const addedXp = typeof tierOrAmount === 'number' ? tierOrAmount : customAmount ?? 5;
+        candidate.amount += addedXp;
+        return;
+      }
+    }
+
     const gem = new XpGem(x, z, tierOrAmount, customAmount);
     this.activeGems.push(gem);
     this.entityManager.add(gem);

@@ -9,6 +9,7 @@ export interface ChestRewards {
 export class TreasureChestModal {
   private element: HTMLDivElement | null = null;
   private onClaimCallback: (() => void) | null = null;
+  private boundKeyHandler: ((e: KeyboardEvent) => void) | null = null;
 
   public mount(parent: HTMLElement, rewards: ChestRewards, onClaim: () => void): void {
     if (this.element) return;
@@ -55,13 +56,15 @@ export class TreasureChestModal {
 
     const claimBtn = document.createElement('button');
     claimBtn.className = 'menu-button';
-    claimBtn.textContent = 'CLAIM SPOILS';
-    claimBtn.onclick = () => {
+    claimBtn.textContent = 'CLAIM SPOILS (ENTER)';
+    const handleClaim = () => {
+      const cb = this.onClaimCallback;
       this.unmount();
-      if (this.onClaimCallback) {
-        this.onClaimCallback();
+      if (cb) {
+        cb();
       }
     };
+    claimBtn.onclick = handleClaim;
 
     panel.appendChild(icon);
     panel.appendChild(title);
@@ -71,9 +74,22 @@ export class TreasureChestModal {
 
     this.element.appendChild(panel);
     parent.appendChild(this.element);
+
+    // Also support Enter / Space keypress for quick claiming
+    this.boundKeyHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.code === 'Space') {
+        e.preventDefault();
+        handleClaim();
+      }
+    };
+    window.addEventListener('keydown', this.boundKeyHandler);
   }
 
   public unmount(): void {
+    if (this.boundKeyHandler) {
+      window.removeEventListener('keydown', this.boundKeyHandler);
+      this.boundKeyHandler = null;
+    }
     if (this.element && this.element.parentElement) {
       this.element.parentElement.removeChild(this.element);
     }
