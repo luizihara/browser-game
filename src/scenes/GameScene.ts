@@ -31,6 +31,10 @@ import type { Enemy } from '../entities/enemy/Enemy';
 import type { UpgradeId } from '../config/upgradeConfig';
 import { ParticleSystem } from '../fx/ParticleSystem';
 import { SoundManager } from '../audio/SoundManager';
+import { PickupSystem } from '../systems/PickupSystem';
+import type { PickupItem } from '../entities/pickup/PickupItem';
+import { TreasureChestModal } from '../ui/TreasureChestModal';
+import { EXPERIENCE_CONFIG } from '../config/experienceConfig';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -57,10 +61,13 @@ export class GameScene extends BaseScene {
   private gameOverMenu: GameOverMenu;
   private levelUpMenu: LevelUpMenu;
   private victoryMenu: VictoryMenu;
+  private chestModal: TreasureChestModal;
+  private pickupSystem: PickupSystem;
   private isPaused: boolean = false;
   private isGameOver: boolean = false;
   private isLevelingUp: boolean = false;
   private isVictory: boolean = false;
+  private isChestOpening: boolean = false;
   private runTime: number = 0;
   private killCount: number = 0;
   private totalDamageDealt: number = 0;
@@ -89,8 +96,10 @@ export class GameScene extends BaseScene {
     this.combatSystem = new CombatSystem(null);
     this.weaponSystem = new WeaponSystem(this.entityManager, this.threeScene);
     this.experienceSystem = new ExperienceSystem(this.entityManager);
+    this.pickupSystem = new PickupSystem(this.entityManager);
     this.upgradeSystem = new UpgradeSystem();
     this.directorSystem = new DirectorSystem();
+    this.chestModal = new TreasureChestModal();
 
     this.pauseMenu = new PauseMenu(
       () => this.resume(),
@@ -142,12 +151,16 @@ export class GameScene extends BaseScene {
     this.isPaused = false;
     this.isGameOver = false;
     this.isLevelingUp = false;
+    this.isVictory = false;
+    this.isChestOpening = false;
     this.runTime = 0;
     this.killCount = 0;
 
+    this.pickupSystem.clear();
     this.experienceSystem.reset();
     this.upgradeSystem.reset(this.player!, this.weaponSystem, this.experienceSystem);
     this.directorSystem.reset();
+    this.applyPermanentMetaUpgrades();
 
     this.hud.mount(this.context.uiRoot);
     this.hud.updateTime(formatTime(this.runTime));
@@ -162,7 +175,7 @@ export class GameScene extends BaseScene {
   }
 
   public override update(deltaTime: number): void {
-    if (this.isLevelingUp || this.isGameOver || this.isVictory) {
+    if (this.isLevelingUp || this.isGameOver || this.isVictory || this.isChestOpening) {
       this.particleSystem.update(deltaTime);
       this.cameraController.update(deltaTime);
       return;
@@ -194,6 +207,7 @@ export class GameScene extends BaseScene {
         this.enemySpawner.clear();
         this.weaponSystem.clear();
         this.experienceSystem.clear();
+        this.pickupSystem.clear();
         this.particleSystem.clear();
       }
     }
@@ -293,6 +307,13 @@ export class GameScene extends BaseScene {
       this.hud.updateXp(xpProg.ratio, xpProg.level);
     }
 
+    // Update Special Arena Pickups
+    if (this.player) {
+      this.pickupSystem.update(deltaTime, this.player, (item) => {
+        this.onCollectPickup(item);
+      });
+    }
+
     // Check Player Status & Update HUD
     if (this.player) {
       this.hud.updateHp(this.player.hp, this.player.maxHp);
@@ -332,6 +353,12 @@ export class GameScene extends BaseScene {
       killedEnemy.gemTier,
       killedEnemy.xpReward
     );
+    // Drop logic: Elites drop treasure chests, normal enemies have random drops
+    if (killedEnemy.type === 'elite') {
+      this.pickupSystem.spawnChest(killedEnemy.position.x, killedEnemy.position.z);
+    } else {
+      this.pickupSystem.trySpawnRandomDrop(killedEnemy.position.x, killedEnemy.position.z);
+    }
     this.enemySpawner.removeEnemy(killedEnemy);
   }
 
@@ -409,15 +436,138 @@ export class GameScene extends BaseScene {
     });
   }
 
+  private applyPermanentMetaUpgrades(): void {
+    if (!this.player) return;
+    const meta = MetaManager.getInstance();
+
+    // Vitality: +Max HP
+    this.player.maxHp = PLAYER_CONFIG.maxHp + meta.getStatBonus('vitality');
+    this.player.resetHp();
+
+    // Armor: flat damage reduction
+    this.player.armor = meta.getStatBonus('armor');
+
+    // Swiftness: +move speed
+    this.player.speed = PLAYER_CONFIG.speed * (1.0 + meta.getStatBonus('swiftness'));
+
+    // Might & Haste: damage and cooldown
+    this.upgradeSystem.damageMultiplier = 1.0 + meta.getStatBonus('might');
+    this.upgradeSystem.cooldownMultiplier = Math.max(0.2, 1.0 - meta.getStatBonus('haste'));
+    this.weaponSystem.applyStatModifiers(
+      this.upgradeSystem.damageMultiplier,
+      this.upgradeSystem.cooldownMultiplier,
+      this.upgradeSystem.projectileSpeedMultiplier
+    );
+
+    // Magnetism: +pickup range
+    const baseRange = EXPERIENCE_CONFIG.basePickupRange * (1.0 + meta.getStatBonus('magnetism'));
+    this.experienceSystem.setPickupRange(baseRange);
+    this.pickupSystem.setPickupRange(baseRange);
+
+    // Growth: +XP multiplier
+    this.experienceSystem.xpMultiplier = 1.0 + meta.getStatBonus('growth');
+  }
+
+  private onCollectPickup(item: PickupItem): void {
+    if (!this.player) return;
+
+    switch (item.pickupType) {
+      case 'potion': {
+        this.player.heal(30);
+        this.hud.updateHp(this.player.hp, this.player.maxHp);
+        this.soundManager.playHeal();
+        this.particleSystem.emitHitSparks(
+          this.player.position.x,
+          this.player.position.y + 0.5,
+          this.player.position.z,
+          0xef4444
+        );
+        break;
+      }
+      case 'vacuum': {
+        this.experienceSystem.attractAllGems();
+        this.soundManager.playVacuum();
+        this.particleSystem.emitLevelUpBurst(
+          this.player.position.x,
+          this.player.position.y,
+          this.player.position.z
+        );
+        break;
+      }
+      case 'bomb': {
+        this.soundManager.playBombExplosion();
+        this.cameraController.addTrauma(0.6);
+        const enemies = this.enemySpawner.getEnemies();
+        for (let i = enemies.length - 1; i >= 0; i--) {
+          const e = enemies[i];
+          if (!e.isDead) {
+            const died = e.takeDamage(250);
+            this.particleSystem.emitDeathExplosion(
+              e.position.x,
+              e.position.y,
+              e.position.z,
+              0xfbbf24
+            );
+            if (died) {
+              this.onEnemyDefeated(e);
+            }
+          }
+        }
+        break;
+      }
+      case 'chest': {
+        this.openTreasureChest();
+        break;
+      }
+    }
+  }
+
+  private openTreasureChest(): void {
+    if (!this.player) return;
+    this.isChestOpening = true;
+    this.soundManager.playChestOpen();
+    this.cameraController.addTrauma(0.3);
+
+    const baseGold = Math.floor(60 + Math.random() * 60);
+    const greedBonus = MetaManager.getInstance().getStatBonus('greed');
+    const finalGold = Math.round(baseGold * (1.0 + greedBonus));
+    MetaManager.getInstance().addGold(finalGold);
+
+    const granted = this.upgradeSystem.grantRandomChestUpgrade(
+      this.player,
+      this.weaponSystem,
+      this.experienceSystem
+    );
+
+    this.hud.updateHp(this.player.hp, this.player.maxHp);
+    const xpProg = this.experienceSystem.getProgress();
+    this.hud.updateXp(xpProg.ratio, xpProg.level);
+
+    this.chestModal.mount(
+      this.context.uiRoot,
+      {
+        gold: finalGold,
+        upgradeName: granted.name,
+        upgradeIcon: granted.icon,
+      },
+      () => {
+        this.isChestOpening = false;
+        this.context.inputSystem.reset();
+      }
+    );
+  }
+
   public restart(): void {
     this.victoryMenu.unmount();
     this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
     this.levelUpMenu.unmount();
+    this.chestModal.unmount();
     this.isGameOver = false;
     this.isVictory = false;
     this.isPaused = false;
     this.isLevelingUp = false;
+    this.isChestOpening = false;
     this.runTime = 0;
     this.killCount = 0;
     this.totalDamageDealt = 0;
@@ -434,6 +584,7 @@ export class GameScene extends BaseScene {
         this.weaponSystem,
         this.experienceSystem
       );
+      this.applyPermanentMetaUpgrades();
       this.player.position.set(
         PLAYER_CONFIG.initialPosition.x,
         PLAYER_CONFIG.initialPosition.y,
@@ -446,6 +597,7 @@ export class GameScene extends BaseScene {
 
     this.enemySpawner.clear();
     this.weaponSystem.clear();
+    this.pickupSystem.clear();
     this.particleSystem.clear();
     this.cameraController.resetTrauma();
     this.experienceSystem.reset();
@@ -461,7 +613,7 @@ export class GameScene extends BaseScene {
   }
 
   public pause(): void {
-    if (this.isPaused || this.isGameOver || this.isVictory || this.isLevelingUp) return;
+    if (this.isPaused || this.isGameOver || this.isVictory || this.isLevelingUp || this.isChestOpening) return;
     this.isPaused = true;
     this.pauseMenu.mount(this.context.uiRoot);
   }
@@ -478,10 +630,12 @@ export class GameScene extends BaseScene {
     this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
     this.levelUpMenu.unmount();
+    this.chestModal.unmount();
     this.isPaused = false;
     this.isGameOver = false;
     this.isVictory = false;
     this.isLevelingUp = false;
+    this.isChestOpening = false;
     this.context.switchScene('menu');
   }
 
@@ -498,11 +652,13 @@ export class GameScene extends BaseScene {
     this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
     this.levelUpMenu.unmount();
+    this.chestModal.unmount();
     this.hud.unmount();
     this.isPaused = false;
     this.isGameOver = false;
     this.isVictory = false;
     this.isLevelingUp = false;
+    this.isChestOpening = false;
   }
 
   public override dispose(): void {
@@ -510,11 +666,13 @@ export class GameScene extends BaseScene {
     this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
     this.levelUpMenu.unmount();
+    this.chestModal.unmount();
     this.hud.unmount();
     if (this.sandboxSpawner) {
       this.sandboxSpawner.dispose();
       this.sandboxSpawner = null;
     }
+    this.pickupSystem.dispose();
     this.particleSystem.dispose();
     this.soundManager.dispose();
     this.weaponSystem.dispose();

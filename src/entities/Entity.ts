@@ -12,6 +12,10 @@ export abstract class Entity implements Disposable, Updatable {
     return this.mesh.position;
   }
 
+  public get rotation(): THREE.Euler {
+    return this.mesh.rotation;
+  }
+
   public getMesh(): THREE.Object3D {
     return this.mesh;
   }

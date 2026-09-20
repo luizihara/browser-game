@@ -133,6 +133,25 @@ export class UpgradeSystem {
     );
   }
 
+  public grantRandomChestUpgrade(
+    player: Player,
+    weaponSystem: WeaponSystem,
+    expSystem: ExperienceSystem
+  ): UpgradeDefinition {
+    const choices = this.getRandomUpgrades(1, weaponSystem);
+    const chosen = choices[0] ?? {
+      id: 'might',
+      name: UPGRADE_CONFIG.might.name,
+      description: UPGRADE_CONFIG.might.description,
+      icon: UPGRADE_CONFIG.might.icon,
+      category: 'passive',
+      categoryLabel: 'PASSIVE',
+    };
+
+    this.applyUpgrade(chosen.id, player, weaponSystem, expSystem);
+    return chosen;
+  }
+
   public reset(
     player: Player,
     weaponSystem: WeaponSystem,

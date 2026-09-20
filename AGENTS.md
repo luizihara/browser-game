@@ -21,7 +21,9 @@ O jogo conta com:
 - Física de separação de corpos rígidos e crowd separation Zero-GC em `EnemyMovementSystem`, prevenindo sobreposição de corpos entre o jogador e as hordas;
 - Direção de arte estilizada Low-Poly Toon com cel-shading discreto de 3 bandas (`ToonMaterialFactory`, `VISUAL_DIRECTION.md`), iluminação atmosférica suave, cenário com props instanciados ricos em detalhes (`PropBuilder`), herói Chibi com passada procedural e 4 arquétipos de monstros com silhuetas caricatas bem definidas;
 - Menu de Configurações (`SettingsMenu`, `settingsConfig.ts`) com controle de áudio, intensidade de trauma e flash de dano;
-- Fluxo de Game Over e Vitória de Run (`VictoryMenu`, `metaConfig.ts`) com detalhamento de DPS por arma, recordes persistentes e acumulação de ouro.
+- Fluxo de Game Over e Vitória de Run (`VictoryMenu`, `metaConfig.ts`) com detalhamento de DPS por arma, recordes persistentes e acumulação de ouro;
+- Loja de Power-ups Permanentes com Ouro (`MetaShopMenu`, `metaUpgradeConfig.ts`) com 8 atributos evolutivos e sistema de reembolso 100% gratuito (*respec*);
+- Drops especiais 3D de arena (`PickupItem`, `PickupSystem`) com Baús de Tesouro (`TreasureChestModal`), Poções de Vida, Ímã Cósmico e Bomba Sacra.
 
 Portanto, **toda decisão técnica tomada no presente deve permitir essa escala sem exigir reescritas completas**.
 
@@ -73,14 +75,14 @@ src/
 ├── camera/      # Câmera e controladores de acompanhamento com screen shake
 ├── config/      # Constantes de configuração centralizadas (sem magic numbers)
 ├── core/        # Game, GameLoop, Renderer, Time
-├── entities/    # Classes base, EntityManager e entidades (Player, Enemy, Projectile, XpGem, SandboxDummy)
+├── entities/    # Classes base, EntityManager e entidades (Player, Enemy, Projectile, XpGem, PickupItem, SandboxDummy)
 ├── fx/          # Sistema de partículas Zero-GC e shaders visuais
 ├── loaders/     # Carregamento assíncrono e cache de assets
 ├── scenes/      # Scene interface, SceneManager e cenas do jogo
 ├── styles/      # Arquivos CSS modulares (global, hud, menu, level-up)
-├── systems/     # Sistemas independentes (InputSystem, EnemyMovementSystem, EnemySpawner, DirectorSystem, CombatSystem, WeaponSystem, ExperienceSystem, UpgradeSystem)
+├── systems/     # Sistemas independentes (InputSystem, EnemyMovementSystem, EnemySpawner, DirectorSystem, CombatSystem, WeaponSystem, ExperienceSystem, UpgradeSystem, PickupSystem)
 ├── types/       # Tipagens e interfaces globais
-├── ui/          # Overlays DOM (HUD, PauseMenu, GameOverMenu, LevelUpMenu, SettingsMenu, VictoryMenu)
+├── ui/          # Overlays DOM (HUD, PauseMenu, GameOverMenu, LevelUpMenu, SettingsMenu, VictoryMenu, MetaShopMenu, TreasureChestModal)
 ├── utils/       # Funções utilitárias (matemática, debug)
 └── weapons/     # Interface Weapon e implementações (ProjectileWeapon, OrbitalWeapon, AuraWeapon, DaggerWeapon)
 ```

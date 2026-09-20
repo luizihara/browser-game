@@ -11,6 +11,7 @@ export class ExperienceSystem implements Disposable {
   private currentXp: number = 0;
   private xpToNextLevel: number;
   private pickupRange: number = EXPERIENCE_CONFIG.basePickupRange;
+  public xpMultiplier: number = 1.0;
 
   constructor(entityManager: EntityManager) {
     this.entityManager = entityManager;
@@ -73,8 +74,15 @@ export class ExperienceSystem implements Disposable {
     }
   }
 
+  public attractAllGems(): void {
+    for (let i = 0; i < this.activeGems.length; i++) {
+      this.activeGems[i].isAttracted = true;
+    }
+  }
+
   public addXp(amount: number, onLevelUp: (newLevel: number) => void): void {
-    this.currentXp += amount;
+    const finalAmount = Math.round(amount * this.xpMultiplier);
+    this.currentXp += finalAmount;
 
     while (this.currentXp >= this.xpToNextLevel) {
       this.currentXp -= this.xpToNextLevel;
@@ -124,6 +132,7 @@ export class ExperienceSystem implements Disposable {
     this.clear();
     this.currentLevel = 1;
     this.currentXp = 0;
+    this.xpMultiplier = 1.0;
     this.xpToNextLevel = this.calculateXpRequirement(this.currentLevel);
     this.pickupRange = EXPERIENCE_CONFIG.basePickupRange;
   }

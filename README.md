@@ -85,6 +85,7 @@ src/
 │   ├── gameConfig.ts
 │   ├── graphicsConfig.ts
 │   ├── metaConfig.ts
+│   ├── metaUpgradeConfig.ts
 │   ├── playerConfig.ts
 │   ├── sandboxConfig.ts
 │   ├── settingsConfig.ts
@@ -102,6 +103,7 @@ src/
 │   ├── enemy/
 │   │   └── Enemy.ts
 │   ├── pickup/
+│   │   ├── PickupItem.ts
 │   │   └── XpGem.ts
 │   ├── player/
 │   │   ├── Player.ts
@@ -131,6 +133,7 @@ src/
 │   ├── EnemySpawner.ts
 │   ├── ExperienceSystem.ts
 │   ├── InputSystem.ts
+│   ├── PickupSystem.ts
 │   ├── SandboxSpawner.ts
 │   ├── UpgradeSystem.ts
 │   └── WeaponSystem.ts
@@ -140,8 +143,10 @@ src/
 │   ├── GameOverMenu.ts
 │   ├── HUD.ts
 │   ├── LevelUpMenu.ts
+│   ├── MetaShopMenu.ts
 │   ├── PauseMenu.ts
 │   ├── SettingsMenu.ts
+│   ├── TreasureChestModal.ts
 │   └── VictoryMenu.ts
 ├── utils/
 │   ├── debug.ts
@@ -257,3 +262,15 @@ src/
 - [x] **Condição de Vitória (Endgame)**: Sobrevivência até o tempo estipulado (`victoryTime = 300s`) com onda final de clímax e confronto épico.
 - [x] **Tela de Vitória**: Resumo completo com tempo sobrevivido, inimigos eliminados, dano total, nível alcançado, ouro obtido e tabela detalhada de dano causado por cada arma com porcentagens de contribuição.
 - [x] **Meta-Progressão e Registro de Recordes (`MetaManager`)**: Rastreamento persistente do melhor tempo de sobrevivência, maior nível, recorde de abates, total de partidas e acumulação de ouro salvo em `localStorage`, visível no Menu Principal.
+
+### Milestone 11 — META SHOP & ARENA DROPS (Concluída)
+- [x] **Loja de Power-ups Permanentes com Ouro (`MetaShopMenu.ts`, `metaUpgradeConfig.ts`)**: Menu dedicado acessível pelo Menu Principal (`POWER-UPS 🪙`) permitindo gastar o ouro acumulado em 8 atributos permanentes (*Might, Vitality, Armor, Swiftness, Arcane Haste, Magnetism, Wisdom, Greed*) com indicadores de rank e custos escalonados.
+- [x] **Sistema de Reembolso 100% Gratuito (Respec)**: Botão `[ REFUND ALL ]` que devolve 100% do ouro investido sem perda ou penalidade para redistribuição livre de atributos.
+- [x] **Drops Especiais 3D de Arena (`PickupItem.ts`, `PickupSystem.ts`)**:
+  - 🎁 **Baú de Tesouro (Treasure Chest)**: Solto com 100% de chance por Elites derrotados;
+  - 💖 **Poção de Vida (Health Potion)**: Restaura 30 HP instantaneamente com som cintilante e faíscas rubi;
+  - 🧲 **Ímã Cósmico (Vacuum Orb)**: Atrai instantaneamente todas as gemas de XP espalhadas pelo chão até o jogador;
+  - 💣 **Bomba Sacra (Holy Bomb)**: Detona uma explosão de 250 de dano limpando os inimigos da tela com screen shake.
+- [x] **Modal de Recompensa de Baú (`TreasureChestModal.ts`)**: Pausa temporária triunfante com fanfarra de áudio procedural, concessão de bônus de ouro imediato e +1 upgrade instantâneo aleatório de armas ou passivas.
+- [x] **Novos Efeitos Sonoros Procedurais (`SoundManager.ts`)**: Síntese nativa Web Audio API para abertura de baús, poção de cura, sucção magnética e explosão de bomba sagrada.
+

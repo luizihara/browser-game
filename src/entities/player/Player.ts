@@ -9,6 +9,7 @@ export class Player extends Entity {
   public hp: number = PLAYER_CONFIG.maxHp;
   public maxHp: number = PLAYER_CONFIG.maxHp;
   public radius: number = PLAYER_CONFIG.radius;
+  public armor: number = 0;
   private invulnerableTimer: number = 0;
 
   // Visual components & animation state
@@ -40,10 +41,18 @@ export class Player extends Entity {
       return false;
     }
 
-    this.hp = Math.max(0, this.hp - amount);
+    const effectiveDamage = Math.max(1, amount - this.armor);
+    this.hp = Math.max(0, this.hp - effectiveDamage);
     this.invulnerableTimer = PLAYER_CONFIG.invulnerabilityDuration;
 
     return true;
+  }
+
+  public heal(amount: number): number {
+    if (this.hp <= 0 || amount <= 0) return 0;
+    const prev = this.hp;
+    this.hp = Math.min(this.maxHp, this.hp + amount);
+    return this.hp - prev;
   }
 
   public isInvulnerable(): boolean {

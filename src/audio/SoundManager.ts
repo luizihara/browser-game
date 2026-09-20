@@ -380,6 +380,152 @@ export class SoundManager implements Disposable {
     }
   }
 
+  /**
+   * Procedural chest open sound: bright triumphant major fanfare.
+   */
+  public playChestOpen(): void {
+    if (!this.canPlay('chestOpen', 0.5)) return;
+    const ctx = this.audioContext!;
+    const now = ctx.currentTime;
+    const freqs = [440, 554.37, 659.25, 880, 1108.73];
+    const step = 0.08;
+
+    for (let i = 0; i < freqs.length; i++) {
+      const noteTime = now + i * step;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freqs[i]!, noteTime);
+
+      gain.gain.setValueAtTime(0.0001, noteTime);
+      gain.gain.linearRampToValueAtTime(0.35, noteTime + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + 0.4);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain!);
+
+      osc.start(noteTime);
+      osc.stop(noteTime + 0.4);
+
+      osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+      };
+    }
+  }
+
+  /**
+   * Procedural heal sound: warm chime.
+   */
+  public playHeal(): void {
+    if (!this.canPlay('heal', 0.2)) return;
+    const ctx = this.audioContext!;
+    const now = ctx.currentTime;
+    const freqs = [523.25, 659.25, 783.99];
+
+    for (let i = 0; i < freqs.length; i++) {
+      const noteTime = now + i * 0.06;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freqs[i]!, noteTime);
+
+      gain.gain.setValueAtTime(0.0001, noteTime);
+      gain.gain.linearRampToValueAtTime(0.3, noteTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, noteTime + 0.35);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain!);
+
+      osc.start(noteTime);
+      osc.stop(noteTime + 0.35);
+
+      osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+      };
+    }
+  }
+
+  /**
+   * Procedural vacuum sound: cosmic magnetic whoosh.
+   */
+  public playVacuum(): void {
+    if (!this.canPlay('vacuum', 0.5)) return;
+    const ctx = this.audioContext!;
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(800, now + 0.4);
+
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(300, now);
+    filter.frequency.exponentialRampToValueAtTime(1200, now + 0.4);
+    filter.Q.setValueAtTime(4.0, now);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.28, now + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain!);
+
+    osc.start(now);
+    osc.stop(now + 0.5);
+
+    osc.onended = () => {
+      osc.disconnect();
+      filter.disconnect();
+      gain.disconnect();
+    };
+  }
+
+  /**
+   * Procedural holy bomb explosion sound.
+   */
+  public playBombExplosion(): void {
+    if (!this.canPlay('bomb', 0.5)) return;
+    const ctx = this.audioContext!;
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.exponentialRampToValueAtTime(30, now + 0.7);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(800, now);
+    filter.frequency.exponentialRampToValueAtTime(40, now + 0.7);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(0.55, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain!);
+
+    osc.start(now);
+    osc.stop(now + 0.7);
+
+    osc.onended = () => {
+      osc.disconnect();
+      filter.disconnect();
+      gain.disconnect();
+    };
+  }
+
   public setMasterVolume(val: number): void {
     this.masterVolume = Math.max(0, Math.min(1, val));
     if (this.audioContext && this.masterGain && !this.muted) {
