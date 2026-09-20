@@ -9,9 +9,10 @@ Jogo 3D para navegador do gênero **survivor / bullet heaven** (inspirado na jog
 | Ação | Controle / Mecânica | Contexto |
 | :--- | :--- | :--- |
 | **Movimentação** | **W, A, S, D** ou **Setas do Teclado** | Gameplay |
-| **Ataque** | **100% Automático**: A arma mira e dispara automaticamente no inimigo mais próximo | Gameplay |
+| **Ataque** | **100% Automático**: Todas as armas equipadas miram e disparam automaticamente | Gameplay |
+| **Arsenal** | Até 4 armas ativas simultâneas (Varinha, Orbes Orbitais, Aura Sagrada, Adagas) | Gameplay |
 | **Coleta de XP** | Aproxime-se dos cristais deixados pelos inimigos para atraí-los magneticamente | Gameplay |
-| **Level Up** | Ao preencher a barra de XP, escolha 1 entre 3 cartas de upgrades sorteadas | Modal de Evolução |
+| **Level Up** | Ao preencher a barra de XP, escolha 1 entre 3 cartas de novas armas, upgrades ou passivas | Modal de Evolução |
 | **Pause** | Tecla **ESC** | Jogo / Pause |
 | **Spawn Inimigos** | Tecla **E** (spawna 5 inimigos em volta do jogador) | DEV Mode |
 | **Spawn Dummies** | Tecla **B** (spawna 20 dummies de teste) | DEV Mode |
@@ -33,16 +34,16 @@ O projeto segue princípios de responsabilidade única (SRP) e baixo acoplamento
 6. **Limites da Arena (`src/world/ArenaBounds.ts`)**: Paredes tridimensionais perimetrais com contenção matemática (`clampPosition`), contendo o jogador e entidades sem a sobrecarga de uma engine física externa.
 7. **Player & Controller (`src/entities/player/`)**: Entidade 3D com modelo e orientação dinâmica. O `PlayerController` interpreta o input e aplica movimentação com Zero-GC. Suporte a dano com *i-frames* (0.5s) e flash visual.
 8. **Inimigos & Arquétipos (`src/entities/enemy/`, `src/systems/`)**: 4 arquétipos distintos em primitivas 3D (*Stalker, Skitterer, Brute, Goliath Elite*) que perseguem o jogador continuamente via `EnemyMovementSystem` com Zero-GC.
-9. **Armas & Combate (`src/weapons/`, `src/systems/WeaponSystem.ts`, `src/systems/CombatSystem.ts`)**: Armas modulares com auto-targeting que disparam projéteis 3D. O `CombatSystem` gerencia danos, colisão de tiros, eliminação de inimigos e acionamento de drop de XP proporcional ao inimigo.
+9. **Arsenal & Combate (`src/weapons/`, `src/systems/WeaponSystem.ts`, `src/systems/CombatSystem.ts`)**: Suporte a até 4 armas simultâneas (*Magic Wand, Guardian Orbs, Radiant Aura, Dagger Throw*). Cada arma possui 5 níveis independentes com aumento de dano, quantidade de projéteis, área e velocidade.
 10. **Survivor Loop & Progressão (`src/systems/ExperienceSystem.ts`, `src/systems/UpgradeSystem.ts`)**:
     - **Gemas de XP Multi-Tier (`XpGem.ts`)**: Cristais 3D octaédricos em 3 raridades (Verde 5 XP, Azul 25 XP, Dourada 100 XP) com efeito magnético de atração.
     - **Barra de Nível**: Progressão com curva exponencial de experiência.
-    - **Pool de Upgrades**: Sorteio de 3 cards aleatórios com bônus acumulativos (*Might, Swiftness, Haste, Vitality, Magnet, Aerodynamics*).
+    - **Pool de Upgrades Híbrido**: Sorteio dinâmico entre desbloqueio de novas armas, upgrades de armas equipadas e bônus passivos acumulativos (*Might, Swiftness, Haste, Vitality, Magnet, Aerodynamics*).
 11. **Diretor de Jogo & Ondas (`src/systems/DirectorSystem.ts`, `src/config/directorConfig.ts`)**:
     - Curva progressiva de dificuldade por tempo (multiplicadores de HP, dano, velocidade e cadência de spawn).
     - Eventos de onda programados (enxames rápidos, cerco em anel e titãs elites com auréola dourada).
     - Banner de alerta visual animado no topo da tela informando a chegada de hordas e elites.
-12. **Interface Desacoplada (`src/ui/`, `src/styles/`)**: Menus, HUD (barra de XP horizontal superior, Badge de Nível, HP, Kills, Timer, Alertas de Onda e Debug) e overlays de Pause, Level Up e Game Over em HTML/CSS isolados da GPU.
+12. **Interface Desacoplada (`src/ui/`, `src/styles/`)**: Menus, HUD (barra de XP superior, Badge de Nível, HP, Kills, Timer, Alertas de Onda e Debug) e overlays de Pause, Level Up (com badges categorizadas) e Game Over em HTML/CSS isolados da GPU.
 
 ---
 
@@ -117,6 +118,9 @@ src/
 │   ├── debug.ts
 │   └── math.ts
 └── weapons/
+    ├── AuraWeapon.ts
+    ├── DaggerWeapon.ts
+    ├── OrbitalWeapon.ts
     ├── ProjectileWeapon.ts
     └── Weapon.ts
 ```
@@ -178,3 +182,13 @@ src/
 - [x] Formações de onda dinâmicas: enxames direcionados (*packs*) e cercos em anel (*ring surges*)
 - [x] Banner de alerta de eventos especiais sobreposto no HUD com pulso animado (`⚠️ HORDE SURGE!`, `💀 ELITE DETECTED!`)
 - [x] Sincronização limpa do Diretor com o ciclo de Pause, Level Up e reinício de partida
+
+### Milestone 7 — ARSENAL (Concluída)
+- [x] Suporte a até 4 armas simultâneas com gerenciamento de slots de equipamento (`WeaponSystem`)
+- [x] 4 arquétipos de armas distintos (*Magic Wand, Guardian Orbs, Radiant Aura, Dagger Throw*)
+- [x] Sistema de níveis por arma (Lv 1 a 5) com progressão cumulativa de tiros, velocidade e alcance
+- [x] Orbes orbitais (`OrbitalWeapon`) com rotação matemática suave ao redor do jogador e dano por contato
+- [x] Onda de choque expansiva (`AuraWeapon`) com dano em área 360° ao redor do personagem
+- [x] Lâminas direcionais (`DaggerWeapon`) disparadas em leque baseado na orientação do movimento
+- [x] Integração no modal de Level Up com badges visuais (`[NEW WEAPON]`, `[UPGRADE LVL X]`, `[PASSIVE]`)
+- [x] Reinício limpo no Game Over retornando o jogador à arma inicial de nível 1

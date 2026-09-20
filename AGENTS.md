@@ -13,12 +13,12 @@ O jogo conta com:
 - Inimigos múltiplos simultâneos com 4 arquétipos distintos em primitivas 3D (*Stalker, Skitterer, Brute, Goliath Elite*);
 - Curva progressiva de dificuldade por tempo e ondas gerenciadas por Diretor de Jogo (*DirectorSystem*);
 - Titãs Elites com auréola dourada e eventos periódicos de cerco/enxame com banner animado de alerta no HUD;
-- Sistema de combate com ataques automáticos, detecção do alvo mais próximo, projéteis 3D, *i-frames* no jogador e eliminação de inimigos com pontuação de abates;
-- Coleta de gemas de experiência multi-tier (Verde, Azul, Dourada), curva exponencial de níveis, HUD de progresso e escolha de upgrades cumulativos via modal de Level Up;
+- Arsenal expansivo com até 4 armas simultâneas (*Magic Wand, Guardian Orbs, Radiant Aura, Dagger Throw*) com 5 níveis de poder independentes;
+- Coleta de gemas de experiência multi-tier (Verde, Azul, Dourada), curva exponencial de níveis, HUD de progresso e escolha de upgrades dinâmicos (novas armas, upgrades de armas e passivas) via modal de Level Up;
 - Fluxo de Game Over com estatística de tempo sobrevivido e reinício de partida.
 
 Futuramente o jogo terá:
-- Variedade expandida de armas secundárias e magias de área (Milestone 7 — Arsenal);
+- Efeitos sonoros, trilha musical procedural e feedback audiovisual (Milestone 8 — Audio & FX);
 - Modelos 3D, texturas, shaders e direção de arte detalhada (Milestone 9 — Polish & Art).
 
 Portanto, **toda decisão técnica tomada no presente deve permitir essa escala sem exigir reescritas completas**.
@@ -33,7 +33,7 @@ Portanto, **toda decisão técnica tomada no presente deve permitir essa escala 
    - `EntityManager` gerencia a coleção, ciclo de vida e renderização de entidades.
    - Controladores (`PlayerController`) interpretam comandos e aplicam cinemática.
    - Sistemas (`EnemyMovementSystem`, `EnemySpawner`, `DirectorSystem`, `CombatSystem`, `WeaponSystem`, `ExperienceSystem`, `UpgradeSystem`) cuidam de tarefas isoladas de IA, dificuldade por tempo, combate, drops de XP e progressão.
-   - Armas (`Weapon`, `ProjectileWeapon`) contêm regras de busca de alvo e disparo.
+   - Armas (`Weapon`, `ProjectileWeapon`, `OrbitalWeapon`, `AuraWeapon`, `DaggerWeapon`) contêm regras de busca de alvo, disparos, rotação orbital e pulsos de área.
    - O mundo (`World`, `ArenaBounds`) delimita o espaço e iluminação.
    - Cenas (`GameScene`) orquestram seus atores.
    - `Game.ts` atua apenas como coordenador geral.
@@ -44,7 +44,7 @@ Portanto, **toda decisão técnica tomada no presente deve permitir essa escala 
    - O ataque é **100% automático**; o jogador apenas se movimenta.
 
 3. **Tempo e Delta Time Estrito**:
-   - Toda alteração cinemática (movimento, rotação, cooldown, timers, tempo de vida de tiros) **obrigatoriamente** multiplica por `deltaTime`.
+   - Toda alteração cinemática (movimento, rotação, cooldown, timers, tempo de vida de tiros, órbitas de armas) **obrigatoriamente** multiplica por `deltaTime`.
    - Nunca utilizar valores fixos por frame (ex: `pos += 0.1` é terminantemente proibido).
    - O tempo é centralizado em `src/core/Time.ts` com proteção de teto (`GAME_CONFIG.maxDeltaTime`).
 
@@ -53,10 +53,10 @@ Portanto, **toda decisão técnica tomada no presente deve permitir essa escala 
    - Não crie novas instâncias de `THREE.Vector3`, matrizes ou objetos descartáveis dentro do loop.
    - Guarde variáveis auxiliares como propriedades privadas reutilizáveis na classe.
    - O `EntityManager` realiza iterações indexadas padrão e remoções O(1) via swap-and-pop.
-   - `EnemyMovementSystem`, `CombatSystem`, `ProjectileWeapon`, `DirectorSystem` e `ExperienceSystem` calculam distâncias e probabilidades puramente com escalares primitivos, sem instanciar vetores temporários.
+   - `EnemyMovementSystem`, `CombatSystem`, `ProjectileWeapon`, `OrbitalWeapon`, `AuraWeapon`, `DirectorSystem` e `ExperienceSystem` calculam distâncias e probabilidades puramente com escalares primitivos, sem instanciar vetores temporários.
 
 5. **Interface desacoplada (HTML/CSS Overlays)**:
-   - Toda UI (menus, HUD, banners de alerta, pause, level up, game over) reside em elementos DOM sobre o canvas (`#ui-root`).
+   - Toda UI (menus, HUD, banners de alerta, pause, level up com badges, game over) reside em elementos DOM sobre o canvas (`#ui-root`).
    - Não renderize texto ou interface 2D no canvas WebGL a menos que seja um elemento intra-mundo.
    - Atualize nós do DOM existentes (`textContent`, `style.width`), nunca recrie o DOM a cada frame.
 
@@ -77,7 +77,7 @@ src/
 ├── types/       # Tipagens e interfaces globais
 ├── ui/          # Overlays DOM (HUD, PauseMenu, GameOverMenu, LevelUpMenu)
 ├── utils/       # Funções utilitárias (matemática, debug)
-└── weapons/     # Interface Weapon e implementações (ProjectileWeapon, etc.)
+└── weapons/     # Interface Weapon e implementações (ProjectileWeapon, OrbitalWeapon, AuraWeapon, DaggerWeapon)
 ```
 
 ---
