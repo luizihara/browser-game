@@ -1,7 +1,7 @@
 import type { EntityManager } from '../entities/EntityManager';
 import type { Player } from '../entities/player/Player';
 import { XpGem } from '../entities/pickup/XpGem';
-import { EXPERIENCE_CONFIG } from '../config/experienceConfig';
+import { EXPERIENCE_CONFIG, type GemTier } from '../config/experienceConfig';
 import type { Disposable } from '../types';
 
 export class ExperienceSystem implements Disposable {
@@ -27,9 +27,10 @@ export class ExperienceSystem implements Disposable {
   public spawnGem(
     x: number,
     z: number,
-    amount: number = EXPERIENCE_CONFIG.defaultGemXp
+    tierOrAmount: GemTier | number = 'green',
+    customAmount?: number
   ): void {
-    const gem = new XpGem(x, z, amount);
+    const gem = new XpGem(x, z, tierOrAmount, customAmount);
     this.activeGems.push(gem);
     this.entityManager.add(gem);
   }
