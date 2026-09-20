@@ -1,3 +1,82 @@
+:root {
+  /* --- Superfícies e Fundos --- */
+  --color-bg-overlay: rgba(10, 14, 22, 0.92);
+  --color-surface: #1a2233;
+  --color-surface-dark: #121824;
+  --color-surface-raised: #242f46;
+  --color-surface-highlight: #2f3d5a;
+  --color-surface-sunken: #0e131d;
+
+  /* --- Contornos e Sombras Gráficas Toon --- */
+  --color-outline: #090c13;
+  --color-outline-light: #2d3b55;
+  --color-outline-dim: rgba(255, 255, 255, 0.12);
+  --shadow-solid: 4px 5px 0 var(--color-outline);
+  --shadow-solid-sm: 2px 3px 0 var(--color-outline);
+  --shadow-solid-lg: 6px 7px 0 var(--color-outline);
+  --shadow-pressed: 1px 1px 0 var(--color-outline);
+
+  /* --- Cores de Ação e Destaque Toon --- */
+  --color-primary: #e63946;
+  --color-primary-light: #ff4d5a;
+  --color-primary-dark: #b81d29;
+
+  --color-gold: #ffb703;
+  --color-gold-light: #ffd166;
+  --color-gold-dark: #cc8b00;
+
+  --color-mana: #00b4d8;
+  --color-mana-light: #48cae4;
+  --color-mana-dark: #0077b6;
+
+  --color-nature: #06d6a0;
+  --color-nature-light: #2ef3be;
+  --color-nature-dark: #048a66;
+
+  --color-purple: #9d4edd;
+  --color-purple-light: #c77dff;
+  --color-purple-dark: #7b2cbf;
+
+  --color-stone: #334155;
+  --color-stone-light: #475569;
+  --color-stone-dark: #1e293b;
+
+  --color-danger: #ef4444;
+  --color-danger-dark: #b91c1c;
+
+  /* --- Tipografia & Texto --- */
+  --font-game: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  --color-text-main: #f8f9fa;
+  --color-text-dim: #c5cbd3;
+  --color-text-muted: #8892a0;
+
+  /* --- Escala Modular de Espaçamento --- */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* --- Bordas e Raios (Marcados e Sólidos) --- */
+  --border-width: 3px;
+  --border-width-sm: 2px;
+  --border-width-lg: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* --- Movimento e Transições Tácteis --- */
+  --ease-game: cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  --ease-snappy: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-fast: 90ms;
+  --motion-normal: 160ms;
+  --motion-slow: 240ms;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -10,9 +89,11 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #0d0f12;
-  color: #f0f4f8;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--color-surface-sunken);
+  color: var(--color-text-main);
+  font-family: var(--font-game);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #app {
@@ -40,6 +121,7 @@ canvas#game-canvas {
   height: 100%;
   z-index: 10;
   pointer-events: none;
+  font-family: var(--font-game);
 }
 
 #ui-root > * {
