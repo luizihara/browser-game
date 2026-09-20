@@ -10,15 +10,19 @@ import { EnemySpawner } from '../systems/EnemySpawner';
 import { EnemyMovementSystem } from '../systems/EnemyMovementSystem';
 import { CombatSystem } from '../systems/CombatSystem';
 import { WeaponSystem } from '../systems/WeaponSystem';
+import { ExperienceSystem } from '../systems/ExperienceSystem';
+import { UpgradeSystem } from '../systems/UpgradeSystem';
 import { GameCamera } from '../camera/GameCamera';
 import { CameraController } from '../camera/CameraController';
 import { HUD } from '../ui/HUD';
 import { PauseMenu } from '../ui/PauseMenu';
 import { GameOverMenu } from '../ui/GameOverMenu';
+import { LevelUpMenu } from '../ui/LevelUpMenu';
 import { InputAction } from '../systems/InputSystem';
 import { formatTime } from '../utils/math';
 import { FpsTracker, IS_DEV } from '../utils/debug';
 import { PLAYER_CONFIG } from '../config/playerConfig';
+import type { UpgradeId } from '../config/upgradeConfig';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -33,13 +37,17 @@ export class GameScene extends BaseScene {
   private enemyMovementSystem: EnemyMovementSystem;
   private combatSystem: CombatSystem;
   private weaponSystem: WeaponSystem;
+  private experienceSystem: ExperienceSystem;
+  private upgradeSystem: UpgradeSystem;
   private player: Player | null = null;
   private playerController: PlayerController | null = null;
   private hud: HUD;
   private pauseMenu: PauseMenu;
   private gameOverMenu: GameOverMenu;
+  private levelUpMenu: LevelUpMenu;
   private isPaused: boolean = false;
   private isGameOver: boolean = false;
+  private isLevelingUp: boolean = false;
   private runTime: number = 0;
   private killCount: number = 0;
   private fpsTracker: FpsTracker;
@@ -58,6 +66,8 @@ export class GameScene extends BaseScene {
     this.enemyMovementSystem = new EnemyMovementSystem(null, null);
     this.combatSystem = new CombatSystem(null);
     this.weaponSystem = new WeaponSystem(this.entityManager);
+    this.experienceSystem = new ExperienceSystem(this.entityManager);
+    this.upgradeSystem = new UpgradeSystem();
 
     this.pauseMenu = new PauseMenu(
       () => this.resume(),
@@ -68,6 +78,8 @@ export class GameScene extends BaseScene {
       () => this.restart(),
       () => this.goToMainMenu()
     );
+
+    this.levelUpMenu = new LevelUpMenu((upgradeId) => this.chooseUpgrade(upgradeId));
   }
 
   public override enter(): void {
@@ -100,12 +112,19 @@ export class GameScene extends BaseScene {
 
     this.isPaused = false;
     this.isGameOver = false;
+    this.isLevelingUp = false;
     this.runTime = 0;
     this.killCount = 0;
+
+    this.experienceSystem.reset();
+    this.upgradeSystem.reset(this.player!, this.weaponSystem, this.experienceSystem);
 
     this.hud.mount(this.context.uiRoot);
     this.hud.updateTime(formatTime(this.runTime));
     this.hud.updateKills(this.killCount);
+
+    const xpProg = this.experienceSystem.getProgress();
+    this.hud.updateXp(xpProg.ratio, xpProg.level);
 
     if (this.player) {
       this.hud.updateHp(this.player.hp, this.player.maxHp);
@@ -113,7 +132,7 @@ export class GameScene extends BaseScene {
   }
 
   public override update(deltaTime: number): void {
-    if (this.isGameOver) {
+    if (this.isLevelingUp || this.isGameOver) {
       return;
     }
 
@@ -142,13 +161,14 @@ export class GameScene extends BaseScene {
         this.sandboxSpawner?.clearDummies();
         this.enemySpawner.clear();
         this.weaponSystem.clear();
+        this.experienceSystem.clear();
       }
     }
 
     this.runTime += deltaTime;
     this.hud.updateTime(formatTime(this.runTime));
 
-    // Update active entities (Player, Dummies, Projectiles)
+    // Update active entities (Player, Dummies, Projectiles, XpGems)
     this.entityManager.update(deltaTime);
 
     if (this.playerController) {
@@ -178,12 +198,24 @@ export class GameScene extends BaseScene {
       (killedEnemy) => {
         this.killCount++;
         this.hud.updateKills(this.killCount);
+        // Spawn XP gem at dead enemy position
+        this.experienceSystem.spawnGem(killedEnemy.position.x, killedEnemy.position.z);
         this.enemySpawner.removeEnemy(killedEnemy);
       },
       (hitProjectile) => {
         this.weaponSystem.removeProjectile(hitProjectile);
       }
     );
+
+    // Update Experience & Pickups
+    if (this.player) {
+      this.experienceSystem.update(deltaTime, this.player, (newLevel) => {
+        this.triggerLevelUp(newLevel);
+      });
+
+      const xpProg = this.experienceSystem.getProgress();
+      this.hud.updateXp(xpProg.ratio, xpProg.level);
+    }
 
     // Check Player Status & Update HUD
     if (this.player) {
@@ -207,6 +239,26 @@ export class GameScene extends BaseScene {
     }
   }
 
+  private triggerLevelUp(level: number): void {
+    this.isLevelingUp = true;
+    const choices = this.upgradeSystem.getRandomUpgrades(3);
+    this.levelUpMenu.mount(this.context.uiRoot, level, choices);
+  }
+
+  private chooseUpgrade(upgradeId: UpgradeId): void {
+    if (!this.player) return;
+
+    this.upgradeSystem.applyUpgrade(
+      upgradeId,
+      this.player,
+      this.weaponSystem,
+      this.experienceSystem
+    );
+    this.levelUpMenu.unmount();
+    this.isLevelingUp = false;
+    this.context.inputSystem.reset();
+  }
+
   private triggerGameOver(): void {
     this.isGameOver = true;
     this.gameOverMenu.mount(this.context.uiRoot, formatTime(this.runTime));
@@ -215,13 +267,19 @@ export class GameScene extends BaseScene {
   public restart(): void {
     this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
+    this.levelUpMenu.unmount();
     this.isGameOver = false;
     this.isPaused = false;
+    this.isLevelingUp = false;
     this.runTime = 0;
     this.killCount = 0;
 
     if (this.player) {
-      this.player.resetHp();
+      this.upgradeSystem.reset(
+        this.player,
+        this.weaponSystem,
+        this.experienceSystem
+      );
       this.player.position.set(
         PLAYER_CONFIG.initialPosition.x,
         PLAYER_CONFIG.initialPosition.y,
@@ -233,15 +291,19 @@ export class GameScene extends BaseScene {
 
     this.enemySpawner.clear();
     this.weaponSystem.clear();
+    this.experienceSystem.reset();
     this.sandboxSpawner?.clearDummies();
 
     this.hud.updateTime(formatTime(this.runTime));
     this.hud.updateKills(this.killCount);
+    const xpProg = this.experienceSystem.getProgress();
+    this.hud.updateXp(xpProg.ratio, xpProg.level);
+
     this.context.inputSystem.reset();
   }
 
   public pause(): void {
-    if (this.isPaused || this.isGameOver) return;
+    if (this.isPaused || this.isGameOver || this.isLevelingUp) return;
     this.isPaused = true;
     this.pauseMenu.mount(this.context.uiRoot);
   }
@@ -256,8 +318,10 @@ export class GameScene extends BaseScene {
   private goToMainMenu(): void {
     this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
+    this.levelUpMenu.unmount();
     this.isPaused = false;
     this.isGameOver = false;
+    this.isLevelingUp = false;
     this.context.switchScene('menu');
   }
 
@@ -272,14 +336,17 @@ export class GameScene extends BaseScene {
   public override exit(): void {
     this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
+    this.levelUpMenu.unmount();
     this.hud.unmount();
     this.isPaused = false;
     this.isGameOver = false;
+    this.isLevelingUp = false;
   }
 
   public override dispose(): void {
     this.gameOverMenu.unmount();
     this.pauseMenu.unmount();
+    this.levelUpMenu.unmount();
     this.hud.unmount();
     if (this.sandboxSpawner) {
       this.sandboxSpawner.dispose();
@@ -287,6 +354,7 @@ export class GameScene extends BaseScene {
     }
     this.weaponSystem.dispose();
     this.enemySpawner.dispose();
+    this.experienceSystem.dispose();
     this.entityManager.dispose();
     this.player = null;
     this.playerController = null;
@@ -294,6 +362,14 @@ export class GameScene extends BaseScene {
       this.world.dispose();
       this.world = null;
     }
+  }
+
+  public getExperienceSystem(): ExperienceSystem {
+    return this.experienceSystem;
+  }
+
+  public getUpgradeSystem(): UpgradeSystem {
+    return this.upgradeSystem;
   }
 
   public getKillCount(): number {
@@ -326,6 +402,10 @@ export class GameScene extends BaseScene {
 
   public getIsGameOver(): boolean {
     return this.isGameOver;
+  }
+
+  public getIsLevelingUp(): boolean {
+    return this.isLevelingUp;
   }
 
   public getRunTime(): number {
