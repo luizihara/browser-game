@@ -10,6 +10,10 @@ export class HUD {
   private levelBadge: HTMLSpanElement | null = null;
   private killsText: HTMLSpanElement | null = null;
   private timerText: HTMLSpanElement | null = null;
+  private alertBanner: HTMLDivElement | null = null;
+  private alertTitle: HTMLDivElement | null = null;
+  private alertSubtitle: HTMLDivElement | null = null;
+  private alertTimeoutId: number | null = null;
   private debugFpsValue: HTMLSpanElement | null = null;
   private debugEntityValue: HTMLSpanElement | null = null;
   private debugPosValue: HTMLSpanElement | null = null;
@@ -116,7 +120,56 @@ export class HUD {
     }
 
     this.element.appendChild(topBar);
+
+    // 3. Wave Alert Banner (centered notification overlay)
+    this.alertBanner = document.createElement('div');
+    this.alertBanner.className = 'hud-alert-banner';
+
+    this.alertTitle = document.createElement('div');
+    this.alertTitle.className = 'hud-alert-title';
+    this.alertTitle.textContent = '';
+
+    this.alertSubtitle = document.createElement('div');
+    this.alertSubtitle.className = 'hud-alert-subtitle';
+    this.alertSubtitle.textContent = '';
+
+    this.alertBanner.appendChild(this.alertTitle);
+    this.alertBanner.appendChild(this.alertSubtitle);
+    this.element.appendChild(this.alertBanner);
+
     parent.appendChild(this.element);
+  }
+
+  public showWaveAlert(
+    title: string,
+    subtitle: string,
+    isElite: boolean = false,
+    durationMs: number = 2800
+  ): void {
+    if (!this.alertBanner || !this.alertTitle || !this.alertSubtitle) return;
+
+    if (this.alertTimeoutId !== null) {
+      window.clearTimeout(this.alertTimeoutId);
+      this.alertTimeoutId = null;
+    }
+
+    this.alertTitle.textContent = title;
+    this.alertSubtitle.textContent = subtitle;
+
+    if (isElite) {
+      this.alertBanner.classList.add('hud-alert-elite');
+    } else {
+      this.alertBanner.classList.remove('hud-alert-elite');
+    }
+
+    this.alertBanner.classList.add('active');
+
+    this.alertTimeoutId = window.setTimeout(() => {
+      if (this.alertBanner) {
+        this.alertBanner.classList.remove('active');
+      }
+      this.alertTimeoutId = null;
+    }, durationMs);
   }
 
   public updateHp(current: number, max: number): void {
@@ -150,7 +203,13 @@ export class HUD {
     }
   }
 
-  public updateDebug(fps: number, x: number, y: number, z: number, entityCount?: number): void {
+  public updateDebug(
+    fps: number,
+    x: number,
+    y: number,
+    z: number,
+    entityCount?: number
+  ): void {
     if (!IS_DEV) return;
     if (this.debugFpsValue) {
       this.debugFpsValue.textContent = `${fps}`;
@@ -168,6 +227,10 @@ export class HUD {
   }
 
   public unmount(): void {
+    if (this.alertTimeoutId !== null) {
+      window.clearTimeout(this.alertTimeoutId);
+      this.alertTimeoutId = null;
+    }
     if (this.xpBarContainer && this.xpBarContainer.parentElement) {
       this.xpBarContainer.parentElement.removeChild(this.xpBarContainer);
     }
@@ -182,6 +245,9 @@ export class HUD {
     this.levelBadge = null;
     this.killsText = null;
     this.timerText = null;
+    this.alertBanner = null;
+    this.alertTitle = null;
+    this.alertSubtitle = null;
     this.debugFpsValue = null;
     this.debugEntityValue = null;
     this.debugPosValue = null;
