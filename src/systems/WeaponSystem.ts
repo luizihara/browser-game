@@ -103,6 +103,19 @@ export class WeaponSystem implements Disposable {
     return weapon.upgrade();
   }
 
+  public evolveWeapon(id: WeaponId): boolean {
+    const weapon = this.getWeapon(id);
+    if (!weapon || !weapon.isMaxLevel || weapon.isEvolved) {
+      return false;
+    }
+    return weapon.evolve();
+  }
+
+  public isWeaponEvolved(id: WeaponId): boolean {
+    const weapon = this.getWeapon(id);
+    return weapon ? weapon.isEvolved : false;
+  }
+
   public applyStatModifiers(
     damageMult: number,
     cooldownMult: number,

@@ -36,6 +36,7 @@ import type { PickupItem } from '../entities/pickup/PickupItem';
 import { TreasureChestModal } from '../ui/TreasureChestModal';
 import { EXPERIENCE_CONFIG } from '../config/experienceConfig';
 import { CHARACTER_CONFIG } from '../config/characterConfig';
+import { DamageNumberSystem, type DamageNumberType } from '../fx/DamageNumberSystem';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -54,6 +55,7 @@ export class GameScene extends BaseScene {
   private upgradeSystem: UpgradeSystem;
   private directorSystem: DirectorSystem;
   private particleSystem: ParticleSystem;
+  private damageNumberSystem: DamageNumberSystem = new DamageNumberSystem();
   private soundManager: SoundManager;
   private player: Player | null = null;
   private playerController: PlayerController | null = null;
@@ -175,6 +177,7 @@ export class GameScene extends BaseScene {
     this.applyPermanentMetaUpgrades();
 
     this.hud.mount(this.context.uiRoot);
+    this.damageNumberSystem.mount(this.context.uiRoot);
     this.hud.updateTime(formatTime(this.runTime));
     this.hud.updateKills(this.killCount);
 
@@ -190,6 +193,12 @@ export class GameScene extends BaseScene {
     if (this.isLevelingUp || this.isGameOver || this.isVictory || this.isChestOpening) {
       this.particleSystem.update(deltaTime);
       this.cameraController.update(deltaTime);
+      this.damageNumberSystem.update(
+        deltaTime,
+        this.gameCamera.getThreeCamera(),
+        window.innerWidth,
+        window.innerHeight
+      );
       return;
     }
 
@@ -236,6 +245,12 @@ export class GameScene extends BaseScene {
     // Update active entities (Player, Dummies, Projectiles, XpGems)
     this.entityManager.update(deltaTime);
     this.particleSystem.update(deltaTime);
+    this.damageNumberSystem.update(
+      deltaTime,
+      this.gameCamera.getThreeCamera(),
+      window.innerWidth,
+      window.innerHeight
+    );
 
     if (this.playerController) {
       this.playerController.update(deltaTime);
@@ -257,6 +272,15 @@ export class GameScene extends BaseScene {
           if (weaponId && dmg) {
             this.totalDamageDealt += dmg;
             this.weaponDamageDealt[weaponId] = (this.weaponDamageDealt[weaponId] || 0) + dmg;
+            const type: DamageNumberType =
+              weaponId === 'wand'
+                ? 'magic'
+                : weaponId === 'aura'
+                  ? 'holy'
+                  : weaponId === 'dagger'
+                    ? 'shadow'
+                    : 'default';
+            this.damageNumberSystem.spawn(hitX, hitY, hitZ, dmg, type, false);
           }
         },
         () => {
@@ -286,8 +310,18 @@ export class GameScene extends BaseScene {
       },
       () => {
         this.cameraController.addTrauma(0.25);
+        if (this.player) {
+          this.damageNumberSystem.spawn(
+            this.player.position.x,
+            this.player.position.y + 0.8,
+            this.player.position.z,
+            15,
+            'hero',
+            false
+          );
+        }
       },
-      (_enemy, hitX, hitY, hitZ, projectile, weaponId, dmg) => {
+      (_enemy, hitX, hitY, hitZ, projectile, weaponId, dmg, isCrit) => {
         this.soundManager.playHit();
         this.particleSystem.emitHitSparks(
           hitX,
@@ -299,6 +333,16 @@ export class GameScene extends BaseScene {
         const d = dmg ?? projectile?.damage ?? 10;
         this.totalDamageDealt += d;
         this.weaponDamageDealt[wId] = (this.weaponDamageDealt[wId] || 0) + d;
+
+        const type: DamageNumberType =
+          wId === 'wand'
+            ? 'magic'
+            : wId === 'aura'
+              ? 'holy'
+              : wId === 'dagger'
+                ? 'shadow'
+                : 'default';
+        this.damageNumberSystem.spawn(hitX, hitY, hitZ, d, type, isCrit ?? false);
       }
     );
 
@@ -493,6 +537,13 @@ export class GameScene extends BaseScene {
         this.player.heal(30);
         this.hud.updateHp(this.player.hp, this.player.maxHp);
         this.soundManager.playHeal();
+        this.damageNumberSystem.spawn(
+          this.player.position.x,
+          this.player.position.y + 0.8,
+          this.player.position.z,
+          30,
+          'heal'
+        );
         this.particleSystem.emitHitSparks(
           this.player.position.x,
           this.player.position.y + 0.5,
@@ -519,6 +570,14 @@ export class GameScene extends BaseScene {
           const e = enemies[i];
           if (!e.isDead) {
             const died = e.takeDamage(250);
+            this.damageNumberSystem.spawn(
+              e.position.x,
+              e.position.y + 0.5,
+              e.position.z,
+              250,
+              'holy',
+              true
+            );
             this.particleSystem.emitDeathExplosion(
               e.position.x,
               e.position.y,
@@ -621,6 +680,7 @@ export class GameScene extends BaseScene {
     this.weaponSystem.clear();
     this.pickupSystem.clear();
     this.particleSystem.clear();
+    this.damageNumberSystem.clear();
     this.cameraController.resetTrauma();
     this.experienceSystem.reset();
     this.directorSystem.reset();
@@ -653,6 +713,7 @@ export class GameScene extends BaseScene {
     this.pauseMenu.unmount();
     this.levelUpMenu.unmount();
     this.chestModal.unmount();
+    this.damageNumberSystem.clear();
     this.isPaused = false;
     this.isGameOver = false;
     this.isVictory = false;
@@ -676,6 +737,7 @@ export class GameScene extends BaseScene {
     this.levelUpMenu.unmount();
     this.chestModal.unmount();
     this.hud.unmount();
+    this.damageNumberSystem.clear();
     this.isPaused = false;
     this.isGameOver = false;
     this.isVictory = false;
@@ -690,6 +752,7 @@ export class GameScene extends BaseScene {
     this.levelUpMenu.unmount();
     this.chestModal.unmount();
     this.hud.unmount();
+    this.damageNumberSystem.dispose();
     if (this.sandboxSpawner) {
       this.sandboxSpawner.dispose();
       this.sandboxSpawner = null;

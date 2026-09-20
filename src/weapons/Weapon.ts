@@ -11,12 +11,14 @@ export interface Weapon extends Disposable {
   level: number;
   readonly maxLevel: number;
   readonly isMaxLevel: boolean;
+  isEvolved: boolean;
 
   damageMultiplier: number;
   cooldownMultiplier: number;
   projectileSpeedMultiplier: number;
 
   upgrade(): boolean;
+  evolve(): boolean;
   getCurrentDescription(): string;
   getNextLevelDescription(): string;
 

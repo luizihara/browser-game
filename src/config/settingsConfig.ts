@@ -7,6 +7,7 @@ export interface GameSettings {
   screenShake: ScreenShakeLevel;
   damageFlash: boolean;
   showFps: boolean;
+  damageNumbers: boolean;
 }
 
 const STORAGE_KEY = 'survivor_game_settings';
@@ -18,6 +19,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   screenShake: 'full',
   damageFlash: true,
   showFps: true,
+  damageNumbers: true,
 };
 
 export class SettingsManager {

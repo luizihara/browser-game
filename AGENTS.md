@@ -24,7 +24,9 @@ O jogo conta com:
 - Fluxo de Game Over e Vitória de Run (`VictoryMenu`, `metaConfig.ts`) com detalhamento de DPS por arma, recordes persistentes e acumulação de ouro;
 - Loja de Power-ups Permanentes com Ouro (`MetaShopMenu`, `metaUpgradeConfig.ts`) com 8 atributos evolutivos e sistema de reembolso 100% gratuito (*respec*);
 - Drops especiais 3D de arena (`PickupItem`, `PickupSystem`) com Baús de Tesouro (`TreasureChestModal`), Poções de Vida, Ímã Cósmico e Bomba Sacra;
-- Seleção de Personagens e 4 Heróis Únicos (`CharacterSelectMenu`, `characterConfig.ts`, `CharacterBuilder.ts`): Sir Roderick (Cavaleiro), Elara (Maga), Kage (Ladino) e Aurelius (Templário), cada qual com modelo 3D low-poly próprio, arma inicial exclusiva, passivas e desbloqueio por ouro persistente no `MetaManager`.
+- Seleção de Personagens e 4 Heróis Únicos (`CharacterSelectMenu`, `characterConfig.ts`, `CharacterBuilder.ts`): Sir Roderick (Cavaleiro), Elara (Maga), Kage (Ladino) e Aurelius (Templário), cada qual com modelo 3D low-poly próprio, arma inicial exclusiva, passivas e desbloqueio por ouro persistente no `MetaManager`;
+- Super-Armas Evoluídas e Sinergias (`evolutionConfig.ts`, `WeaponSystem.ts`, `UpgradeSystem.ts`): 4 armas evoluídas lendárias (*Holy Astral Beam, Aegis Citadel, Solar Supernova, Thousand Shadow Blades*) combinando armas Lv 5 com passivas adquiridas, disponíveis no modal de Level Up e Baús;
+- Números de Dano Flutuantes Zero-GC e Acertos Críticos (`DamageNumberSystem.ts`, `CombatSystem.ts`): Feedback visual de combate com projeção 3D para tela, cores temáticas por elemento/arma, tipografia de acertos críticos com exclamação (*CRIT!*) e alternância nas Configurações.
 
 Portanto, **toda decisão técnica tomada no presente deve permitir essa escala sem exigir reescritas completas**.
 
@@ -77,7 +79,7 @@ src/
 ├── config/      # Constantes de configuração centralizadas (sem magic numbers)
 ├── core/        # Game, GameLoop, Renderer, Time
 ├── entities/    # Classes base, EntityManager e entidades (Player, Enemy, Projectile, XpGem, PickupItem, SandboxDummy)
-├── fx/          # Sistema de partículas Zero-GC e shaders visuais
+├── fx/          # Sistema de partículas Zero-GC, shaders visuais e DamageNumberSystem
 ├── loaders/     # Carregamento assíncrono e cache de assets
 ├── scenes/      # Scene interface, SceneManager e cenas do jogo
 ├── styles/      # Arquivos CSS modulares (global, hud, menu, level-up)

@@ -15,6 +15,7 @@ export class AuraWeapon implements Weapon {
   public readonly icon: string = WEAPON_CONFIG.aura.icon;
   public level: number = 1;
   public readonly maxLevel: number = WEAPON_CONFIG.aura.maxLevel;
+  public isEvolved: boolean = false;
 
   public damageMultiplier: number = 1.0;
   public cooldownMultiplier: number = 1.0;
@@ -54,7 +55,7 @@ export class AuraWeapon implements Weapon {
     geo.rotateX(-Math.PI / 2); // Lay flat on XZ plane
 
     this.ringMat = new THREE.MeshBasicMaterial({
-      color: WEAPON_CONFIG.aura.color,
+      color: this.isEvolved ? 0xf97316 : WEAPON_CONFIG.aura.color,
       transparent: true,
       opacity: 0,
       depthWrite: false,
@@ -76,17 +77,30 @@ export class AuraWeapon implements Weapon {
     return true;
   }
 
+  public evolve(): boolean {
+    if (this.isEvolved) return false;
+    this.isEvolved = true;
+    if (this.ringMat) {
+      this.ringMat.color.setHex(0xf97316);
+    }
+    return true;
+  }
+
   public getCurrentConfig(): WeaponLevelConfig {
     const levels = WEAPON_CONFIG.aura.levels;
     return levels[Math.min(this.level - 1, levels.length - 1)];
   }
 
   public getCurrentDescription(): string {
+    if (this.isEvolved) {
+      return '[EVOLVED] Solar Supernova: Pulso solar devastador de plasma com alcance dobrado e dano cataclísmico.';
+    }
     return this.getCurrentConfig().description;
   }
 
   public getNextLevelDescription(): string {
-    if (this.isMaxLevel) return 'Maximum Level reached.';
+    if (this.isEvolved) return 'Evolução Máxima alcançada.';
+    if (this.isMaxLevel) return 'Nível Máximo alcançado. Pronto para evoluir com Might!';
     return WEAPON_CONFIG.aura.levels[this.level].description;
   }
 
@@ -114,15 +128,17 @@ export class AuraWeapon implements Weapon {
 
     // Trigger radiant pulse shockwave
     if (this.cooldownTimer <= 0) {
-      this.cooldownTimer = cfg.cooldown * this.cooldownMultiplier;
+      const cooldown = (this.isEvolved ? 1.3 : cfg.cooldown) * this.cooldownMultiplier;
+      this.cooldownTimer = cooldown;
       this.pulseTimer = this.pulseDuration;
-      this.currentWaveRadius = cfg.radius ?? 5.0;
+      this.currentWaveRadius = this.isEvolved ? 8.5 : (cfg.radius ?? 5.0);
 
       // Deal damage to all enemies within radius
       const px = player.position.x;
       const py = player.position.y;
       const pz = player.position.z;
-      const damage = Math.round(cfg.damage * this.damageMultiplier);
+      const baseDmg = this.isEvolved ? 110 : cfg.damage;
+      const damage = Math.round(baseDmg * this.damageMultiplier);
       const radSq = this.currentWaveRadius * this.currentWaveRadius;
 
       for (let i = 0; i < enemies.length; i++) {
@@ -152,7 +168,7 @@ export class AuraWeapon implements Weapon {
 
         this.ringMesh.position.set(player.position.x, 0.05, player.position.z);
         this.ringMesh.scale.set(scale, 1, scale);
-        this.ringMat.opacity = (1 - progress) * 0.85;
+        this.ringMat.opacity = (1 - progress) * (this.isEvolved ? 0.95 : 0.85);
       } else {
         this.ringMat.opacity = 0;
       }
@@ -161,12 +177,14 @@ export class AuraWeapon implements Weapon {
 
   public reset(): void {
     this.level = 1;
+    this.isEvolved = false;
     this.cooldownTimer = 0;
     this.pulseTimer = 0;
     this.damageMultiplier = 1.0;
     this.cooldownMultiplier = 1.0;
     this.projectileSpeedMultiplier = 1.0;
     if (this.ringMat) {
+      this.ringMat.color.setHex(WEAPON_CONFIG.aura.color);
       this.ringMat.opacity = 0;
     }
   }

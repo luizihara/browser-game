@@ -47,7 +47,7 @@ export const UPGRADE_CONFIG = {
 
 export type PassiveUpgradeId = keyof typeof UPGRADE_CONFIG;
 export type UpgradeId = string;
-export type UpgradeCategory = 'new_weapon' | 'weapon_upgrade' | 'passive';
+export type UpgradeCategory = 'new_weapon' | 'weapon_upgrade' | 'passive' | 'evolution';
 
 export interface UpgradeDefinition {
   readonly id: UpgradeId;

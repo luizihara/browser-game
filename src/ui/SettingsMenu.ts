@@ -154,6 +154,27 @@ export class SettingsMenu {
     flashRow.appendChild(flashLabel);
     flashRow.appendChild(flashBtn);
 
+    // 6. Damage Numbers Row
+    const dmgNumRow = document.createElement('div');
+    dmgNumRow.className = 'settings-row';
+
+    const dmgNumLabel = document.createElement('span');
+    dmgNumLabel.className = 'settings-label';
+    dmgNumLabel.textContent = 'DAMAGE NUMBERS';
+
+    const dmgNumBtn = document.createElement('button');
+    dmgNumBtn.className = `settings-toggle-btn ${current.damageNumbers ? 'active' : ''}`;
+    dmgNumBtn.textContent = current.damageNumbers ? 'ON' : 'OFF';
+    dmgNumBtn.onclick = () => {
+      const isEnabled = !this.settingsManager.getSettings().damageNumbers;
+      dmgNumBtn.className = `settings-toggle-btn ${isEnabled ? 'active' : ''}`;
+      dmgNumBtn.textContent = isEnabled ? 'ON' : 'OFF';
+      this.settingsManager.updateSettings({ damageNumbers: isEnabled });
+    };
+
+    dmgNumRow.appendChild(dmgNumLabel);
+    dmgNumRow.appendChild(dmgNumBtn);
+
     // Close Button
     const closeBtn = document.createElement('button');
     closeBtn.className = 'menu-button';
@@ -166,6 +187,7 @@ export class SettingsMenu {
     panel.appendChild(muteRow);
     panel.appendChild(shakeRow);
     panel.appendChild(flashRow);
+    panel.appendChild(dmgNumRow);
     panel.appendChild(closeBtn);
 
     this.element.appendChild(panel);

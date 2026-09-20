@@ -116,6 +116,14 @@ export class Enemy extends Entity {
     return false;
   }
 
+  public applyKnockback(dirX: number, dirZ: number, force: number): void {
+    if (this.isDead) return;
+    const resistance = this.type === 'elite' ? 0.2 : this.type === 'tank' ? 0.4 : 1.0;
+    const effectiveForce = force * resistance;
+    this.position.x += dirX * effectiveForce;
+    this.position.z += dirZ * effectiveForce;
+  }
+
   public getColor(): number {
     return this.originalColor;
   }

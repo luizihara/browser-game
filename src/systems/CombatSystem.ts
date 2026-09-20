@@ -27,7 +27,8 @@ export class CombatSystem {
       hitZ: number,
       projectile?: Projectile,
       weaponId?: WeaponId,
-      damage?: number
+      damage?: number,
+      isCrit?: boolean
     ) => void
   ): void {
     // 1. Player contact damage check
@@ -58,6 +59,9 @@ export class CombatSystem {
 
     // 2. Projectile vs Enemy collision check
     if (projectiles && projectiles.length > 0) {
+      const critChance =
+        0.05 + (this.player && this.player.characterId === 'rogue' ? 0.15 : 0);
+
       for (let p = 0; p < projectiles.length; p++) {
         const proj = projectiles[p];
         if (proj.isExpired) continue;
@@ -69,23 +73,42 @@ export class CombatSystem {
         for (let e = 0; e < enemies.length; e++) {
           const enemy = enemies[e];
           if (enemy.isDead) continue;
+          if (proj.lastHitEnemy === enemy) continue;
 
           const dx = projX - enemy.position.x;
           const dz = projZ - enemy.position.z;
           const collisionDist = projRadius + enemy.radius;
 
           if (dx * dx + dz * dz <= collisionDist * collisionDist) {
-            const died = enemy.takeDamage(proj.damage);
+            const isCrit = Math.random() < critChance;
+            const finalDamage = isCrit ? Math.round(proj.damage * 2.0) : proj.damage;
+            const died = enemy.takeDamage(finalDamage);
+
             if (onEnemyHit) {
-              onEnemyHit(enemy, projX, proj.position.y, projZ, proj, proj.weaponId, proj.damage);
+              onEnemyHit(
+                enemy,
+                projX,
+                proj.position.y,
+                projZ,
+                proj,
+                proj.weaponId,
+                finalDamage,
+                isCrit
+              );
             }
             if (died && onEnemyKilled) {
               onEnemyKilled(enemy);
             }
-            if (onProjectileHit) {
-              onProjectileHit(proj);
+
+            if (proj.pierceCount > 0) {
+              proj.pierceCount--;
+              proj.lastHitEnemy = enemy;
+            } else {
+              if (onProjectileHit) {
+                onProjectileHit(proj);
+              }
+              break; // Projectile consumed on impact
             }
-            break; // Projectile consumed on impact
           }
         }
       }

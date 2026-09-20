@@ -81,6 +81,7 @@ src/
 │   ├── characterConfig.ts
 │   ├── directorConfig.ts
 │   ├── enemyConfig.ts
+│   ├── evolutionConfig.ts
 │   ├── experienceConfig.ts
 │   ├── fxConfig.ts
 │   ├── gameConfig.ts
@@ -114,6 +115,7 @@ src/
 │   └── sandbox/
 │       └── SandboxDummy.ts
 ├── fx/
+│   ├── DamageNumberSystem.ts
 │   └── ParticleSystem.ts
 ├── loaders/
 │   └── AssetLoader.ts
@@ -286,5 +288,24 @@ src/
 - [x] **Menu de Seleção de Personagens (`CharacterSelectMenu.ts`, `menu.css`)**: Modal visual moderno aberto pelo botão `[ START GAME ]` no Menu Principal com cards dos 4 heróis, badges da arma inicial, descrição de passivas, status de bloqueio e botão de compra por ouro acumulado.
 - [x] **Persistência de Personagens e Desbloqueio com Ouro (`MetaManager.ts`, `metaConfig.ts`)**: Suporte a heróis desbloqueáveis com ouro (Sir Roderick gratuito, Elara 250🪙, Kage 500🪙, Aurelius 800🪙), persistidos com segurança no `localStorage`.
 - [x] **Integração Completa na Partida (`Player.ts`, `GameScene.ts`, `UpgradeSystem.ts`, `WeaponSystem.ts`)**: Modificadores de classe aplicados no instanciamento e no restart, troca de malha 3D instantânea e arma inicial atribuída de acordo com o herói escolhido.
+
+### Milestone 13 — WEAPON EVOLUTIONS, CRITICAL HITS & FLOATING COMBAT TEXT (Concluída)
+- [x] **4 Super-Armas Evoluídas & Sistema de Sinergias (`evolutionConfig.ts`, `WeaponSystem.ts`, `UpgradeSystem.ts`)**:
+  - 💫 **Holy Astral Beam** (*Magic Wand Lv 5 + Arcane Haste*): Dispara feixes cósmicos contínuos e velozes que perfuram até 3 inimigos com rastro de luz ciano e alta cadência.
+  - 🛡️ **Aegis Citadel** (*Guardian Orbs Lv 5 + Vitality*): 6 orbes sagrados ampliados com rotação orbital extrema (6.2 rad/s), dano ampliado e repulsão por impacto (*knockback*) contínua contra hordas.
+  - ☀️ **Solar Supernova** (*Radiant Aura Lv 5 + Might*): Pulso solar cataclísmico com alcance expandido (8.5m), dano estelar massivo (110 dano base) e anel flamejante de alta opacidade.
+  - 🗡️ **Thousand Shadow Blades** (*Dagger Throw Lv 5 + Swiftness*): Tempestade contínua em espiral giratória de 360° com 8 adagas sombrias simultâneas, penetração e alta taxa de crítico.
+- [x] **Cartas de Evolução Lendárias no Level Up & Baús (`LevelUpMenu.ts`, `menu.css`, `TreasureChestModal.ts`)**:
+  - Detecção automática de armas no nível máximo combinadas a passivas adquiridas (`getEligibleEvolutions`).
+  - Card de evolução com borda dourada cintilante, pulso luminoso e badge especial `[👑 EVOLUTION]`.
+  - Baús de Tesouro garantem a evolução prioritariamente quando o jogador possui os requisitos.
+- [x] **Sistema de Acertos Críticos & Knockback (`CombatSystem.ts`, `Enemy.ts`)**:
+  - Cálculo de acertos críticos com base de 5% (+15% para o Ladino Kage), causando 2.0x de dano.
+  - Inimigos recebem impulso de repulsão (*knockback*) escalonado por resistência de arquétipo ao serem atingidos por armas evoluídas.
+- [x] **Números de Dano Flutuantes Zero-GC (`DamageNumberSystem.ts`, `hud.css`)**:
+  - Pool pré-alocado de 60 nós DOM com projeção matemática 3D para tela (`camera.project()`) sem alocações de lixo no loop.
+  - Tipografia de alto impacto com cores dinâmicas: Ciano (Magia), Dourado (*CRIT!* e Dano Sagrado), Púrpura (Lâminas), Vermelho (Dano recebido pelo Herói) e Verde esmeralda (Cura de poções `+30 HP`).
+  - Alternância rápida para ligar/desligar Números de Dano no Menu de Opções (`SettingsMenu.ts`).
+
 
 

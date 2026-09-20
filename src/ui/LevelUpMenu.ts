@@ -36,7 +36,8 @@ export class LevelUpMenu {
       const keyIndex = i + 1;
 
       const card = document.createElement('div');
-      card.className = 'upgrade-card';
+      card.className =
+        choice.category === 'evolution' ? 'upgrade-card evolution' : 'upgrade-card';
       card.onclick = () => this.onSelectCallback(choice.id);
 
       // Card Header: Key shortcut and category badge

@@ -222,3 +222,103 @@
     transform: translateX(-50%) scale(1.05);
   }
 }
+
+/* ==========================================================================
+   FLOATING COMBAT TEXT & DAMAGE NUMBERS
+   ========================================================================== */
+.damage-numbers-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 15;
+}
+
+.dmg-num {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 900;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+  user-select: none;
+  pointer-events: none;
+  white-space: nowrap;
+  will-change: transform, opacity;
+  text-shadow:
+    -1.5px -1.5px 0 #000,
+    1.5px -1.5px 0 #000,
+    -1.5px 1.5px 0 #000,
+    1.5px 1.5px 0 #000,
+    0 3px 6px rgba(0, 0, 0, 0.9);
+}
+
+.dmg-default {
+  color: #f1f5f9;
+}
+
+.dmg-crit {
+  font-size: 1.55rem;
+  color: #facc15;
+  text-shadow:
+    0 0 10px rgba(250, 204, 21, 0.95),
+    -1.5px -1.5px 0 #000,
+    1.5px -1.5px 0 #000,
+    -1.5px 1.5px 0 #000,
+    1.5px 1.5px 0 #000,
+    0 4px 8px rgba(0, 0, 0, 0.95);
+}
+
+.dmg-magic {
+  color: #38bdf8;
+  text-shadow:
+    0 0 8px rgba(56, 189, 248, 0.85),
+    -1.5px -1.5px 0 #000,
+    1.5px -1.5px 0 #000,
+    -1.5px 1.5px 0 #000,
+    1.5px 1.5px 0 #000;
+}
+
+.dmg-holy {
+  color: #fef08a;
+  text-shadow:
+    0 0 10px rgba(254, 240, 138, 0.9),
+    -1.5px -1.5px 0 #000,
+    1.5px -1.5px 0 #000,
+    -1.5px 1.5px 0 #000,
+    1.5px 1.5px 0 #000;
+}
+
+.dmg-shadow {
+  color: #d8b4fe;
+  text-shadow:
+    0 0 8px rgba(216, 180, 254, 0.85),
+    -1.5px -1.5px 0 #000,
+    1.5px -1.5px 0 #000,
+    -1.5px 1.5px 0 #000,
+    1.5px 1.5px 0 #000;
+}
+
+.dmg-hero {
+  color: #ef4444;
+  font-size: 1.35rem;
+  text-shadow:
+    0 0 10px rgba(239, 68, 68, 0.95),
+    -1.5px -1.5px 0 #000,
+    1.5px -1.5px 0 #000,
+    -1.5px 1.5px 0 #000,
+    1.5px 1.5px 0 #000;
+}
+
+.dmg-heal {
+  color: #4ade80;
+  font-size: 1.3rem;
+  text-shadow:
+    0 0 10px rgba(74, 222, 128, 0.9),
+    -1.5px -1.5px 0 #000,
+    1.5px -1.5px 0 #000,
+    -1.5px 1.5px 0 #000,
+    1.5px 1.5px 0 #000;
+}
+

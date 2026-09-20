@@ -10,6 +10,8 @@ export class Projectile extends Entity {
   public isExpired: boolean = false;
   public readonly color: number;
   public readonly weaponId: WeaponId;
+  public pierceCount: number = 0;
+  public lastHitEnemy: unknown = null;
   private dirX: number;
   private dirZ: number;
 

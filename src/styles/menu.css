@@ -149,6 +149,36 @@
   border: 1px solid rgba(16, 185, 129, 0.6);
 }
 
+.badge-evolution {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.4), rgba(249, 115, 22, 0.4));
+  color: #fef08a;
+  border: 1px solid #facc15;
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+  animation: badge-evolution-pulse 1.5s infinite alternate;
+}
+
+@keyframes badge-evolution-pulse {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  100% {
+    transform: scale(1.05);
+    filter: brightness(1.25);
+  }
+}
+
+.upgrade-card.evolution {
+  background: linear-gradient(145deg, rgba(45, 30, 65, 0.96), rgba(25, 20, 45, 0.98));
+  border: 2px solid #facc15;
+  box-shadow: 0 0 25px rgba(234, 179, 8, 0.45);
+}
+
+.upgrade-card.evolution:hover {
+  border-color: #fde047;
+  box-shadow: 0 0 35px rgba(250, 204, 21, 0.75);
+}
+
 .upgrade-icon {
   font-size: 3rem;
   margin-bottom: 1rem;

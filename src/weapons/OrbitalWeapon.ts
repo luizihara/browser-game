@@ -20,6 +20,8 @@ export class OrbitalWeapon implements Weapon {
   public cooldownMultiplier: number = 1.0;
   public projectileSpeedMultiplier: number = 1.0;
 
+  public isEvolved: boolean = false;
+
   private scene: THREE.Scene | null = null;
   private group: THREE.Group = new THREE.Group();
   private orbMeshes: THREE.Mesh[] = [];
@@ -53,17 +55,28 @@ export class OrbitalWeapon implements Weapon {
     return true;
   }
 
+  public evolve(): boolean {
+    if (this.isEvolved) return false;
+    this.isEvolved = true;
+    this.rebuildOrbs();
+    return true;
+  }
+
   public getCurrentConfig(): WeaponLevelConfig {
     const levels = WEAPON_CONFIG.orbital.levels;
     return levels[Math.min(this.level - 1, levels.length - 1)];
   }
 
   public getCurrentDescription(): string {
+    if (this.isEvolved) {
+      return '[EVOLVED] Aegis Citadel: 6 orbes celestiais com rotação veloz, repulsão de impacto e dano ampliado.';
+    }
     return this.getCurrentConfig().description;
   }
 
   public getNextLevelDescription(): string {
-    if (this.isMaxLevel) return 'Maximum Level reached.';
+    if (this.isEvolved) return 'Evolução Máxima alcançada.';
+    if (this.isMaxLevel) return 'Nível Máximo alcançado. Pronto para evoluir com Vitality!';
     return WEAPON_CONFIG.orbital.levels[this.level].description;
   }
 
@@ -82,20 +95,20 @@ export class OrbitalWeapon implements Weapon {
     this.orbMeshes.length = 0;
 
     const cfg = this.getCurrentConfig();
-    const count = cfg.count ?? 1;
+    const count = this.isEvolved ? 6 : (cfg.count ?? 1);
+    const orbRadius = this.isEvolved ? 0.32 : WEAPON_CONFIG.orbital.orbRadius;
+    const color = this.isEvolved ? 0xfacc15 : WEAPON_CONFIG.orbital.color;
+    const emissive = this.isEvolved ? 0xfef08a : WEAPON_CONFIG.orbital.emissiveColor;
+    const intensity = this.isEvolved ? 1.2 : WEAPON_CONFIG.orbital.emissiveIntensity;
 
     for (let i = 0; i < count; i++) {
-      const geo = new THREE.SphereGeometry(
-        WEAPON_CONFIG.orbital.orbRadius,
-        10,
-        10
-      );
+      const geo = new THREE.SphereGeometry(orbRadius, 10, 10);
       const mat = new THREE.MeshStandardMaterial({
-        color: WEAPON_CONFIG.orbital.color,
-        emissive: WEAPON_CONFIG.orbital.emissiveColor,
-        emissiveIntensity: WEAPON_CONFIG.orbital.emissiveIntensity,
-        roughness: 0.2,
-        metalness: 0.8,
+        color,
+        emissive,
+        emissiveIntensity: intensity,
+        roughness: 0.15,
+        metalness: 0.85,
       });
 
       const mesh = new THREE.Mesh(geo, mat);
@@ -128,17 +141,19 @@ export class OrbitalWeapon implements Weapon {
     const count = this.orbMeshes.length;
     if (count === 0) return;
 
-    const orbitSpeed = (cfg.speed ?? 3.0) * this.projectileSpeedMultiplier;
+    const orbitSpeed =
+      (this.isEvolved ? 6.2 : (cfg.speed ?? 3.0)) * this.projectileSpeedMultiplier;
     this.currentAngle += orbitSpeed * deltaTime;
 
-    const orbitRadius = cfg.radius ?? 2.3;
+    const orbitRadius = this.isEvolved ? 2.8 : (cfg.radius ?? 2.3);
     const px = player.position.x;
     const py = player.position.y;
     const pz = player.position.z;
 
-    const damage = Math.round(cfg.damage * this.damageMultiplier);
-    const hitCooldown = cfg.hitCooldown ?? 0.4;
-    const orbRadius = WEAPON_CONFIG.orbital.orbRadius;
+    const baseDmg = this.isEvolved ? 55 : cfg.damage;
+    const damage = Math.round(baseDmg * this.damageMultiplier);
+    const hitCooldown = this.isEvolved ? 0.22 : (cfg.hitCooldown ?? 0.4);
+    const orbRadius = this.isEvolved ? 0.32 : WEAPON_CONFIG.orbital.orbRadius;
 
     // Decay enemy hit timers
     for (const [enemy, timer] of this.enemyHitTimers.entries()) {
@@ -174,6 +189,15 @@ export class OrbitalWeapon implements Weapon {
           const died = enemy.takeDamage(damage);
           this.enemyHitTimers.set(enemy, hitCooldown);
 
+          if (this.isEvolved) {
+            const dist = Math.sqrt(dx * dx + dz * dz);
+            const invDist = dist > 0.001 ? 1 / dist : 0;
+            // Repel enemy outward from player center
+            const pushX = (enemy.position.x - px) * invDist;
+            const pushZ = (enemy.position.z - pz) * invDist;
+            enemy.applyKnockback(pushX, pushZ, 1.4);
+          }
+
           if (onEnemyHit) {
             onEnemyHit(enemy, ox, py, oz, this.id, damage);
           }
@@ -188,6 +212,7 @@ export class OrbitalWeapon implements Weapon {
 
   public reset(): void {
     this.level = 1;
+    this.isEvolved = false;
     this.currentAngle = 0;
     this.damageMultiplier = 1.0;
     this.cooldownMultiplier = 1.0;
