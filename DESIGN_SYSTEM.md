@@ -146,26 +146,27 @@ A análise detalhada da interface atual identificou os seguintes padrões genér
 
 # Target UI Design System
 
-*Direção visual oficial para a nova interface.*
+*Direção visual oficial aprovada para o jogo: **Tavern Carved Wood & Iron Shield**.*
 
-## Conceito Principal: Low-Poly Toon Fantasy Arcade
+## Conceito Principal: Medieval Fantasy Tavern & Forged Iron
 
-A interface deve parecer parte integrante do mundo 3D do jogo:
-- **Estilizada, sólida, artesanal e com personalidade de videogame comercial indie.**
-- Inspirada em jogos como *Brawl Stars*, *Hades*, *Enter the Gungeon* e *Vampire Survivors*: blocos marcados, chanfros, placas resistentes, bordas escuras contrastantes, sombras sólidas projetadas e feedback táctil imediato.
-- **Não infantil**: nada de cores caóticas descontroladas ou Comic Sans; o visual é maduro, polido e legível.
+A interface pertence organicamente ao universo de fantasia medieval do jogo:
+- **Madeira de Carvalho Escuro Entalhada, Ferro Forjado e Latão/Bronze Rebitado**: placas espessas, cantoneiras chanfradas com rebites, tábuas de taberna suspensas por correntes e relevos de entalhe em madeira.
+- **Botões Tácteis em Pranchas de Madeira**: chanfros beveled em tons de carvalho e âmbar incandescente, afundamento mecânico físico no clique (`transform: translateY(5px)`) e sombreado de relevo.
+- **Títulos em Ouro Envelhecido com Entalhe**: tipografia sólida em `'Russo One'` com sombreamento chiseled simulando letras fundidas em latão ou ouro cravadas na madeira.
+- **HUD Temático de Taberna**: medidor de HP com poção rubi, canaleta chanfrada de XP em esmeralda/hidromel, brasão de madeira esculpida e placas rústicas com números em ouro reluzente.
 
 ## Princípio Visual: "UI de Videogame, não UI de Aplicação Web"
 
-| Aspecto | UI de Web / Dashboard (Atual) | UI de Videogame (Nova) |
+| Aspecto | UI de Web / Dashboard (Antiga) | UI de Videogame (Tavern Wood & Iron) |
 | :--- | :--- | :--- |
-| **Materialidade** | Vidro translúcido, blur de fundo | Placas sólidas, relevo de pedra, metal ou madeira estilizada |
-| **Bordas** | 1px semitransparente branca | 2px a 4px sólidas, escuras/tintadas com contorno nítido |
-| **Sombras** | Difusas, grandes raios de desfoque | Gráficas, sólidas, deslocadas (`3px 4px 0 ...`) |
-| **Botões** | Planos ou com gradiente flutuante | Peças físicas com chanfro, borda escura e afundamento real ao clique |
-| **Títulos** | Texto com gradiente recortado de web | Letras com peso, contorno escuro marcante e sombra gráfica |
-| **Containers** | Cards aninhados em cascata | Painéis sólidos unificados com divisores limpos |
-| **Badges** | Pílulas arredondadas 9999px | Brasões, losangos ou placas retangulares chanfradas |
+| **Materialidade** | Vidro translúcido, blur de fundo | Carvalho escuro envelhecido, ferro forjado e rebites de bronze |
+| **Bordas** | 1px semitransparente branca | 3px a 4px de ferro forjado escuro com chanfro interno de bronze |
+| **Sombras** | Difusas, grandes raios de desfoque | Relevo mecânico sólido e sombras gráficas de peso físico |
+| **Botões** | Planos ou com gradiente flutuante | Pranchas chanfradas de carvalho com rebites e afundamento real no clique |
+| **Títulos** | Texto com gradiente recortado de web | Letras com peso chiseled, contorno escuro e ouro reluzente |
+| **Containers** | Cards aninhados em cascata | Baús e gabinetes de carvalho maciço com dobradiças de ferro |
+| **Badges** | Pílulas arredondadas 9999px | Placas de latão martelado, brasões entalhados e fitas de expedição |
 
 ---
 
@@ -173,73 +174,53 @@ A interface deve parecer parte integrante do mundo 3D do jogo:
 
 ```css
 :root {
-  /* --- Cores de Fundo e Superfície --- */
-  --color-bg-overlay: rgba(10, 13, 20, 0.94);
-  --color-surface: #1a2233;
-  --color-surface-dark: #121824;
-  --color-surface-raised: #242f46;
-  --color-surface-highlight: #2f3d5a;
+  /* --- Superfícies de Madeira e Carvalho de Taberna --- */
+  --tavern-wood-deep: #1b120c;
+  --tavern-wood-dark: #2a1b12;
+  --tavern-wood-base: #3e271c;
+  --tavern-wood-warm: #543725;
+  --tavern-wood-light: #734c34;
+  --tavern-wood-plank: #8d5e41;
 
-  /* --- Contornos e Sombras Gráficas --- */
-  --color-outline: #090c13;
-  --color-outline-light: #2d3b55;
-  --shadow-solid: 4px 5px 0 var(--color-outline);
-  --shadow-solid-sm: 2px 3px 0 var(--color-outline);
-  --shadow-solid-lg: 6px 7px 0 var(--color-outline);
-  --shadow-pressed: 1px 1px 0 var(--color-outline);
+  /* --- Metais: Ferro Forjado e Latão/Bronze Rebitado --- */
+  --tavern-iron-dark: #120e0a;
+  --tavern-iron-base: #251d18;
+  --tavern-iron-rim: #3d312a;
+  --tavern-bronze-dark: #78350f;
+  --tavern-bronze-base: #b45309;
+  --tavern-gold-bright: #ffb703;
+  --tavern-gold-light: #ffd166;
+  --tavern-gold-dark: #cc8800;
 
-  /* --- Cores Primárias de Jogo (Sólidas e Toon) --- */
-  --color-primary: #e63946;          /* Vermelho heróico para ação principal */
-  --color-primary-light: #ff4d5a;
-  --color-primary-dark: #b81d29;
+  /* --- Cores de Ação de Fantasia (Ember Red, Mead Gold, Mystic Emerald, etc.) --- */
+  --color-primary: #b91c1c;
+  --color-primary-light: #dc2626;
+  --color-primary-dark: #7f1d1d;
 
-  --color-gold: #ffb703;             /* Ouro nobre / Recompensas / Estrelas */
+  --color-gold: #ffb703;
   --color-gold-light: #ffd166;
-  --color-gold-dark: #cc8b00;
+  --color-gold-dark: #b45309;
 
-  --color-mana: #00b4d8;             /* Mana / Magia / Ciano vibrante */
-  --color-mana-light: #48cae4;
-  --color-mana-dark: #0077b6;
+  --color-mana: #0284c7;
+  --color-mana-light: #38bdf8;
+  --color-mana-dark: #0369a1;
 
-  --color-nature: #06d6a0;           /* Cura / XP Esmeralda */
-  --color-nature-light: #2ef3be;
-  --color-nature-dark: #048a66;
+  --color-nature: #059669;
+  --color-nature-light: #10b981;
+  --color-nature-dark: #047857;
 
-  --color-purple: #9d4edd;           /* Evoluções / Raro / Boss */
-  --color-purple-light: #c77dff;
-  --color-purple-dark: #7b2cbf;
+  --color-purple: #7c3aed;
+  --color-purple-light: #a78bfa;
+  --color-purple-dark: #5b21b6;
 
-  /* --- Cores Neutras e Texto --- */
-  --color-text-main: #f8f9fa;
-  --color-text-dim: #c5cbd3;
-  --color-text-muted: #8892a0;
-
-  /* --- Tipografia --- */
-  --font-game: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* --- Tipografia de Taberna Medieval --- */
+  --font-game: 'Russo One', 'Rubik', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Cinzel', 'MedievalSharp', serif;
   --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
-  /* --- Escala de Espaçamento Modular --- */
-  --space-2xs: 4px;
-  --space-xs: 8px;
-  --space-sm: 12px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-2xl: 48px;
-
-  /* --- Bordas e Raios (Sutis e Marcados) --- */
-  --border-width: 3px;
-  --border-width-sm: 2px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-
-  /* --- Sistema de Movimento Táctil --- */
-  --ease-game: cubic-bezier(0.18, 0.89, 0.32, 1.28);
-  --ease-snappy: cubic-bezier(0.16, 1, 0.3, 1);
-  --motion-fast: 90ms;
-  --motion-normal: 160ms;
-  --motion-slow: 240ms;
+  --color-text-main: #fef3c7;
+  --color-text-dim: #d4c5a9;
+  --color-text-muted: #9c8b73;
 }
 ```
 

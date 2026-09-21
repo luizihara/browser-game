@@ -1,36 +1,38 @@
 /* ==========================================================================
-   LOW-POLY TOON SURVIVOR — HUD & COMBAT UI DESIGN SYSTEM
-   Compact, High-Readability Video-Game Widgets (Zero Glassmorphism)
+   SURVIVOR 3D — TAVERN WOOD & IRON HUD & COMBAT UI
+   Tactile Oak Plaques, Carved Frames, Ruby & Emerald Potions, Forged Metal
    ========================================================================== */
 
-/* --- Continuous Top XP Bar with Notched Border --- */
+/* --- Continuous Top XP Bar (Carved Mead/Emerald Groove) --- */
 .hud-xp-bar-container {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 12px;
+  height: 14px;
   background: var(--color-surface-sunken);
   overflow: hidden;
   z-index: 20;
-  border-bottom: 2px solid var(--color-outline);
+  border-bottom: 3px solid var(--tavern-iron-dark);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9);
 }
 
 .hud-xp-bar-fill {
   width: 0%;
   height: 100%;
-  background: var(--color-nature);
-  border-right: 2px solid var(--color-outline);
+  background: linear-gradient(90deg, #059669, #10b981, #34d399);
+  border-right: 2px solid var(--tavern-iron-dark);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
   transition: width 0.15s ease-out;
 }
 
 /* --- HUD Overlay Container --- */
 .hud-container {
   position: absolute;
-  top: 12px;
+  top: 14px;
   left: 0;
   width: 100%;
-  height: calc(100% - 12px);
+  height: calc(100% - 14px);
   pointer-events: none;
   z-index: 15;
   display: flex;
@@ -47,45 +49,49 @@
   width: 100%;
 }
 
-/* --- HP Meter Widget --- */
+/* --- HP Meter Widget (Carved Oak Plaque & Ruby Health Potion) --- */
 .hud-hp-container {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  background: var(--color-surface);
-  padding: 0.55rem 0.85rem;
+  background: linear-gradient(180deg, #3e271c 0%, #2a1b12 100%);
+  padding: 0.55rem 0.95rem;
   border-radius: var(--radius-sm);
-  border: var(--border-width-sm) solid var(--color-outline);
-  box-shadow: var(--shadow-solid-sm);
+  border: 3px solid var(--tavern-iron-dark);
+  box-shadow:
+    inset 0 0 0 1px var(--tavern-bronze-dark),
+    0 4px 0 var(--tavern-iron-dark),
+    0 6px 12px rgba(0, 0, 0, 0.7);
 }
 
 .hud-hp-label {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   color: var(--color-text-main);
-  text-shadow: 1px 1px 0 var(--color-outline);
+  text-shadow: 1px 1.5px 0 #1b120c;
 }
 
 .hud-hp-bar {
-  width: 190px;
-  height: 16px;
+  width: 195px;
+  height: 18px;
   background: var(--color-surface-sunken);
   border-radius: 4px;
   overflow: hidden;
-  border: 2px solid var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9);
 }
 
 .hud-hp-fill {
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-gold), var(--color-nature));
+  background: linear-gradient(90deg, #b91c1c, #ea580c, #10b981);
   border-radius: 2px;
   transition: width 0.15s ease-out;
 }
 
-/* --- Stats Group (Level Crest, Kills, Timer) --- */
+/* --- Stats Group (Shield Crest, Kills, Timer) --- */
 .hud-stats-group {
   display: flex;
   gap: 0.85rem;
@@ -93,60 +99,67 @@
 }
 
 .hud-level-badge {
-  background: var(--color-nature);
-  color: var(--color-surface-dark);
-  padding: 0.45rem 0.95rem;
+  background: linear-gradient(180deg, #d97706 0%, #92400e 100%);
+  color: #fffbeb;
+  padding: 0.45rem 1rem;
   border-radius: var(--radius-sm);
-  font-size: 0.98rem;
+  font-size: 1rem;
   font-weight: 900;
   letter-spacing: 0.08em;
-  border: var(--border-width-sm) solid var(--color-outline);
-  box-shadow: var(--shadow-solid-sm);
+  border: 3px solid var(--tavern-iron-dark);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 4px 0 var(--tavern-iron-dark);
+  text-shadow: 1px 1px 0 #1b120c;
 }
 
 .hud-kills-container {
-  background: var(--color-surface);
-  padding: 0.45rem 1rem;
+  background: linear-gradient(180deg, #3e271c 0%, #2a1b12 100%);
+  padding: 0.45rem 1.1rem;
   border-radius: var(--radius-sm);
-  border: var(--border-width-sm) solid var(--color-outline);
-  box-shadow: var(--shadow-solid-sm);
+  border: 3px solid var(--tavern-iron-dark);
+  box-shadow:
+    inset 0 0 0 1px var(--tavern-bronze-dark),
+    0 4px 0 var(--tavern-iron-dark);
 }
 
 .hud-kills-text {
-  font-family: var(--font-mono);
+  font-family: var(--font-game);
   font-size: 1.15rem;
   font-weight: 900;
   letter-spacing: 0.06em;
-  color: var(--color-gold);
+  color: var(--tavern-gold-bright);
   font-variant-numeric: tabular-nums;
-  text-shadow: 1px 1px 0 var(--color-outline);
+  text-shadow: 1.5px 1.5px 0 #1b120c;
 }
 
 .hud-timer-container {
-  background: var(--color-surface);
-  padding: 0.35rem 1.15rem;
+  background: linear-gradient(180deg, #3e271c 0%, #2a1b12 100%);
+  padding: 0.35rem 1.25rem;
   border-radius: var(--radius-sm);
-  border: var(--border-width-sm) solid var(--color-outline);
-  box-shadow: var(--shadow-solid-sm);
+  border: 3px solid var(--tavern-iron-dark);
+  box-shadow:
+    inset 0 0 0 1px var(--tavern-bronze-dark),
+    0 4px 0 var(--tavern-iron-dark);
 }
 
 .hud-timer-text {
-  font-family: var(--font-mono);
+  font-family: var(--font-game);
   font-size: 1.55rem;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.06em;
-  color: var(--color-text-main);
-  text-shadow: 1.5px 1.5px 0 var(--color-outline);
+  color: #ffffff;
+  text-shadow: 2px 2px 0 #1b120c;
 }
 
 /* --- Developer Debug Widget --- */
 .hud-debug-container {
-  background: var(--color-surface-dark);
+  background: var(--color-surface-sunken);
   padding: 0.5rem 0.85rem;
   border-radius: var(--radius-sm);
-  border: var(--border-width-sm) solid var(--color-outline);
-  box-shadow: var(--shadow-solid-sm);
+  border: 2px solid var(--tavern-iron-dark);
+  box-shadow: 0 3px 0 var(--tavern-iron-dark);
   font-family: var(--font-mono);
   font-size: 0.82rem;
   color: var(--color-text-dim);
@@ -161,12 +174,12 @@
 }
 
 .hud-debug-value {
-  color: var(--color-mana-light);
-  font-weight: 800;
+  color: var(--tavern-gold-bright);
+  font-weight: 900;
 }
 
 /* ==========================================================================
-   WAVE & EVENT ALERT BANNER (Comic / Arcade Pop Style)
+   WAVE & EVENT ALERT BANNER (Tavern War Horn Announcement)
    ========================================================================== */
 .hud-alert-banner {
   position: absolute;
@@ -178,11 +191,14 @@
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-primary);
+  background: linear-gradient(180deg, #472f22 0%, #2a1b12 100%);
+  border: 4px solid var(--tavern-iron-dark);
   border-radius: var(--radius-md);
-  padding: 0.85rem 2.5rem;
-  box-shadow: var(--shadow-solid-lg);
+  padding: 0.85rem 2.8rem;
+  box-shadow:
+    inset 0 0 0 2px var(--color-primary),
+    0 6px 0 var(--tavern-iron-dark),
+    0 14px 28px rgba(0, 0, 0, 0.85);
   text-align: center;
   pointer-events: none;
   opacity: 0;
@@ -202,21 +218,25 @@
 }
 
 .hud-alert-banner.hud-alert-elite {
-  border-color: var(--color-gold);
+  border-color: var(--tavern-iron-dark);
+  box-shadow:
+    inset 0 0 0 2px var(--tavern-gold-bright),
+    0 6px 0 var(--tavern-iron-dark),
+    0 14px 28px rgba(0, 0, 0, 0.85);
 }
 
 .hud-alert-title {
   font-family: var(--font-game);
-  font-size: 1.45rem;
+  font-size: 1.55rem;
   font-weight: 900;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: var(--color-primary-light);
   text-transform: uppercase;
-  text-shadow: 2px 2px 0 var(--color-outline);
+  text-shadow: 2px 2px 0 #1b120c;
 }
 
 .hud-alert-banner.hud-alert-elite .hud-alert-title {
-  color: var(--color-gold);
+  color: var(--tavern-gold-bright);
 }
 
 .hud-alert-subtitle {
@@ -252,18 +272,18 @@
   left: 0;
   font-family: var(--font-game);
   font-weight: 900;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   letter-spacing: 0.02em;
   user-select: none;
   pointer-events: none;
   white-space: nowrap;
   will-change: transform, opacity;
   text-shadow:
-    -2px -2px 0 var(--color-outline),
-    2px -2px 0 var(--color-outline),
-    -2px 2px 0 var(--color-outline),
-    2px 2px 0 var(--color-outline),
-    0 3px 0 var(--color-outline);
+    -2px -2px 0 var(--tavern-iron-dark),
+    2px -2px 0 var(--tavern-iron-dark),
+    -2px 2px 0 var(--tavern-iron-dark),
+    2px 2px 0 var(--tavern-iron-dark),
+    0 3px 0 var(--tavern-iron-dark);
 }
 
 .dmg-default {
@@ -271,34 +291,34 @@
 }
 
 .dmg-crit {
-  font-size: 1.55rem;
-  color: var(--color-gold);
+  font-size: 1.6rem;
+  color: var(--tavern-gold-bright);
 }
 
 .dmg-magic {
-  color: var(--color-mana-light);
+  color: #38bdf8;
 }
 
 .dmg-holy {
-  color: var(--color-gold-light);
+  color: #fef08a;
 }
 
 .dmg-shadow {
-  color: var(--color-purple-light);
+  color: #d8b4fe;
 }
 
 .dmg-hero {
-  color: var(--color-primary-light);
-  font-size: 1.35rem;
+  color: #ef4444;
+  font-size: 1.4rem;
 }
 
 .dmg-heal {
-  color: var(--color-nature-light);
-  font-size: 1.3rem;
+  color: #4ade80;
+  font-size: 1.35rem;
 }
 
 /* ==========================================================================
-   BOSS HEALTH BAR (Arcade Boss Meter)
+   BOSS HEALTH BAR (Iron-Spiked Tavern Monster Frame)
    ========================================================================== */
 .hud-boss-bar-container {
   position: absolute;
@@ -307,11 +327,14 @@
   transform: translateX(-50%);
   width: 480px;
   max-width: 90vw;
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-primary);
+  background: linear-gradient(180deg, #3e271c 0%, #1f140e 100%);
+  border: 4px solid var(--tavern-iron-dark);
   border-radius: var(--radius-md);
   padding: 8px 14px;
-  box-shadow: var(--shadow-solid-lg);
+  box-shadow:
+    inset 0 0 0 2px var(--tavern-bronze-dark),
+    0 8px 0 var(--tavern-iron-dark),
+    0 14px 25px rgba(0, 0, 0, 0.85);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -339,24 +362,25 @@
 }
 
 .hud-boss-badge {
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   font-weight: 900;
   letter-spacing: 0.08em;
-  background: var(--color-primary);
-  color: #ffffff;
+  background: #7f1d1d;
+  color: #fffbeb;
   border-radius: 4px;
   padding: 2px 8px;
-  border: 1.5px solid var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
+  box-shadow: 0 2px 0 var(--tavern-iron-dark);
 }
 
 .hud-boss-name {
   font-family: var(--font-game);
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 900;
-  color: var(--color-text-main);
+  color: var(--tavern-gold-bright);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  text-shadow: 1.5px 1.5px 0 var(--color-outline);
+  text-shadow: 1.5px 1.5px 0 #1b120c;
 }
 
 .hud-boss-hp-track {
@@ -366,13 +390,14 @@
   background: var(--color-surface-sunken);
   border-radius: 4px;
   overflow: hidden;
-  border: 2px solid var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9);
 }
 
 .hud-boss-hp-fill {
   height: 100%;
   width: 100%;
-  background: var(--color-primary);
+  background: linear-gradient(90deg, #991b1b, #dc2626, #f97316);
   transition: width 0.15s ease-out;
 }
 
@@ -386,7 +411,7 @@
   font-size: 0.76rem;
   font-weight: 900;
   color: #ffffff;
-  text-shadow: 1px 1px 0 var(--color-outline);
+  text-shadow: 1px 1px 0 #1b120c;
 }
 
 /* ==========================================================================
@@ -399,8 +424,11 @@
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  border: var(--border-width) solid var(--color-outline);
-  box-shadow: var(--shadow-solid);
+  border: 4px solid var(--tavern-iron-dark);
+  box-shadow:
+    inset 0 0 0 2px var(--tavern-bronze-dark),
+    0 6px 0 var(--tavern-iron-dark),
+    0 10px 20px rgba(0, 0, 0, 0.8);
   pointer-events: none;
   z-index: 10;
   background: var(--color-surface-sunken);
@@ -427,20 +455,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-primary);
-  border: var(--border-width-sm) solid var(--color-outline);
+  background: linear-gradient(180deg, #dc2626, #991b1b);
+  border: 2px solid var(--tavern-iron-dark);
   border-radius: var(--radius-sm);
   padding: 4px 9px;
-  box-shadow: var(--shadow-solid-sm);
+  box-shadow: 0 3px 0 var(--tavern-iron-dark);
   animation: threat-pointer-pulse 1.2s infinite alternate;
 }
 
 .threat-pointer-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-game);
   font-size: 0.78rem;
   font-weight: 900;
   color: #ffffff;
-  text-shadow: 1px 1px 0 var(--color-outline);
+  text-shadow: 1px 1px 0 #1b120c;
 }
 
 @keyframes threat-pointer-pulse {

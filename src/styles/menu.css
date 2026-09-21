@@ -1,9 +1,9 @@
 /* ==========================================================================
-   LOW-POLY TOON SURVIVOR — MENU & MODAL DESIGN SYSTEM
-   Video-game Arcade Aesthetics: Chunky Outlines, Tactile Buttons, Solid Panels
+   SURVIVOR 3D — TAVERN CARVED WOOD & IRON SHIELD DESIGN SYSTEM
+   Authentic Medieval Fantasy Tavern: Dark Oak, Cast Iron, Riveted Bronze & Gold
    ========================================================================== */
 
-/* --- Base Overlay Screen --- */
+/* --- Base Tavern Overlay Screen --- */
 .overlay-screen {
   position: absolute;
   top: 0;
@@ -14,74 +14,119 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: var(--color-bg-overlay);
+  background:
+    radial-gradient(circle at 50% 38%, rgba(62, 39, 28, 0.94) 0%, rgba(27, 18, 12, 0.98) 70%, #0d0906 100%);
   color: var(--color-text-main);
   z-index: 20;
   transition: opacity var(--motion-normal) ease;
+  user-select: none;
 }
 
-/* --- Cartoon Video-Game Titles (Extrusion & Dark Outlines) --- */
+/* ==========================================================================
+   TAVERN SIGNBOARD HEADER (Carved Oak Plaque on Iron Chains)
+   ========================================================================== */
+.tavern-signboard {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #543725 0%, #3e271c 45%, #2a1b12 100%);
+  border: 4px solid var(--tavern-iron-dark);
+  border-radius: 12px;
+  padding: 1.1rem 3.4rem;
+  margin-bottom: 2.2rem;
+  box-shadow:
+    inset 0 0 0 2px var(--tavern-bronze-dark),
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    0 8px 0 var(--tavern-iron-dark),
+    0 14px 28px rgba(0, 0, 0, 0.85);
+}
+
+/* Hanging Iron Chain Links */
+.tavern-signboard::before,
+.tavern-signboard::after {
+  content: '';
+  position: absolute;
+  top: -26px;
+  width: 10px;
+  height: 28px;
+  background: repeating-linear-gradient(180deg, #1b120c 0px, #1b120c 6px, #78350f 7px, #78350f 9px);
+  border: 2px solid #120e0a;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+}
+
+.tavern-signboard::before {
+  left: 28px;
+}
+
+.tavern-signboard::after {
+  right: 28px;
+}
+
+/* --- Chiseled Gold-Leaf Titles --- */
 .screen-title {
   font-family: var(--font-game);
-  font-size: 3.4rem;
+  font-size: 3.5rem;
   font-weight: 900;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  margin-bottom: 2rem;
-  color: var(--color-gold);
+  margin: 0;
+  color: var(--tavern-gold-bright);
   text-shadow:
-    3px 4px 0 var(--color-outline),
-    -2px -2px 0 var(--color-outline),
-    2px -2px 0 var(--color-outline),
-    -2px 2px 0 var(--color-outline),
-    0 6px 0 var(--color-gold-dark);
+    2px 2px 0 #3e271c,
+    -2px -2px 0 #3e271c,
+    2px -2px 0 #3e271c,
+    -2px 2px 0 #3e271c,
+    0 4px 0 #1b120c,
+    0 8px 14px rgba(0, 0, 0, 0.9);
 }
 
 .game-over-title {
   font-family: var(--font-game);
   font-size: 3.8rem;
   font-weight: 900;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
-  color: var(--color-primary);
+  margin-bottom: 0.6rem;
+  color: #ef4444;
   text-shadow:
-    3px 4px 0 var(--color-outline),
-    -2px -2px 0 var(--color-outline),
-    2px -2px 0 var(--color-outline),
-    -2px 2px 0 var(--color-outline),
-    0 7px 0 var(--color-primary-dark);
+    2px 2px 0 #3e271c,
+    -2px -2px 0 #3e271c,
+    2px -2px 0 #3e271c,
+    -2px 2px 0 #3e271c,
+    0 5px 0 #450a0a,
+    0 10px 18px rgba(0, 0, 0, 0.95);
 }
 
 .levelup-title {
   font-family: var(--font-game);
   font-size: 3.4rem;
   font-weight: 900;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
-  color: var(--color-nature);
+  margin-bottom: 0.4rem;
+  color: var(--tavern-gold-bright);
   text-shadow:
-    3px 4px 0 var(--color-outline),
-    -2px -2px 0 var(--color-outline),
-    2px -2px 0 var(--color-outline),
-    -2px 2px 0 var(--color-outline),
-    0 6px 0 var(--color-nature-dark);
+    2px 2px 0 #3e271c,
+    -2px -2px 0 #3e271c,
+    2px -2px 0 #3e271c,
+    -2px 2px 0 #3e271c,
+    0 5px 0 #1b120c,
+    0 8px 16px rgba(0, 0, 0, 0.85);
 }
 
 .survival-stat {
-  font-family: var(--font-mono);
-  font-size: 1.35rem;
-  font-weight: 800;
+  font-family: var(--font-game);
+  font-size: 1.3rem;
   color: var(--color-text-dim);
   margin-bottom: 2rem;
-  font-variant-numeric: tabular-nums;
   letter-spacing: 0.06em;
   background: var(--color-surface-sunken);
-  border: var(--border-width-sm) solid var(--color-outline);
-  padding: 0.45rem 1.2rem;
+  border: 3px solid var(--tavern-iron-dark);
+  padding: 0.55rem 1.4rem;
   border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-solid-sm);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7), 0 4px 0 var(--tavern-iron-dark);
 }
 
 .levelup-subtitle {
@@ -93,13 +138,13 @@
 }
 
 /* ==========================================================================
-   BASE TACTILE BUTTONS (Arcade Physics & Mechanical Sink)
+   BEVELED OAK PLANK BUTTONS (Tactile Fantasy Wood & Forged Iron Rim)
    ========================================================================== */
 .main-menu-buttons {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.1rem;
+  gap: 1.15rem;
   width: 100%;
 }
 
@@ -109,19 +154,24 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 0.9rem 2.2rem;
+  padding: 0.95rem 2.4rem;
   font-family: var(--font-game);
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: #ffffff;
-  background: var(--color-primary);
-  border: var(--border-width) solid var(--color-outline);
-  border-radius: var(--radius-md);
+  color: #fffbeb;
+  background: linear-gradient(180deg, #c2410c 0%, #9a3412 40%, #7c2d12 100%);
+  border: 3px solid var(--tavern-iron-dark);
+  border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 6px 0 var(--color-primary-dark), 0 9px 0 var(--color-outline);
-  text-shadow: 2px 2px 0 var(--color-outline);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+    0 6px 0 #431407,
+    0 10px 0 var(--tavern-iron-dark),
+    0 14px 20px rgba(0, 0, 0, 0.65);
+  text-shadow: 1.5px 2px 0 #431407, 0 0 8px rgba(249, 115, 22, 0.4);
   transition:
     transform var(--motion-fast) var(--ease-snappy),
     box-shadow var(--motion-fast) var(--ease-snappy),
@@ -138,17 +188,27 @@
 
 .menu-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 0 var(--color-primary-dark), 0 11px 0 var(--color-outline);
-  filter: brightness(1.1);
+  filter: brightness(1.12);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+    0 8px 0 #431407,
+    0 12px 0 var(--tavern-iron-dark),
+    0 16px 24px rgba(0, 0, 0, 0.7);
 }
 
 .menu-button:active:not(:disabled) {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 var(--color-primary-dark), 0 3px 0 var(--color-outline);
+  transform: translateY(5px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    0 1px 0 #431407,
+    0 2px 0 var(--tavern-iron-dark),
+    0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
 .menu-button:focus-visible {
-  outline: 3px solid var(--color-gold);
+  outline: 3px solid var(--tavern-gold-bright);
   outline-offset: 3px;
 }
 
@@ -156,71 +216,120 @@
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
-  background: var(--color-stone);
-  box-shadow: 0 4px 0 var(--color-stone-dark), 0 6px 0 var(--color-outline);
+  background: #3e271c;
+  box-shadow: 0 4px 0 #1b120c;
 }
 
-/* Secondary Button Variant (Chunky Iron / Dark Stone) */
+/* Secondary Button Variant: Weathered Dark Oak Plank */
 .menu-button.secondary {
-  background: var(--color-stone);
-  box-shadow: 0 6px 0 var(--color-stone-dark), 0 9px 0 var(--color-outline);
+  background: linear-gradient(180deg, #543725 0%, #3e271c 45%, #2a1b12 100%);
+  color: #fef3c7;
+  text-shadow: 1.5px 2px 0 #120e0a;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+    0 6px 0 #1b120c,
+    0 10px 0 var(--tavern-iron-dark),
+    0 14px 20px rgba(0, 0, 0, 0.65);
 }
 
 .menu-button.secondary:hover:not(:disabled) {
-  background: var(--color-stone-light);
-  box-shadow: 0 8px 0 var(--color-stone-dark), 0 11px 0 var(--color-outline);
+  background: linear-gradient(180deg, #65432d 0%, #4a2f22 45%, #342217 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+    0 8px 0 #1b120c,
+    0 12px 0 var(--tavern-iron-dark),
+    0 16px 24px rgba(0, 0, 0, 0.7);
 }
 
 .menu-button.secondary:active:not(:disabled) {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 var(--color-stone-dark), 0 3px 0 var(--color-outline);
+  transform: translateY(5px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 1px 0 #1b120c,
+    0 2px 0 var(--tavern-iron-dark);
 }
 
-/* Gold / Accent Button Variant */
+/* Gold / Recompensa Button Variant */
 .menu-button.gold {
-  background: var(--color-gold);
-  color: var(--color-surface-dark);
-  text-shadow: none;
-  box-shadow: 0 6px 0 var(--color-gold-dark), 0 9px 0 var(--color-outline);
-}
-
-.menu-button.gold:hover:not(:disabled) {
-  background: var(--color-gold-light);
-  box-shadow: 0 8px 0 var(--color-gold-dark), 0 11px 0 var(--color-outline);
-}
-
-.menu-button.gold:active:not(:disabled) {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 var(--color-gold-dark), 0 3px 0 var(--color-outline);
+  background: linear-gradient(180deg, #d97706 0%, #b45309 45%, #78350f 100%);
+  color: #fffbeb;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.3),
+    0 6px 0 #451a03,
+    0 10px 0 var(--tavern-iron-dark);
 }
 
 /* ==========================================================================
-   MAIN MENU EXTRAS
+   MAIN MENU RECORDS PLAQUE (Hammered Brass & Riveted Oak)
    ========================================================================== */
 .main-menu-records {
-  margin-top: 1.6rem;
+  margin-top: 1.8rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 1.25rem;
-  background: var(--color-surface-raised);
-  border: var(--border-width-sm) solid var(--color-outline);
-  padding: 0.65rem 1.4rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.88rem;
+  gap: 1.4rem;
+  background: linear-gradient(180deg, #3e271c 0%, #2a1b12 100%);
+  border: 3px solid var(--tavern-iron-dark);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 0 1.5px var(--tavern-bronze-base),
+    0 6px 0 var(--tavern-iron-dark),
+    0 10px 18px rgba(0, 0, 0, 0.75);
+  padding: 0.75rem 1.6rem;
+  font-size: 0.92rem;
   color: var(--color-text-dim);
-  font-family: var(--font-mono);
-  box-shadow: var(--shadow-solid-sm);
+  font-family: var(--font-game);
   align-items: center;
   justify-content: center;
 }
 
 .main-menu-records b {
-  color: var(--color-gold);
+  color: var(--tavern-gold-bright);
   font-weight: 900;
+  text-shadow: 1px 1px 0 #1b120c;
 }
 
 /* ==========================================================================
-   LEVEL UP MODAL & UPGRADE CARDS
+   BASE TAVERN CABINET / CHEST PANELS
+   ========================================================================== */
+.settings-panel,
+.victory-panel,
+.shop-panel,
+.char-select-panel,
+.chest-panel {
+  background: linear-gradient(180deg, #3e271c 0%, #2a1b12 40%, #1f140e 100%);
+  border: 4px solid var(--tavern-iron-dark);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 0 0 2px var(--tavern-bronze-dark),
+    inset 0 2px 0 rgba(255, 255, 255, 0.15),
+    0 10px 0 var(--tavern-iron-dark),
+    0 18px 35px rgba(0, 0, 0, 0.85);
+  color: var(--color-text-main);
+  user-select: none;
+}
+
+/* --- Custom Tavern Scrollbars --- */
+::-webkit-scrollbar {
+  width: 9px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-surface-sunken);
+  border-radius: 4px;
+  border: 1px solid var(--tavern-iron-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: #543725;
+  border: 1px solid var(--tavern-iron-dark);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--tavern-gold-bright);
+}
+
+/* ==========================================================================
+   LEVEL UP MODAL & UPGRADE CARDS (Carved Tavern Plaques)
    ========================================================================== */
 .levelup-container {
   display: flex;
@@ -233,16 +342,19 @@
 
 .upgrade-card {
   flex: 1;
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-outline);
-  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, #472f22 0%, #342117 100%);
+  border: 3px solid var(--tavern-iron-dark);
+  border-radius: 10px;
   padding: 1.75rem 1.25rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   cursor: pointer;
-  box-shadow: var(--shadow-solid);
+  box-shadow:
+    inset 0 0 0 1.5px var(--tavern-bronze-dark),
+    0 6px 0 var(--tavern-iron-dark),
+    0 10px 18px rgba(0, 0, 0, 0.6);
   transition:
     transform var(--motion-normal) var(--ease-snappy),
     border-color var(--motion-fast) ease,
@@ -251,8 +363,11 @@
 
 .upgrade-card:hover {
   transform: translateY(-6px);
-  border-color: var(--color-nature);
-  box-shadow: var(--shadow-solid-lg);
+  border-color: var(--tavern-gold-bright);
+  box-shadow:
+    inset 0 0 0 1.5px var(--tavern-gold-bright),
+    0 10px 0 var(--tavern-iron-dark),
+    0 16px 26px rgba(0, 0, 0, 0.75);
 }
 
 .upgrade-card-header {
@@ -264,14 +379,15 @@
 }
 
 .upgrade-key-shortcut {
-  font-family: var(--font-mono);
+  font-family: var(--font-game);
   font-size: 0.82rem;
   font-weight: 900;
-  color: var(--color-mana-light);
+  color: var(--tavern-gold-bright);
   background: var(--color-surface-sunken);
-  border: var(--border-width-sm) solid var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
   padding: 0.2rem 0.55rem;
   border-radius: var(--radius-sm);
+  box-shadow: 0 2px 0 var(--tavern-iron-dark);
 }
 
 .upgrade-badge {
@@ -282,27 +398,28 @@
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  border: var(--border-width-sm) solid var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
 }
 
 .badge-new_weapon {
-  background: var(--color-gold);
-  color: var(--color-surface-dark);
+  background: linear-gradient(180deg, #d97706, #b45309);
+  color: #fff;
 }
 
 .badge-weapon_upgrade {
-  background: var(--color-mana);
-  color: #ffffff;
+  background: linear-gradient(180deg, #0284c7, #0369a1);
+  color: #fff;
 }
 
 .badge-passive {
-  background: var(--color-nature);
-  color: var(--color-surface-dark);
+  background: linear-gradient(180deg, #059669, #047857);
+  color: #fff;
 }
 
 .badge-evolution {
-  background: var(--color-purple);
-  color: #ffffff;
+  background: linear-gradient(180deg, #7c3aed, #5b21b6);
+  color: #fef08a;
+  border-color: var(--tavern-gold-bright);
   animation: badge-evolution-pulse 1.4s infinite alternate;
 }
 
@@ -312,30 +429,28 @@
 }
 
 .upgrade-card.evolution {
-  background: #231c33;
-  border-color: var(--color-gold);
-  box-shadow: var(--shadow-solid), 0 0 15px rgba(255, 183, 3, 0.25);
-}
-
-.upgrade-card.evolution:hover {
-  border-color: var(--color-gold-light);
-  box-shadow: var(--shadow-solid-lg), 0 0 25px rgba(255, 183, 3, 0.45);
+  background: linear-gradient(180deg, #3b2047 0%, #24142e 100%);
+  border-color: var(--tavern-gold-bright);
+  box-shadow:
+    inset 0 0 0 2px var(--tavern-gold-bright),
+    0 6px 0 var(--tavern-iron-dark),
+    0 10px 22px rgba(217, 119, 6, 0.3);
 }
 
 .upgrade-icon {
   font-size: 3.2rem;
   margin-bottom: 0.85rem;
-  filter: drop-shadow(0 3px 0 var(--color-outline));
+  filter: drop-shadow(0 4px 0 var(--tavern-iron-dark));
 }
 
 .upgrade-title {
   font-size: 1.25rem;
   font-weight: 900;
-  color: var(--color-text-main);
+  color: var(--tavern-gold-bright);
   margin-bottom: 0.45rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  text-shadow: 1.5px 1.5px 0 var(--color-outline);
+  text-shadow: 1.5px 1.5px 0 #1b120c;
 }
 
 .upgrade-description {
@@ -345,52 +460,8 @@
 }
 
 /* ==========================================================================
-   LOADING SCREEN
+   SETTINGS MODAL (Oak Cabinet Chest)
    ========================================================================== */
-.loading-text {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: var(--color-text-dim);
-  letter-spacing: 0.08em;
-  margin-bottom: 1.25rem;
-  text-shadow: 1px 1px 0 var(--color-outline);
-}
-
-.progress-bar-container {
-  width: 340px;
-  height: 16px;
-  background: var(--color-surface-sunken);
-  border: var(--border-width) solid var(--color-outline);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  box-shadow: var(--shadow-solid-sm);
-}
-
-.progress-bar-fill {
-  width: 0%;
-  height: 100%;
-  background: var(--color-gold);
-  border-right: 2px solid var(--color-outline);
-  transition: width 0.15s ease-out;
-}
-
-/* ==========================================================================
-   BASE PANEL (SETTINGS, VICTORY, SHOP, CHARACTERS, STAGES, CHEST)
-   ========================================================================== */
-.settings-panel,
-.victory-panel,
-.shop-panel,
-.char-select-panel,
-.chest-panel {
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-outline);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-solid-lg), inset 0 0 0 2px var(--color-outline-light);
-  color: var(--color-text-main);
-  user-select: none;
-}
-
-/* Settings Modal */
 .settings-panel {
   padding: 2.25rem 2.5rem;
   display: flex;
@@ -404,24 +475,6 @@
 .settings-panel .screen-title {
   font-size: 2.2rem;
   margin-bottom: 0.75rem;
-}
-
-/* --- Custom Videogame Scrollbars --- */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: var(--color-surface-sunken);
-  border-radius: 4px;
-  border: 1px solid var(--color-outline);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-stone);
-  border: 1px solid var(--color-outline);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-gold);
 }
 
 .settings-row {
@@ -443,63 +496,65 @@
 .settings-value {
   font-family: var(--font-mono);
   font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--color-gold);
+  font-weight: 900;
+  color: var(--tavern-gold-bright);
   min-width: 45px;
   text-align: right;
+  text-shadow: 1px 1px 0 #1b120c;
 }
 
 .settings-slider {
   flex: 1;
   -webkit-appearance: none;
   appearance: none;
-  height: 10px;
-  border-radius: 4px;
+  height: 12px;
+  border-radius: 6px;
   background: var(--color-surface-sunken);
   outline: none;
-  border: var(--border-width-sm) solid var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .settings-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
-  background: var(--color-gold);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #ffb703 0%, #b45309 100%);
   cursor: pointer;
-  border: var(--border-width-sm) solid var(--color-outline);
-  box-shadow: 1px 2px 0 var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
+  box-shadow: 0 3px 0 var(--tavern-iron-dark);
   transition: transform var(--motion-fast) ease;
 }
 
 .settings-slider::-webkit-slider-thumb:hover {
   transform: scale(1.15);
-  background: var(--color-gold-light);
+  background: linear-gradient(180deg, #ffd166 0%, #d97706 100%);
 }
 
 .settings-toggle-btn {
-  padding: 0.45rem 1.25rem;
+  padding: 0.5rem 1.3rem;
   border-radius: var(--radius-sm);
   font-size: 0.92rem;
   font-weight: 900;
-  background: var(--color-surface-raised);
+  background: linear-gradient(180deg, #543725, #3e271c);
   color: var(--color-text-dim);
-  border: var(--border-width-sm) solid var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
   cursor: pointer;
-  box-shadow: 0 3px 0 var(--color-surface-dark), 0 4px 0 var(--color-outline);
+  box-shadow: 0 4px 0 var(--tavern-iron-dark);
   transition: all var(--motion-fast) ease;
 }
 
 .settings-toggle-btn:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--color-surface-dark), 0 2px 0 var(--color-outline);
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--tavern-iron-dark);
 }
 
 .settings-toggle-btn.active {
-  background: var(--color-primary);
-  color: #ffffff;
-  box-shadow: 0 3px 0 var(--color-primary-dark), 0 4px 0 var(--color-outline);
+  background: linear-gradient(180deg, #c2410c, #7c2d12);
+  color: #fffbeb;
+  box-shadow: 0 4px 0 #431407;
 }
 
 .settings-btn-group {
@@ -508,34 +563,33 @@
 }
 
 .settings-choice-btn {
-  padding: 0.4rem 0.85rem;
+  padding: 0.45rem 0.95rem;
   border-radius: var(--radius-sm);
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 800;
-  background: var(--color-surface-raised);
+  background: linear-gradient(180deg, #543725, #3e271c);
   color: var(--color-text-dim);
-  border: var(--border-width-sm) solid var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
   cursor: pointer;
-  box-shadow: 0 3px 0 var(--color-surface-dark), 0 4px 0 var(--color-outline);
+  box-shadow: 0 3px 0 var(--tavern-iron-dark);
   transition: all var(--motion-fast) ease;
 }
 
 .settings-choice-btn:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--color-surface-dark), 0 2px 0 var(--color-outline);
+  box-shadow: 0 1px 0 var(--tavern-iron-dark);
 }
 
 .settings-choice-btn.active {
-  background: var(--color-mana);
+  background: linear-gradient(180deg, #0284c7, #0369a1);
   color: #ffffff;
-  box-shadow: 0 3px 0 var(--color-mana-dark), 0 4px 0 var(--color-outline);
+  box-shadow: 0 3px 0 #082f49;
 }
 
 /* ==========================================================================
-   VICTORY SCREEN
+   VICTORY SCREEN (Tavern Triumph Banner)
    ========================================================================== */
 .victory-panel {
-  border-color: var(--color-gold);
   padding: 2.25rem 2.75rem;
   display: flex;
   flex-direction: column;
@@ -554,16 +608,17 @@
   font-family: var(--font-game);
   font-size: 3.4rem;
   font-weight: 900;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   margin-bottom: 0.35rem;
-  color: var(--color-gold);
+  color: var(--tavern-gold-bright);
   text-shadow:
-    3px 4px 0 var(--color-outline),
-    -2px -2px 0 var(--color-outline),
-    2px -2px 0 var(--color-outline),
-    -2px 2px 0 var(--color-outline),
-    0 6px 0 var(--color-gold-dark);
+    2px 2px 0 #3e271c,
+    -2px -2px 0 #3e271c,
+    2px -2px 0 #3e271c,
+    -2px 2px 0 #3e271c,
+    0 5px 0 #1b120c,
+    0 10px 18px rgba(0, 0, 0, 0.85);
 }
 
 .victory-subtitle {
@@ -585,18 +640,18 @@
 
 .victory-stat-box {
   background: var(--color-surface-sunken);
-  border: var(--border-width-sm) solid var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
   border-radius: var(--radius-sm);
   padding: 0.75rem 0.6rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
-  box-shadow: var(--shadow-solid-sm);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8), 0 3px 0 var(--tavern-iron-dark);
 }
 
 .victory-stat-box.highlight {
-  border-color: var(--color-gold);
+  border-color: var(--tavern-gold-bright);
 }
 
 .victory-stat-label {
@@ -608,31 +663,31 @@
 }
 
 .victory-stat-val {
-  font-family: var(--font-mono);
+  font-family: var(--font-game);
   font-size: 1.25rem;
   font-weight: 900;
   color: var(--color-text-main);
 }
 
 .victory-stat-box.highlight .victory-stat-val {
-  color: var(--color-gold);
+  color: var(--tavern-gold-bright);
 }
 
 .victory-weapons-section {
   width: 100%;
   background: var(--color-surface-sunken);
-  border: var(--border-width-sm) solid var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
   border-radius: var(--radius-md);
   padding: 1rem 1.25rem;
   margin-bottom: 1.5rem;
-  box-shadow: var(--shadow-solid-sm);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
 }
 
 .victory-section-title {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 900;
   letter-spacing: 0.08em;
-  color: var(--color-mana-light);
+  color: var(--tavern-gold-bright);
   text-transform: uppercase;
   margin-bottom: 0.75rem;
   text-align: center;
@@ -649,8 +704,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.45rem 0.75rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-outline-light);
+  background: #342117;
+  border: 1px solid var(--tavern-iron-dark);
   border-radius: var(--radius-sm);
 }
 
@@ -664,7 +719,7 @@
   font-family: var(--font-mono);
   font-size: 0.92rem;
   font-weight: 800;
-  color: var(--color-gold);
+  color: var(--tavern-gold-bright);
 }
 
 .victory-btn-row {
@@ -673,7 +728,7 @@
 }
 
 /* ==========================================================================
-   META SHOP / POWER-UPS MENU
+   META SHOP / POWER-UPS MENU (Blacksmith & Merchant Shelf)
    ========================================================================== */
 .shop-panel {
   padding: 2rem 2.5rem;
@@ -692,7 +747,7 @@
   width: 100%;
   margin-bottom: 1.25rem;
   padding-bottom: 0.75rem;
-  border-bottom: var(--border-width-sm) solid var(--color-outline);
+  border-bottom: 2px solid var(--tavern-iron-dark);
 }
 
 .shop-title {
@@ -700,21 +755,21 @@
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-gold);
-  text-shadow: 2px 2px 0 var(--color-outline);
+  color: var(--tavern-gold-bright);
+  text-shadow: 2px 2px 0 #1b120c;
   margin: 0;
 }
 
 .shop-gold-badge {
-  background: var(--color-surface-raised);
-  border: var(--border-width-sm) solid var(--color-outline);
-  padding: 0.45rem 1.15rem;
+  background: var(--color-surface-sunken);
+  border: 2px solid var(--tavern-iron-dark);
+  padding: 0.45rem 1.25rem;
   border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
-  font-size: 1.1rem;
+  font-family: var(--font-game);
+  font-size: 1.15rem;
   font-weight: 900;
-  color: var(--color-gold);
-  box-shadow: var(--shadow-solid-sm);
+  color: var(--tavern-gold-bright);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7), 0 3px 0 var(--tavern-iron-dark);
 }
 
 .shop-grid {
@@ -729,19 +784,21 @@
 }
 
 .shop-card {
-  background: var(--color-surface-raised);
-  border: var(--border-width-sm) solid var(--color-outline);
+  background: linear-gradient(180deg, #472f22 0%, #342117 100%);
+  border: 2px solid var(--tavern-iron-dark);
   border-radius: var(--radius-md);
   padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  box-shadow: var(--shadow-solid-sm);
+  box-shadow:
+    inset 0 0 0 1px var(--tavern-bronze-dark),
+    0 4px 0 var(--tavern-iron-dark);
   transition: border-color var(--motion-fast), transform var(--motion-fast);
 }
 
 .shop-card:hover {
-  border-color: var(--color-gold);
+  border-color: var(--tavern-gold-bright);
   transform: translateY(-2px);
 }
 
@@ -775,16 +832,17 @@
 
 .shop-pip {
   flex: 1;
-  height: 8px;
+  height: 9px;
   background: var(--color-surface-sunken);
-  border: 1px solid var(--color-outline);
+  border: 1px solid var(--tavern-iron-dark);
   border-radius: 3px;
   transition: background var(--motion-fast);
 }
 
 .shop-pip.filled {
-  background: var(--color-nature);
-  border-color: var(--color-nature-dark);
+  background: linear-gradient(180deg, #34d399, #059669);
+  border-color: #047857;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
 }
 
 .shop-card-bottom {
@@ -798,44 +856,44 @@
   font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 800;
-  color: var(--color-mana-light);
+  color: var(--tavern-gold-bright);
 }
 
 .shop-buy-btn {
-  padding: 0.45rem 0.95rem;
-  font-size: 0.85rem;
+  padding: 0.5rem 1.05rem;
+  font-size: 0.88rem;
   font-weight: 900;
   border-radius: var(--radius-sm);
-  border: var(--border-width-sm) solid var(--color-outline);
-  background: var(--color-gold);
-  color: var(--color-surface-dark);
+  border: 2px solid var(--tavern-iron-dark);
+  background: linear-gradient(180deg, #ffb703, #b45309);
+  color: #1b120c;
   cursor: pointer;
-  box-shadow: 0 3px 0 var(--color-gold-dark), 0 4px 0 var(--color-outline);
+  box-shadow: 0 3px 0 #78350f, 0 4px 0 var(--tavern-iron-dark);
   transition: transform var(--motion-fast), filter var(--motion-fast);
 }
 
 .shop-buy-btn:hover:not(:disabled) {
-  filter: brightness(1.1);
+  filter: brightness(1.15);
   transform: translateY(-1px);
 }
 
 .shop-buy-btn:active:not(:disabled) {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--color-gold-dark), 0 2px 0 var(--color-outline);
+  box-shadow: 0 1px 0 #78350f;
 }
 
 .shop-buy-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-  background: var(--color-stone);
-  color: var(--color-text-muted);
-  box-shadow: 0 2px 0 var(--color-stone-dark), 0 3px 0 var(--color-outline);
+  background: #3e271c;
+  color: #a89f91;
+  box-shadow: 0 2px 0 #1b120c;
 }
 
 .shop-buy-btn.maxed {
-  background: var(--color-nature);
-  color: var(--color-surface-dark);
-  box-shadow: 0 3px 0 var(--color-nature-dark), 0 4px 0 var(--color-outline);
+  background: linear-gradient(180deg, #10b981, #047857);
+  color: #ffffff;
+  box-shadow: 0 3px 0 #064e3b;
 }
 
 .shop-footer-row {
@@ -846,10 +904,9 @@
 }
 
 /* ==========================================================================
-   TREASURE CHEST MODAL
+   TREASURE CHEST MODAL (Oak & Brass Latch)
    ========================================================================== */
 .chest-panel {
-  border-color: var(--color-gold);
   padding: 2.2rem 2.5rem;
   max-width: 520px;
   width: 90%;
@@ -866,10 +923,10 @@
 }
 
 .chest-icon {
-  font-size: 4rem;
+  font-size: 4.2rem;
   margin-bottom: 0.4rem;
   animation: chestWobble 1.2s infinite ease-in-out;
-  filter: drop-shadow(0 4px 0 var(--color-outline));
+  filter: drop-shadow(0 4px 0 var(--tavern-iron-dark));
 }
 
 @keyframes chestWobble {
@@ -882,8 +939,8 @@
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-gold);
-  text-shadow: 2px 3px 0 var(--color-outline);
+  color: var(--tavern-gold-bright);
+  text-shadow: 2px 3px 0 #1b120c;
   margin-bottom: 0.35rem;
 }
 
@@ -904,28 +961,28 @@
 
 .chest-reward-item {
   background: var(--color-surface-sunken);
-  border: var(--border-width-sm) solid var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
   border-radius: var(--radius-sm);
-  padding: 0.8rem 1.2rem;
+  padding: 0.85rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 1.1rem;
   font-weight: 900;
-  box-shadow: var(--shadow-solid-sm);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8), 0 3px 0 var(--tavern-iron-dark);
 }
 
 .chest-gold {
-  color: var(--color-gold);
-  font-family: var(--font-mono);
+  color: var(--tavern-gold-bright);
+  font-family: var(--font-game);
 }
 
 .chest-upgrade-name {
-  color: var(--color-mana-light);
+  color: #38bdf8;
 }
 
 /* ==========================================================================
-   CHARACTER SELECTION MENU
+   CHARACTER SELECTION MENU (Bounty Board / Adventurers Guild)
    ========================================================================== */
 .char-select-panel {
   padding: 1.8rem 2.2rem;
@@ -944,7 +1001,7 @@
   width: 100%;
   margin-bottom: 1.2rem;
   padding-bottom: 0.6rem;
-  border-bottom: var(--border-width-sm) solid var(--color-outline);
+  border-bottom: 2px solid var(--tavern-iron-dark);
 }
 
 .char-select-title {
@@ -952,8 +1009,8 @@
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-mana-light);
-  text-shadow: 2px 2px 0 var(--color-outline);
+  color: var(--tavern-gold-bright);
+  text-shadow: 2px 2px 0 #1b120c;
   margin: 0;
 }
 
@@ -972,8 +1029,8 @@
 }
 
 .char-card {
-  background: var(--color-surface-raised);
-  border: var(--border-width-sm) solid var(--color-outline);
+  background: linear-gradient(180deg, #472f22 0%, #342117 100%);
+  border: 3px solid var(--tavern-iron-dark);
   border-radius: var(--radius-md);
   padding: 1.2rem 1rem;
   display: flex;
@@ -981,7 +1038,9 @@
   align-items: center;
   text-align: center;
   cursor: pointer;
-  box-shadow: var(--shadow-solid-sm);
+  box-shadow:
+    inset 0 0 0 1px var(--tavern-bronze-dark),
+    0 5px 0 var(--tavern-iron-dark);
   transition:
     transform var(--motion-normal) var(--ease-snappy),
     border-color var(--motion-fast) ease,
@@ -990,26 +1049,30 @@
 
 .char-card:hover:not(.locked) {
   transform: translateY(-4px);
-  border-color: var(--color-mana);
-  box-shadow: var(--shadow-solid);
+  border-color: var(--tavern-gold-bright);
+  box-shadow:
+    inset 0 0 0 1.5px var(--tavern-gold-bright),
+    0 8px 0 var(--tavern-iron-dark);
 }
 
 .char-card.selected {
-  border-color: var(--color-gold);
-  background: var(--color-surface-highlight);
-  box-shadow: var(--shadow-solid), inset 0 0 0 1px var(--color-gold);
+  border-color: var(--tavern-gold-bright);
+  background: linear-gradient(180deg, #5c3c2b 0%, #432b1e 100%);
+  box-shadow:
+    inset 0 0 0 2px var(--tavern-gold-bright),
+    0 8px 0 var(--tavern-iron-dark);
   transform: translateY(-3px);
 }
 
 .char-card.locked {
-  opacity: 0.6;
-  border-color: var(--color-outline-light);
+  opacity: 0.55;
+  filter: grayscale(0.5);
 }
 
 .char-avatar {
   font-size: 3.2rem;
   margin-bottom: 0.35rem;
-  filter: drop-shadow(0 3px 0 var(--color-outline));
+  filter: drop-shadow(0 4px 0 var(--tavern-iron-dark));
 }
 
 .char-name {
@@ -1017,7 +1080,7 @@
   font-weight: 900;
   color: var(--color-text-main);
   margin-bottom: 0.15rem;
-  text-shadow: 1px 1px 0 var(--color-outline);
+  text-shadow: 1px 1px 0 #1b120c;
 }
 
 .char-title {
@@ -1034,18 +1097,18 @@
   align-items: center;
   gap: 0.35rem;
   background: var(--color-surface-sunken);
-  border: var(--border-width-sm) solid var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
   border-radius: var(--radius-sm);
   padding: 0.3rem 0.75rem;
   font-size: 0.8rem;
   font-weight: 800;
-  color: var(--color-text-main);
+  color: var(--tavern-gold-bright);
   margin-bottom: 0.75rem;
 }
 
 .char-passive-box {
   background: var(--color-surface-sunken);
-  border: 1.5px solid var(--color-outline);
+  border: 1.5px solid var(--tavern-iron-dark);
   border-radius: var(--radius-sm);
   padding: 0.55rem 0.65rem;
   width: 100%;
@@ -1056,7 +1119,7 @@
 .char-passive-name {
   font-size: 0.72rem;
   font-weight: 900;
-  color: var(--color-gold);
+  color: var(--tavern-gold-bright);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 0.2rem;
@@ -1075,40 +1138,39 @@
   border-radius: var(--radius-sm);
   font-size: 0.82rem;
   font-weight: 900;
-  border: var(--border-width-sm) solid var(--color-outline);
+  border: 2px solid var(--tavern-iron-dark);
   cursor: pointer;
   transition: transform var(--motion-fast), filter var(--motion-fast);
 }
 
 .char-card-btn.selected {
-  background: var(--color-gold);
-  color: var(--color-surface-dark);
-  box-shadow: 0 3px 0 var(--color-gold-dark), 0 4px 0 var(--color-outline);
+  background: linear-gradient(180deg, #ffb703, #b45309);
+  color: #1b120c;
+  box-shadow: 0 3px 0 #78350f;
 }
 
 .char-card-btn.unlocked {
   background: var(--color-surface-sunken);
   color: var(--color-text-main);
-  box-shadow: 0 3px 0 var(--color-surface-dark), 0 4px 0 var(--color-outline);
+  box-shadow: 0 3px 0 var(--tavern-iron-dark);
 }
 
 .char-card-btn.unlocked:hover {
-  background: var(--color-mana);
-  color: #ffffff;
+  background: linear-gradient(180deg, #d97706, #92400e);
+  color: #fffbeb;
 }
 
 .char-card-btn.buy {
-  background: var(--color-gold);
-  color: var(--color-surface-dark);
-  box-shadow: 0 3px 0 var(--color-gold-dark), 0 4px 0 var(--color-outline);
+  background: linear-gradient(180deg, #ffb703, #b45309);
+  color: #1b120c;
+  box-shadow: 0 3px 0 #78350f;
 }
 
 .char-card-btn.buy:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-  background: var(--color-stone);
+  background: #3e271c;
   color: var(--color-text-muted);
-  box-shadow: 0 2px 0 var(--color-stone-dark), 0 3px 0 var(--color-outline);
 }
 
 .char-footer {
@@ -1125,7 +1187,7 @@
 }
 
 /* ==========================================================================
-   STAGE SELECTION MENU
+   STAGE SELECTION MENU (Guild Expedition Map Board)
    ========================================================================== */
 .stage-select-subtitle {
   font-size: 0.88rem;
@@ -1148,15 +1210,17 @@
 }
 
 .stage-card {
-  background: var(--color-surface-raised);
-  border: var(--border-width-sm) solid var(--color-outline);
+  background: linear-gradient(180deg, #472f22 0%, #342117 100%);
+  border: 3px solid var(--tavern-iron-dark);
   border-radius: var(--radius-md);
   padding: 1.2rem 1.1rem;
   display: flex;
   flex-direction: column;
   text-align: left;
   cursor: pointer;
-  box-shadow: var(--shadow-solid-sm);
+  box-shadow:
+    inset 0 0 0 1px var(--tavern-bronze-dark),
+    0 5px 0 var(--tavern-iron-dark);
   transition:
     transform var(--motion-normal) var(--ease-snappy),
     border-color var(--motion-fast) ease,
@@ -1166,20 +1230,23 @@
 
 .stage-card:hover:not(.locked) {
   transform: translateY(-4px);
-  border-color: var(--color-mana);
-  box-shadow: var(--shadow-solid);
+  border-color: var(--tavern-gold-bright);
+  box-shadow:
+    inset 0 0 0 1.5px var(--tavern-gold-bright),
+    0 8px 0 var(--tavern-iron-dark);
 }
 
 .stage-card.selected {
-  border-color: var(--color-gold);
-  background: var(--color-surface-highlight);
-  box-shadow: var(--shadow-solid), inset 0 0 0 1px var(--color-gold);
+  border-color: var(--tavern-gold-bright);
+  background: linear-gradient(180deg, #5c3c2b 0%, #432b1e 100%);
+  box-shadow:
+    inset 0 0 0 2px var(--tavern-gold-bright),
+    0 8px 0 var(--tavern-iron-dark);
   transform: translateY(-3px);
 }
 
 .stage-card.locked {
-  opacity: 0.6;
-  border-color: var(--color-outline-light);
+  opacity: 0.55;
   cursor: not-allowed;
   filter: grayscale(0.5);
 }
@@ -1193,7 +1260,7 @@
 
 .stage-avatar {
   font-size: 2.6rem;
-  filter: drop-shadow(0 3px 0 var(--color-outline));
+  filter: drop-shadow(0 3px 0 var(--tavern-iron-dark));
 }
 
 .stage-badge {
@@ -1204,8 +1271,8 @@
   padding: 0.25rem 0.65rem;
   border-radius: var(--radius-sm);
   background: var(--color-surface-sunken);
-  color: var(--color-mana-light);
-  border: var(--border-width-sm) solid var(--color-outline);
+  color: var(--tavern-gold-bright);
+  border: 2px solid var(--tavern-iron-dark);
 }
 
 .stage-name {
@@ -1213,7 +1280,7 @@
   font-weight: 900;
   color: var(--color-text-main);
   margin-bottom: 0.2rem;
-  text-shadow: 1px 1px 0 var(--color-outline);
+  text-shadow: 1px 1px 0 #1b120c;
 }
 
 .stage-subtitle {
@@ -1221,7 +1288,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-gold);
+  color: var(--tavern-gold-bright);
   margin-bottom: 0.6rem;
 }
 
@@ -1247,21 +1314,21 @@
   padding: 0.2rem 0.55rem;
   border-radius: var(--radius-sm);
   text-transform: uppercase;
-  border: 1.5px solid var(--color-outline);
+  border: 1.5px solid var(--tavern-iron-dark);
 }
 
 .stage-mod-tag.gold {
-  background: var(--color-gold);
-  color: var(--color-surface-dark);
+  background: linear-gradient(180deg, #ffb703, #b45309);
+  color: #1b120c;
 }
 
 .stage-mod-tag.xp {
-  background: var(--color-nature);
-  color: var(--color-surface-dark);
+  background: linear-gradient(180deg, #10b981, #047857);
+  color: #ffffff;
 }
 
 .stage-mod-tag.danger {
-  background: var(--color-primary);
+  background: linear-gradient(180deg, #ef4444, #991b1b);
   color: #ffffff;
 }
 
@@ -1274,7 +1341,7 @@
   font-size: 0.76rem;
   color: var(--color-text-dim);
   padding-top: 0.6rem;
-  border-top: 1px solid var(--color-outline-light);
+  border-top: 1px solid var(--tavern-iron-rim);
   font-weight: 700;
-  font-family: var(--font-mono);
+  font-family: var(--font-game);
 }

@@ -1,56 +1,77 @@
 :root {
-  /* --- Superfícies e Fundos --- */
-  --color-bg-overlay: rgba(10, 14, 22, 0.92);
-  --color-surface: #1a2233;
-  --color-surface-dark: #121824;
-  --color-surface-raised: #242f46;
-  --color-surface-highlight: #2f3d5a;
-  --color-surface-sunken: #0e131d;
+  /* --- Superfícies de Madeira e Carvalho de Taberna --- */
+  --tavern-wood-deep: #1b120c;
+  --tavern-wood-dark: #2a1b12;
+  --tavern-wood-base: #3e271c;
+  --tavern-wood-warm: #543725;
+  --tavern-wood-light: #734c34;
+  --tavern-wood-plank: #8d5e41;
 
-  /* --- Contornos e Sombras Gráficas Toon --- */
-  --color-outline: #090c13;
-  --color-outline-light: #2d3b55;
-  --color-outline-dim: rgba(255, 255, 255, 0.12);
-  --shadow-solid: 4px 5px 0 var(--color-outline);
-  --shadow-solid-sm: 2px 3px 0 var(--color-outline);
-  --shadow-solid-lg: 6px 7px 0 var(--color-outline);
-  --shadow-pressed: 1px 1px 0 var(--color-outline);
+  /* --- Metais: Ferro Forjado e Latão/Bronze Rebitado --- */
+  --tavern-iron-dark: #120e0a;
+  --tavern-iron-base: #251d18;
+  --tavern-iron-rim: #3d312a;
+  --tavern-bronze-dark: #78350f;
+  --tavern-bronze-base: #b45309;
+  --tavern-gold-bright: #ffb703;
+  --tavern-gold-light: #ffd166;
+  --tavern-gold-dark: #cc8800;
 
-  /* --- Cores de Ação e Destaque Toon --- */
-  --color-primary: #e63946;
-  --color-primary-light: #ff4d5a;
-  --color-primary-dark: #b81d29;
+  /* --- Pergaminho e Couro para Insets de Leitura --- */
+  --tavern-parchment-base: #f5eedc;
+  --tavern-parchment-dark: #e6dab8;
+  --tavern-parchment-ink: #2b1a0e;
+  --tavern-parchment-dim: #5c4432;
+
+  /* --- Cores de Ação de Fantasia (Ember Red, Mead Gold, Mystic Emerald, etc.) --- */
+  --color-primary: #b91c1c;
+  --color-primary-light: #dc2626;
+  --color-primary-dark: #7f1d1d;
 
   --color-gold: #ffb703;
   --color-gold-light: #ffd166;
-  --color-gold-dark: #cc8b00;
+  --color-gold-dark: #b45309;
 
-  --color-mana: #00b4d8;
-  --color-mana-light: #48cae4;
-  --color-mana-dark: #0077b6;
+  --color-mana: #0284c7;
+  --color-mana-light: #38bdf8;
+  --color-mana-dark: #0369a1;
 
-  --color-nature: #06d6a0;
-  --color-nature-light: #2ef3be;
-  --color-nature-dark: #048a66;
+  --color-nature: #059669;
+  --color-nature-light: #10b981;
+  --color-nature-dark: #047857;
 
-  --color-purple: #9d4edd;
-  --color-purple-light: #c77dff;
-  --color-purple-dark: #7b2cbf;
-
-  --color-stone: #334155;
-  --color-stone-light: #475569;
-  --color-stone-dark: #1e293b;
+  --color-purple: #7c3aed;
+  --color-purple-light: #a78bfa;
+  --color-purple-dark: #5b21b6;
 
   --color-danger: #ef4444;
   --color-danger-dark: #b91c1c;
 
-  /* --- Tipografia & Texto --- */
-  --font-game: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* --- Mapeamento para Tokens Globais de Superfície e Contorno --- */
+  --color-bg-overlay: rgba(14, 9, 6, 0.95);
+  --color-surface: var(--tavern-wood-dark);
+  --color-surface-dark: var(--tavern-wood-deep);
+  --color-surface-raised: var(--tavern-wood-base);
+  --color-surface-highlight: var(--tavern-wood-warm);
+  --color-surface-sunken: #140d08;
+
+  --color-outline: var(--tavern-iron-dark);
+  --color-outline-light: var(--tavern-wood-warm);
+  --color-outline-dim: rgba(255, 183, 3, 0.2);
+
+  --shadow-solid: 0 5px 0 var(--tavern-iron-dark), 0 8px 15px rgba(0, 0, 0, 0.85);
+  --shadow-solid-sm: 0 3px 0 var(--tavern-iron-dark), 0 5px 10px rgba(0, 0, 0, 0.8);
+  --shadow-solid-lg: 0 8px 0 var(--tavern-iron-dark), 0 14px 25px rgba(0, 0, 0, 0.9);
+  --shadow-pressed: 0 2px 0 var(--tavern-iron-dark);
+
+  /* --- Tipografia de Taberna Medieval --- */
+  --font-game: 'Russo One', 'Rubik', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Cinzel', 'MedievalSharp', serif;
   --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
-  --color-text-main: #f8f9fa;
-  --color-text-dim: #c5cbd3;
-  --color-text-muted: #8892a0;
+  --color-text-main: #fef3c7;
+  --color-text-dim: #d4c5a9;
+  --color-text-muted: #9c8b73;
 
   /* --- Escala Modular de Espaçamento --- */
   --space-2xs: 4px;
@@ -61,7 +82,7 @@
   --space-xl: 32px;
   --space-2xl: 48px;
 
-  /* --- Bordas e Raios (Marcados e Sólidos) --- */
+  /* --- Bordas e Raios Estilo Placa de Madeira --- */
   --border-width: 3px;
   --border-width-sm: 2px;
   --border-width-lg: 4px;
