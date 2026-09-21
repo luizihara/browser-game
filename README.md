@@ -377,6 +377,24 @@ src/
   - Rastreamento acumulado de monstros eliminados, chefes derrotados, baús abertos, objetos quebrados, tempo intocado sem dano e vitórias por classe de herói, salvos em `localStorage`.
   - Selo de notificação vermelho com contador de recompensas pendentes exibido no botão `BOUNTY BOARD 📜` do Menu Principal.
 
+### Milestone 17 — TAVERN RELICS & LEVEL UP DECKBUILDING (Concluída)
+- [x] **6 Relíquias Ancestrais de Taberna (`src/config/relicConfig.ts`, `src/systems/RelicSystem.ts`)**:
+  - 🍷 **Cálice do Vampiro**: 6% de todo dano crítico converte-se em cura imediata de HP para o herói.
+  - ⏳ **Ampulheta Espectral**: Congela todos os monstros da arena por 3.5s a cada 45 segundos.
+  - 🎲 **Dado da Sorte da Taberna**: +25% de ouro, +10% de chance de crítico e +2 Rerolls no Level Up.
+  - 👢 **Passada Ígnea**: Caminhar deixa uma trilha de fogo contínua no solo que causa 35 DPS a perseguidores com Zero-GC.
+  - 🛡️ **Coração de Golem**: Converte armadura em poder ofensivo (+10% de dano para cada ponto de armadura).
+  - 🧲 **Bússola Astral**: +75% de raio de coleta magnética e atrai todas as gemas da arena periodicamente.
+- [x] **Inventário de Relíquias no HUD (`src/ui/HUD.ts`, `src/styles/hud.css`)**:
+  - Até 3 relíquias simultâneas exibidas no HUD com brasões circulares forjados em bronze e ouro, com tooltip descritivo.
+- [x] **Controles de Deckbuilding no Level Up (`src/ui/LevelUpMenu.ts`, `src/systems/UpgradeSystem.ts`)**:
+  - 🎲 **Reroll**: Permite sortear uma nova mão de cartas de upgrades (atalho rápido `[R]`).
+  - ⏭️ **Pular (Skip)**: Pula o nível ganhando 50 moedas de ouro imediatas (atalho rápido `[S]`).
+  - 🚫 **Banir (Banish)**: Botão individual em cada carta que remove permanentemente uma opção indesejada do pool de drops da run.
+- [x] **Descoberta de Relíquias em Baús de Tesouro (`src/ui/TreasureChestModal.ts`, `src/scenes/GameScene.ts`)**:
+  - Baús de monstros elites e chefes concedem chance de descoberta de relíquias com destaque dourado brilhante no modal.
+
+
 
 
 

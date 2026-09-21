@@ -46,6 +46,7 @@ import { DestructibleSystem, type PropDrop } from '../systems/DestructibleSystem
 import type { BreakableProp } from '../entities/destructible/BreakableProp';
 import { AuraWeapon } from '../weapons/AuraWeapon';
 import { ACHIEVEMENTS_CONFIG } from '../config/achievementConfig';
+import { RelicSystem } from '../systems/RelicSystem';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -55,6 +56,7 @@ export class GameScene extends BaseScene {
   private cameraController: CameraController;
   private unsubscribeAchievement: (() => void) | null = null;
   private tookDamageThisRun: boolean = false;
+  private relicSystem: RelicSystem = new RelicSystem();
   private world: World | null = null;
   private entityManager: EntityManager;
   private sandboxSpawner: SandboxSpawner | null = null;
@@ -133,7 +135,12 @@ export class GameScene extends BaseScene {
       () => this.goToMainMenu()
     );
 
-    this.levelUpMenu = new LevelUpMenu((upgradeId) => this.chooseUpgrade(upgradeId));
+    this.levelUpMenu = new LevelUpMenu({
+      onSelect: (upgradeId) => this.chooseUpgrade(upgradeId),
+      onReroll: () => this.handleReroll(),
+      onSkip: () => this.handleSkip(),
+      onBanish: (upgradeId) => this.handleBanish(upgradeId),
+    });
     this.victoryMenu = new VictoryMenu(
       () => this.restart(),
       () => this.goToMainMenu()
@@ -212,9 +219,11 @@ export class GameScene extends BaseScene {
       charDef.startingWeapon
     );
     this.directorSystem.reset();
+    this.relicSystem.reset();
     this.applyPermanentMetaUpgrades();
 
     this.hud.mount(this.context.uiRoot);
+    this.hud.updateRelics(this.relicSystem.getActiveRelics());
     this.damageNumberSystem.mount(this.context.uiRoot);
     this.telegraphSystem.setScene(this.threeScene);
     this.radarSystem.mount(this.context.uiRoot);
@@ -491,6 +500,10 @@ export class GameScene extends BaseScene {
                 ? 'shadow'
                 : 'default';
         this.damageNumberSystem.spawn(hitX, hitY, hitZ, d, type, isCrit ?? false);
+
+        if (isCrit && this.player) {
+          this.relicSystem.onCritDamage(d, this.player, this.damageNumberSystem, this.soundManager);
+        }
       }
     );
 
@@ -513,6 +526,20 @@ export class GameScene extends BaseScene {
 
       const xpProg = this.experienceSystem.getProgress();
       this.hud.updateXp(xpProg.ratio, xpProg.level);
+    }
+
+    // Update Relics & Artifact Powers
+    if (this.player) {
+      this.relicSystem.update(
+        deltaTime,
+        this.player,
+        this.combatEnemies,
+        this.experienceSystem,
+        this.particleSystem,
+        this.soundManager,
+        this.damageNumberSystem,
+        (killedEnemy) => this.onEnemyDefeated(killedEnemy)
+      );
     }
 
     // Update Special Arena Pickups
@@ -680,7 +707,50 @@ export class GameScene extends BaseScene {
       );
     }
     const choices = this.upgradeSystem.getRandomUpgrades(3, this.weaponSystem);
-    this.levelUpMenu.mount(this.context.uiRoot, level, choices);
+    this.levelUpMenu.mount(
+      this.context.uiRoot,
+      level,
+      choices,
+      this.upgradeSystem.rerollsRemaining + this.relicSystem.getExtraRerolls(),
+      this.upgradeSystem.skipsRemaining,
+      this.upgradeSystem.banishesRemaining
+    );
+  }
+
+  private handleReroll(): void {
+    if (this.upgradeSystem.useReroll()) {
+      this.soundManager.playShoot();
+      const choices = this.upgradeSystem.getRandomUpgrades(3, this.weaponSystem);
+      this.levelUpMenu.refreshChoices(
+        choices,
+        this.upgradeSystem.rerollsRemaining + this.relicSystem.getExtraRerolls(),
+        this.upgradeSystem.skipsRemaining,
+        this.upgradeSystem.banishesRemaining
+      );
+    }
+  }
+
+  private handleSkip(): void {
+    if (this.upgradeSystem.useSkip()) {
+      MetaManager.getInstance().addGold(50);
+      this.soundManager.playCoinReward();
+      this.levelUpMenu.unmount();
+      this.isLevelingUp = false;
+      this.context.inputSystem.reset();
+    }
+  }
+
+  private handleBanish(upgradeId: UpgradeId): void {
+    if (this.upgradeSystem.banish(upgradeId)) {
+      this.soundManager.playEnemyDeath();
+      const choices = this.upgradeSystem.getRandomUpgrades(3, this.weaponSystem);
+      this.levelUpMenu.refreshChoices(
+        choices,
+        this.upgradeSystem.rerollsRemaining + this.relicSystem.getExtraRerolls(),
+        this.upgradeSystem.skipsRemaining,
+        this.upgradeSystem.banishesRemaining
+      );
+    }
   }
 
   private chooseUpgrade(upgradeId: UpgradeId): void {
@@ -954,12 +1024,27 @@ export class GameScene extends BaseScene {
     const xpProg = this.experienceSystem.getProgress();
     this.hud.updateXp(xpProg.ratio, xpProg.level);
 
+    // Roll for ancient relic discovery (50% chance if has open relic slot)
+    let discoveredRelic = null;
+    if (this.relicSystem.canAddRelic() && Math.random() < 0.50) {
+      discoveredRelic = this.relicSystem.getRandomAvailableRelic();
+      if (discoveredRelic) {
+        this.relicSystem.addRelic(discoveredRelic.id);
+        if (discoveredRelic.id === 'dice') {
+          this.upgradeSystem.rerollsRemaining += 2;
+        }
+        this.hud.updateRelics(this.relicSystem.getActiveRelics());
+      }
+    }
+
     this.chestModal.mount(
       this.context.uiRoot,
       {
         gold: finalGold,
         upgradeName: granted.name,
         upgradeIcon: granted.icon,
+        relicName: discoveredRelic ? discoveredRelic.name : undefined,
+        relicIcon: discoveredRelic ? discoveredRelic.icon : undefined,
       },
       () => {
         this.isChestOpening = false;
@@ -974,6 +1059,8 @@ export class GameScene extends BaseScene {
     this.pauseMenu.unmount();
     this.levelUpMenu.unmount();
     this.chestModal.unmount();
+    this.relicSystem.reset();
+    this.hud.updateRelics(this.relicSystem.getActiveRelics());
     this.isGameOver = false;
     this.isVictory = false;
     this.isPaused = false;

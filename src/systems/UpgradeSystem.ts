@@ -17,6 +17,45 @@ export class UpgradeSystem {
   public pickupRangeMultiplier: number = 1.0;
   public projectileSpeedMultiplier: number = 1.0;
   private acquiredPassives: Set<string> = new Set();
+  private banishedIds: Set<string> = new Set();
+  public rerollsRemaining: number = 1;
+  public skipsRemaining: number = 1;
+  public banishesRemaining: number = 1;
+
+  public canReroll(): boolean {
+    return this.rerollsRemaining > 0;
+  }
+
+  public useReroll(): boolean {
+    if (this.rerollsRemaining <= 0) return false;
+    this.rerollsRemaining--;
+    return true;
+  }
+
+  public canSkip(): boolean {
+    return this.skipsRemaining > 0;
+  }
+
+  public useSkip(): boolean {
+    if (this.skipsRemaining <= 0) return false;
+    this.skipsRemaining--;
+    return true;
+  }
+
+  public canBanish(): boolean {
+    return this.banishesRemaining > 0;
+  }
+
+  public banish(id: string): boolean {
+    if (this.banishesRemaining <= 0) return false;
+    this.banishesRemaining--;
+    this.banishedIds.add(id);
+    return true;
+  }
+
+  public isBanished(id: string): boolean {
+    return this.banishedIds.has(id);
+  }
 
   public getEligibleEvolutions(weaponSystem?: WeaponSystem): UpgradeDefinition[] {
     if (!weaponSystem) return [];
@@ -57,7 +96,7 @@ export class UpgradeSystem {
       if (weaponSystem.canEquipNewWeapon()) {
         for (let i = 0; i < allWeaponIds.length; i++) {
           const wid = allWeaponIds[i];
-          if (!weaponSystem.hasWeapon(wid)) {
+          if (!weaponSystem.hasWeapon(wid) && !this.isBanished(wid) && !this.isBanished(`weapon_unlock_${wid}`)) {
             const wCfg = WEAPON_CONFIG[wid];
             pool.push({
               id: `weapon_unlock_${wid}`,
@@ -76,7 +115,7 @@ export class UpgradeSystem {
       const equipped = weaponSystem.getWeapons();
       for (let i = 0; i < equipped.length; i++) {
         const w = equipped[i];
-        if (!w.isMaxLevel) {
+        if (!w.isMaxLevel && !this.isBanished(w.id) && !this.isBanished(`weapon_upgrade_${w.id}`)) {
           pool.push({
             id: `weapon_upgrade_${w.id}`,
             name: `${w.name} (Lv ${w.level + 1})`,
@@ -94,14 +133,16 @@ export class UpgradeSystem {
     const passives = Object.values(UPGRADE_CONFIG);
     for (let i = 0; i < passives.length; i++) {
       const p = passives[i];
-      pool.push({
-        id: p.id,
-        name: p.name,
-        description: p.description,
-        icon: p.icon,
-        category: 'passive',
-        categoryLabel: 'PASSIVE',
-      });
+      if (!this.isBanished(p.id)) {
+        pool.push({
+          id: p.id,
+          name: p.name,
+          description: p.description,
+          icon: p.icon,
+          category: 'passive',
+          categoryLabel: 'PASSIVE',
+        });
+      }
     }
 
     // Shuffle general pool
@@ -221,6 +262,10 @@ export class UpgradeSystem {
     this.pickupRangeMultiplier = 1.0;
     this.projectileSpeedMultiplier = 1.0;
     this.acquiredPassives.clear();
+    this.banishedIds.clear();
+    this.rerollsRemaining = 1;
+    this.skipsRemaining = 1;
+    this.banishesRemaining = 1;
 
     player.speed = PLAYER_CONFIG.speed;
     player.maxHp = PLAYER_CONFIG.maxHp;

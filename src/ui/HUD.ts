@@ -1,5 +1,6 @@
 import '../styles/hud.css';
 import { IS_DEV } from '../utils/debug';
+import { RELIC_CONFIG, type RelicId } from '../config/relicConfig';
 
 export class HUD {
   private element: HTMLDivElement | null = null;
@@ -10,6 +11,7 @@ export class HUD {
   private levelBadge: HTMLSpanElement | null = null;
   private killsText: HTMLSpanElement | null = null;
   private timerText: HTMLSpanElement | null = null;
+  private relicsContainer: HTMLDivElement | null = null;
   private alertBanner: HTMLDivElement | null = null;
   private alertTitle: HTMLDivElement | null = null;
   private alertSubtitle: HTMLDivElement | null = null;
@@ -89,6 +91,10 @@ export class HUD {
     statsGroup.appendChild(this.levelBadge);
     statsGroup.appendChild(killsContainer);
     statsGroup.appendChild(timerContainer);
+
+    this.relicsContainer = document.createElement('div');
+    this.relicsContainer.className = 'hud-relics-container';
+    statsGroup.appendChild(this.relicsContainer);
 
     topBar.appendChild(hpContainer);
     topBar.appendChild(statsGroup);
@@ -339,6 +345,20 @@ export class HUD {
     }, durationMs);
   }
 
+  public updateRelics(relicIds: readonly RelicId[]): void {
+    if (!this.relicsContainer) return;
+    this.relicsContainer.innerHTML = '';
+    relicIds.forEach((id) => {
+      const def = RELIC_CONFIG[id];
+      if (!def) return;
+      const relicTag = document.createElement('div');
+      relicTag.className = 'hud-relic-badge';
+      relicTag.title = `${def.name}: ${def.description}`;
+      relicTag.textContent = def.icon;
+      this.relicsContainer!.appendChild(relicTag);
+    });
+  }
+
   public hideBossBar(): void {
     if (this.bossBarContainer) {
       this.bossBarContainer.style.display = 'none';
@@ -372,6 +392,7 @@ export class HUD {
     this.levelBadge = null;
     this.killsText = null;
     this.timerText = null;
+    this.relicsContainer = null;
     this.alertBanner = null;
     this.alertTitle = null;
     this.alertSubtitle = null;

@@ -29,6 +29,7 @@ export class Enemy extends Entity {
   protected originalColor: number;
   protected flashTimer: number = 0;
   protected wobbleTimer: number = 0;
+  public freezeTimer: number = 0;
 
   constructor(
     x: number = 0,
@@ -106,6 +107,17 @@ export class Enemy extends Entity {
         }
       }
     }
+
+    // 3. Freeze timer countdown
+    if (this.freezeTimer > 0) {
+      this.freezeTimer -= deltaTime;
+      if (this.freezeTimer < 0) this.freezeTimer = 0;
+    }
+  }
+
+  public applyFreeze(duration: number): void {
+    if (this.isDead) return;
+    this.freezeTimer = Math.max(this.freezeTimer, duration);
   }
 
   public takeDamage(amount: number): boolean {

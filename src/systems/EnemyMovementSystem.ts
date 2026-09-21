@@ -43,7 +43,7 @@ export class EnemyMovementSystem {
     // 1. Move enemies toward the target and orient them correctly
     for (let i = 0; i < len; i++) {
       const enemy = enemies[i]!;
-      if (enemy.isDead) continue;
+      if (enemy.isDead || enemy.freezeTimer > 0) continue;
 
       const dx = targetX - enemy.position.x;
       const dz = targetZ - enemy.position.z;
