@@ -163,7 +163,7 @@ export class EnemySpawner implements Disposable {
     );
   }
 
-  public removeEnemy(enemy: Enemy): void {
+  public removeEnemy(enemy: Enemy): boolean {
     const idx = this.enemies.indexOf(enemy);
     if (idx !== -1) {
       const last = this.enemies.pop()!;
@@ -171,7 +171,9 @@ export class EnemySpawner implements Disposable {
         this.enemies[idx] = last;
       }
       this.entityManager.remove(enemy);
+      return true;
     }
+    return false;
   }
 
   public getEnemies(): readonly Enemy[] {

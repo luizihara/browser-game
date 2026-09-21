@@ -598,6 +598,15 @@ export class GameScene extends BaseScene {
       );
     }
 
+    // Safety sweep: ensure any enemy killed by burn DoT, volatile friendly fire, or hazards is fully removed
+    const spawnedEnemies = this.enemySpawner.getEnemies();
+    for (let i = spawnedEnemies.length - 1; i >= 0; i--) {
+      const e = spawnedEnemies[i];
+      if (e && (e.isDead || e.hp <= 0)) {
+        this.onEnemyDefeated(e);
+      }
+    }
+
     // Update Special Arena Pickups
     if (this.player) {
       this.pickupSystem.update(deltaTime, this.player, (item) => {
@@ -680,6 +689,9 @@ export class GameScene extends BaseScene {
       this.onBossDefeated(this.activeBoss);
       return;
     }
+    const wasRemoved = this.enemySpawner.removeEnemy(killedEnemy);
+    if (!wasRemoved) return;
+
     this.killCount++;
     this.hud.updateKills(this.killCount);
     this.soundManager.playEnemyDeath();
@@ -702,7 +714,6 @@ export class GameScene extends BaseScene {
     } else {
       this.pickupSystem.trySpawnRandomDrop(killedEnemy.position.x, killedEnemy.position.z);
     }
-    this.enemySpawner.removeEnemy(killedEnemy);
   }
 
   private spawnBoss(bossId: BossId): void {

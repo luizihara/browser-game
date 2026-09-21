@@ -188,7 +188,7 @@ export class Enemy extends Entity {
   }
 
   public takeDamage(amount: number): boolean {
-    if (this.isDead) return true;
+    if (this.isDead) return false;
 
     this.hp -= amount;
     this.flashTimer = FX_CONFIG.hitFlash.duration;
