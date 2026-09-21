@@ -10,26 +10,29 @@ O projeto é um jogo 3D para navegador do gênero **survivor / bullet heaven** (
 
 O jogo conta com:
 - Jogador em 3D movimentando-se em arena fechada com câmera suave e colisão perimetral;
-- Inimigos múltiplos simultâneos com 4 arquétipos distintos em primitivas 3D (*Stalker, Skitterer, Brute, Goliath Elite*);
+- Inimigos múltiplos simultâneos com 7 arquétipos distintos em primitivas 3D (*Stalker, Skitterer, Brute, Goliath Elite, Arcane Cultist, Bone Shaman, Volatile Crawler*);
 - Curva progressiva de dificuldade por tempo e ondas gerenciadas por Diretor de Jogo (*DirectorSystem*);
 - Titãs Elites com auréola dourada e eventos periódicos de cerco/enxame com banner animado de alerta no HUD;
-- Arsenal expansivo com até 4 armas simultâneas (*Magic Wand, Guardian Orbs, Radiant Aura, Dagger Throw*) com 5 níveis de poder independentes;
-- Coleta de gemas de experiência multi-tier (Verde, Azul, Dourada), curva exponencial de níveis, HUD de progresso e escolha de upgrades dinâmicos (novas armas, upgrades de armas e passivas) via modal de Level Up;
-- Efeitos sonoros procedurais nativos via Web Audio API (disparos, impactos, mortes, gemas, level up, alertas de onda, game over);
-- Sistema de partículas Zero-GC (`ParticleSystem`) com shaders GLSL e pooling de buffer para faíscas de impacto, explosões radiais e fonte de level up;
+- Arsenal expansivo com até 4 armas simultâneas dentre 6 disponíveis (*Magic Wand, Guardian Orbs, Radiant Aura, Dagger Throw, Thunder Hammer, Alchemist Flask*) com 5 níveis de poder independentes e efeitos elementais (queimadura, lentidão, choque em cadeia);
+- Coleta de gemas de experiência multi-tier (Verde, Azul, Dourada), curva exponencial de níveis, HUD de progresso e escolha de upgrades dinâmicos com deckbuilding tático (*Reroll, Skip, Banish*) via modal de Level Up;
+- Relíquias de Taberna (`RelicSystem`, `relicConfig.ts`): até 3 relíquias ancestrais passivas equipadas simultaneamente com efeitos de impacto e sinergias;
+- Quadro de Caçadas e Conquistas da Guilda (`BountyBoardMenu`, `achievementConfig.ts`): 16 desafios com recompensas em ouro, toasts animados e persistência;
+- Efeitos sonoros procedurais nativos via Web Audio API (disparos, impactos, mortes, gemas, level up, alertas de onda, relâmpagos, poções, fanfarras, game over);
+- Sistema de partículas Zero-GC (`ParticleSystem`) com shaders GLSL e pooling de buffer para faíscas de impacto, explosões radiais, raios e fonte de level up;
 - Hit-flash em inimigos ao sofrerem dano e trauma-based screen shake na câmera (`CameraController`);
 - Física de separação de corpos rígidos e crowd separation Zero-GC em `EnemyMovementSystem`, prevenindo sobreposição de corpos entre o jogador e as hordas;
-- Direção de arte estilizada Low-Poly Toon com cel-shading discreto de 3 bandas (`ToonMaterialFactory`, `VISUAL_DIRECTION.md`), iluminação atmosférica suave, cenário com props instanciados ricos em detalhes (`PropBuilder`), herói Chibi com passada procedural e 4 arquétipos de monstros com silhuetas caricatas bem definidas;
+- Direção de arte estilizada Low-Poly Toon com cel-shading discreto de 3 bandas (`ToonMaterialFactory`, `VISUAL_DIRECTION.md`), iluminação atmosférica suave, cenário com props instanciados ricos em detalhes (`PropBuilder`), herói Chibi com passada procedural e monstros com silhuetas caricatas bem definidas;
 - Menu de Configurações (`SettingsMenu`, `settingsConfig.ts`) com controle de áudio, intensidade de trauma e flash de dano;
 - Fluxo de Game Over e Vitória de Run (`VictoryMenu`, `metaConfig.ts`) com detalhamento de DPS por arma, recordes persistentes e acumulação de ouro;
+- Modo Sobrevivência Sem Fim (Endless) e 6 Graus de Tormento selecionáveis (Normal a Tormento V) com escalonamento de dificuldade e recompensas;
 - Loja de Power-ups Permanentes com Ouro (`MetaShopMenu`, `metaUpgradeConfig.ts`) com 8 atributos evolutivos e sistema de reembolso 100% gratuito (*respec*);
 - Drops especiais 3D de arena (`PickupItem`, `PickupSystem`) com Baús de Tesouro (`TreasureChestModal`), Poções de Vida, Ímã Cósmico e Bomba Sacra;
 - Seleção de Personagens e 4 Heróis Únicos (`CharacterSelectMenu`, `characterConfig.ts`, `CharacterBuilder.ts`): Sir Roderick (Cavaleiro), Elara (Maga), Kage (Ladino) e Aurelius (Templário), cada qual com modelo 3D low-poly próprio, arma inicial exclusiva, passivas e desbloqueio por ouro persistente no `MetaManager`;
-- Super-Armas Evoluídas e Sinergias (`evolutionConfig.ts`, `WeaponSystem.ts`, `UpgradeSystem.ts`): 4 armas evoluídas lendárias (*Holy Astral Beam, Aegis Citadel, Solar Supernova, Thousand Shadow Blades*) combinando armas Lv 5 com passivas adquiridas, disponíveis no modal de Level Up e Baús;
+- Super-Armas Evoluídas e Sinergias (`evolutionConfig.ts`, `WeaponSystem.ts`, `UpgradeSystem.ts`): 6 armas evoluídas lendárias (*Holy Astral Beam, Aegis Citadel, Solar Supernova, Thousand Shadow Blades, Storm Cataclysm, Midas Plague*) combinando armas Lv 5 com passivas adquiridas, disponíveis no modal de Level Up e Baús;
 - Confrontos Épicos com Chefes, Decais de Telégrafo de Perigo e Radar Minimap (`bossConfig.ts`, `Boss.ts`, `TelegraphSystem.ts`, `RadarSystem.ts`, `HUD.ts`): Mid-Boss *Gorgonath the Earthbreaker* (150s) e Final Boss *Malakor the Shadow Overlord* (260s) com IA de máquina de estados, imunidade a knockback, telégrafos de solo pré-alocados para impactos circulares e investidas retangulares, barra de vida de chefe no HUD e minimapa radar com rastreador fora de tela;
 - Sistema Multi-Estágios & Biomas Únicos (`stageConfig.ts`, `StageSelectMenu.ts`, `World.ts`, `Ground.ts`, `Lighting.ts`, `ArenaBounds.ts`, `PropBuilder.ts`): 3 biomas com paletas dinâmicas em tempo de execução (*Verdant Citadel*, *Infernal Caldera* com +20% velocidade e +30% ouro, *Glacial Crypts* com +30% HP e +25% XP), desbloqueios por tempo, recordes persistentes e mutação de vértices e iluminação Zero-GC;
 - Objetos Destrutíveis de Arena & Drops Extras (`BreakableProp.ts`, `DestructibleSystem.ts`): Vasos de cerâmica, barris reforçados e cristais de gelo que quebram com projéteis ou pulsos de aura, liberando ouro, corações de cura e gemas bônus de XP;
-- Clima Atmosférico Procedural e Áudio de Bioma (`ParticleSystem.ts`, `SoundManager.ts`): Fagulhas/cinzas vulcânicas ascendentes, tempestade de neve contínua e sintetizador aditivo em tempo real de drones harmônicos para cada ambiente.
+- Clima Atmosférico Procedural e Áudio de Bioma (`ParticleSystem.ts`, `SoundManager.ts`): Fagulhas/cinzas vulcânicas ascendentes, tempestade de neve contínua, chuvas de meteoros ativas e sintetizador aditivo em tempo real de drones harmônicos para cada ambiente.
 
 Portanto, **toda decisão técnica tomada no presente deve permitir essa escala sem exigir reescritas completas**.
 

@@ -394,6 +394,41 @@ src/
 - [x] **Descoberta de Relíquias em Baús de Tesouro (`src/ui/TreasureChestModal.ts`, `src/scenes/GameScene.ts`)**:
   - Baús de monstros elites e chefes concedem chance de descoberta de relíquias com destaque dourado brilhante no modal.
 
+### Milestone 18 — ARSENAL EXPANSION, THUNDER HAMMER, ALCHEMIST FLASK & ELEMENTAL STATUS EFFECTS (Concluída)
+- [x] **Duas Novas Armas com Mecânicas Únicas (`hammerConfig.ts`, `HammerWeapon.ts`, `FlaskWeapon.ts`)**:
+  - ⚡ **Martelo do Trovão (`hammer`)**: Dispara faíscas elétricas que saltam em cadeia instantaneamente entre até 5 inimigos próximos sem alocação de lixo no loop, infligindo dano de raio crepitante e faíscas azuis.
+  - 🧪 **Frasco Alquímico (`flask`)**: Lança frascos de poção em parábolas tridimensionais balísticas que se quebram no solo, espalhando poças químicas corrosivas que queimam monstros com dano contínuo (DoT).
+- [x] **Super-Armas Evoluídas Inéditas (`evolutionConfig.ts`, `WeaponSystem.ts`)**:
+  - 🌩️ **Cataclismo da Tempestade (`storm_cataclysm`)**: Evolução de Martelo Lv 5 + Might. Dispara tempestades de relâmpagos com 10 arcos simultâneos em cadeia e 100% de chance de crítico.
+  - 🏺 **Praga de Midas (`midas_plague`)**: Evolução de Frasco Lv 5 + Magnet. Poças de ouro cáustico corrosivas que aumentam em 200% o drop de moedas de ouro dos monstros derrotados no miasma.
+- [x] **Sistema de Efeitos de Status Elementais (`CombatSystem.ts`, `Enemy.ts`)**:
+  - 🔥 **Queimadura (Burn)**: Dano por segundo acumulável aplicado por poças e chamas.
+  - ❄️ **Congelamento & Lentidão (Chill / Freeze)**: Redução de 40% a 100% da velocidade de aproximação dos monstros.
+- [x] **Efeitos Sonoros e Visuais Procedurais (`SoundManager.ts`, `ParticleSystem.ts`, `DamageNumberSystem.ts`)**:
+  - Sons sintetizados via Web Audio API para trovões elétricos (`playLightning`) e estilhaço de frascos químicos (`playPotionShatter`).
+  - Cores dedicadas de dano: Ciano Elétrico (`.dmg-lightning`) e Laranja Incandescente (`.dmg-fire`).
+
+### Milestone 19 — ADVANCED ENEMY ARCHETYPES & ACTIVE WEATHER EVENTS (Concluída)
+- [x] **Três Novos Arquétipos de Inimigos Inteligentes (`EnemyAbilitySystem.ts`, `Enemy.ts`, `EnemyVisualBuilder.ts`)**:
+  - 🔮 **Cultista Arcano (`ranged`)**: Inimigo tático que mantém distância segura do herói (8-10m) e canaliza projéteis mágicos sombrios em sua direção com som e telegrafia directional.
+  - 💀 **Xamã Ósseo (`shaman`)**: Conjurador de retaguarda que emite pulsos periódicos de suporte com área de efeito, curando hordas aliadas (+25 HP) e concedendo +30% de velocidade de investida aos perseguidores.
+  - 💣 **Rastejante Volátil (`volatile`)**: Monstro quadrúpede veloz que, ao alcançar raio de proximidade, prepara detonação rápida de 0.85s com decal circular de perigo, explodindo com dano ao herói e 140 de dano em fogo amigo que extermina hordas inimigas.
+- [x] **Eventos Climáticos Ativos & Perigos de Arena (`EnemyAbilitySystem.ts`, `GameScene.ts`)**:
+  - ☄️ **Chuva de Meteoros na Caldeira Infernal**: Bombardeios periódicos do céu com decais circulares de impacto e explosões de cinzas e rochas que forçam reposicionamento dinâmico.
+  - 🌪️ **Nevasca Uivante nas Criptas Glaciais**: Vendavais contínuos que aumentam o efeito de chill e retardam o avanço de herói e monstros.
+
+### Milestone 20 — ENDLESS SURVIVAL MODE & TORMENT RANKS I-V (Concluída)
+- [x] **Seletor de Tormento da Taberna (`tormentConfig.ts`, `StageSelectMenu.ts`, `menu.css`)**:
+  - 6 Níveis de Dificuldade selecionáveis no menu de estágios: **Normal**, **Tormento I** (+20% HP, +25% Ouro), **Tormento II** (+40% HP, +50% Ouro), **Tormento III** (+65% HP, +80% Ouro), **Tormento IV** (+90% HP, +110% Ouro) e **Tormento V (Extremo)** (+120% HP, +150% Ouro).
+  - Componente de UI em madeira e ferro forjado com setas táteis `[ ◀ ]` e `[ ▶ ]` e descrição detalhada de risco vs. recompensa.
+- [x] **Modo Sem Fim / Sobrevivência Eterna (`VictoryMenu.ts`, `GameScene.ts`, `DirectorSystem.ts`)**:
+  - Botão `[ 🔥 CONTINUAR (ENDLESS) ]` no modal de vitória do estágio, permitindo que a partida continue além dos 300 segundos.
+  - Ondas de horda recorrentes de intensidade crescente a cada 45 segundos, com escalonamento infinito de HP e velocidade.
+- [x] **Identificadores no HUD e Tela de Game Over (`HUD.ts`, `GameOverMenu.ts`, `hud.css`)**:
+  - Badge pulsante no HUD `🔥 ENDLESS • TORM III` acompanhando a contagem de tempo.
+  - Tela de derrota comemorativa exibindo o tempo total sobrevivido com a insígnia da dificuldade atingida: `SOBREVIVEU: 12:45 (ENDLESS • TORMENTO III)`.
+
+
 
 
 
