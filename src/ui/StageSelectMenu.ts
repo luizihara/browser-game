@@ -1,4 +1,5 @@
 import { STAGE_CONFIG, type StageId } from '../config/stageConfig';
+import { TORMENT_CONFIG, MAX_TORMENT_RANK } from '../config/tormentConfig';
 import { MetaManager } from '../config/metaConfig';
 import { formatTime } from '../utils/math';
 import '../styles/menu.css';
@@ -44,6 +45,59 @@ export class StageSelectMenu {
     this.gridContainer.className = 'stage-grid';
     this.renderCards();
     panel.appendChild(this.gridContainer);
+
+    // Torment Level Selector Row
+    const tormentRow = document.createElement('div');
+    tormentRow.className = 'stage-torment-selector';
+
+    const renderTorment = () => {
+      tormentRow.innerHTML = '';
+      const currentRank = MetaManager.getInstance().getSelectedTorment();
+      const cfg = TORMENT_CONFIG[currentRank] ?? TORMENT_CONFIG[0];
+
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'stage-torment-nav';
+      prevBtn.textContent = '◀';
+      prevBtn.disabled = currentRank <= 0;
+      prevBtn.onclick = () => {
+        if (currentRank > 0) {
+          MetaManager.getInstance().setSelectedTorment(currentRank - 1);
+          renderTorment();
+        }
+      };
+
+      const infoBox = document.createElement('div');
+      infoBox.className = 'stage-torment-info';
+
+      const rankBadge = document.createElement('span');
+      rankBadge.className = 'stage-torment-badge';
+      rankBadge.textContent = cfg.badge;
+
+      const rankDesc = document.createElement('span');
+      rankDesc.className = 'stage-torment-desc';
+      rankDesc.textContent = cfg.description;
+
+      infoBox.appendChild(rankBadge);
+      infoBox.appendChild(rankDesc);
+
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'stage-torment-nav';
+      nextBtn.textContent = '▶';
+      nextBtn.disabled = currentRank >= MAX_TORMENT_RANK;
+      nextBtn.onclick = () => {
+        if (currentRank < MAX_TORMENT_RANK) {
+          MetaManager.getInstance().setSelectedTorment(currentRank + 1);
+          renderTorment();
+        }
+      };
+
+      tormentRow.appendChild(prevBtn);
+      tormentRow.appendChild(infoBox);
+      tormentRow.appendChild(nextBtn);
+    };
+
+    renderTorment();
+    panel.appendChild(tormentRow);
 
     // Footer
     const footer = document.createElement('div');

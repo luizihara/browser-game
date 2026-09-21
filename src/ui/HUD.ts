@@ -28,6 +28,7 @@ export class HUD {
   private achievementToastTitle: HTMLDivElement | null = null;
   private achievementToastReward: HTMLSpanElement | null = null;
   private achievementToastTimeout: number | null = null;
+  private endlessBadge: HTMLSpanElement | null = null;
 
   public mount(parent: HTMLElement): void {
     if (this.element) return;
@@ -87,6 +88,12 @@ export class HUD {
     this.timerText.className = 'hud-timer-text';
     this.timerText.textContent = '00:00';
     timerContainer.appendChild(this.timerText);
+
+    this.endlessBadge = document.createElement('span');
+    this.endlessBadge.className = 'hud-endless-badge';
+    this.endlessBadge.style.display = 'none';
+    this.endlessBadge.textContent = '🔥 ENDLESS';
+    timerContainer.appendChild(this.endlessBadge);
 
     statsGroup.appendChild(this.levelBadge);
     statsGroup.appendChild(killsContainer);
@@ -369,6 +376,14 @@ export class HUD {
     return this.element;
   }
 
+  public setEndlessMode(active: boolean, tormentRank: number = 0): void {
+    if (this.endlessBadge) {
+      this.endlessBadge.style.display = active ? 'inline-block' : 'none';
+      this.endlessBadge.textContent =
+        tormentRank > 0 ? `🔥 ENDLESS (T-${tormentRank})` : '🔥 ENDLESS';
+    }
+  }
+
   public unmount(): void {
     if (this.alertTimeoutId !== null) {
       window.clearTimeout(this.alertTimeoutId);
@@ -392,6 +407,7 @@ export class HUD {
     this.levelBadge = null;
     this.killsText = null;
     this.timerText = null;
+    this.endlessBadge = null;
     this.relicsContainer = null;
     this.alertBanner = null;
     this.alertTitle = null;

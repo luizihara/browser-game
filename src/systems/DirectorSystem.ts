@@ -14,6 +14,9 @@ export class DirectorSystem {
   private lastScheduledTime: number = 0;
   private stageHpMult: number = 1.0;
   private stageSpeedMult: number = 1.0;
+  private tormentHpMult: number = 1.0;
+  private tormentSpeedMult: number = 1.0;
+  private tormentDamageMult: number = 1.0;
 
   constructor() {
     this.initTimeline();
@@ -22,6 +25,12 @@ export class DirectorSystem {
   public setStageModifiers(hpMult: number, speedMult: number): void {
     this.stageHpMult = hpMult;
     this.stageSpeedMult = speedMult;
+  }
+
+  public setTormentModifiers(hpMult: number, speedMult: number, damageMult: number): void {
+    this.tormentHpMult = hpMult;
+    this.tormentSpeedMult = speedMult;
+    this.tormentDamageMult = damageMult;
   }
 
   private initTimeline(): void {
@@ -37,14 +46,14 @@ export class DirectorSystem {
 
   public getMultipliers(): EnemyStatMultipliers {
     const minutes = this.runTime / 60;
-    const hp = (1.0 + minutes * DIRECTOR_CONFIG.scaling.hpGrowthPerMinute) * this.stageHpMult;
-    const damage = 1.0 + minutes * DIRECTOR_CONFIG.scaling.damageGrowthPerMinute;
+    const hp = (1.0 + minutes * DIRECTOR_CONFIG.scaling.hpGrowthPerMinute) * this.stageHpMult * this.tormentHpMult;
+    const damage = (1.0 + minutes * DIRECTOR_CONFIG.scaling.damageGrowthPerMinute) * this.tormentDamageMult;
     const speed =
       (1.0 +
       Math.min(
         DIRECTOR_CONFIG.scaling.speedGrowthMax,
         minutes * DIRECTOR_CONFIG.scaling.speedGrowthPerMinute
-      )) * this.stageSpeedMult;
+      )) * this.stageSpeedMult * this.tormentSpeedMult;
     return { hp, damage, speed };
   }
 

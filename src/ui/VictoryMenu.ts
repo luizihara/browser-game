@@ -21,10 +21,16 @@ export class VictoryMenu {
   private element: HTMLDivElement | null = null;
   private onRestartCallback: () => void;
   private onMainMenuCallback: () => void;
+  private onContinueEndlessCallback?: () => void;
 
-  constructor(onRestart: () => void, onMainMenu: () => void) {
+  constructor(
+    onRestart: () => void,
+    onMainMenu: () => void,
+    onContinueEndless?: () => void
+  ) {
     this.onRestartCallback = onRestart;
     this.onMainMenuCallback = onMainMenu;
+    this.onContinueEndlessCallback = onContinueEndless;
   }
 
   public mount(parent: HTMLElement, stats: VictoryStats): void {
@@ -105,6 +111,21 @@ export class VictoryMenu {
     // Button Row
     const btnRow = document.createElement('div');
     btnRow.className = 'victory-btn-row';
+
+    if (this.onContinueEndlessCallback) {
+      const endlessBtn = document.createElement('button');
+      endlessBtn.className = 'menu-button';
+      endlessBtn.style.background = 'linear-gradient(180deg, #c2410c 0%, #7c2d12 100%)';
+      endlessBtn.style.color = '#fef08a';
+      endlessBtn.textContent = '🔥 CONTINUAR (ENDLESS)';
+      endlessBtn.onclick = () => {
+        this.unmount();
+        if (this.onContinueEndlessCallback) {
+          this.onContinueEndlessCallback();
+        }
+      };
+      btnRow.appendChild(endlessBtn);
+    }
 
     const restartBtn = document.createElement('button');
     restartBtn.className = 'menu-button';

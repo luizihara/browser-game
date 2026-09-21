@@ -43,6 +43,7 @@ export interface PlayerRecords {
   selectedStage: StageId;
   unlockedStages: StageId[];
   stageRecords: Record<StageId, StageRecord>;
+  selectedTorment: number;
   achievements: Record<AchievementId, AchievementRecord>;
   stats: CumulativeStats;
 }
@@ -99,6 +100,7 @@ const DEFAULT_RECORDS: PlayerRecords = {
   selectedStage: 'verdant',
   unlockedStages: ['verdant'],
   stageRecords: { ...DEFAULT_STAGE_RECORDS },
+  selectedTorment: 0,
   achievements: createDefaultAchievements(),
   stats: { ...DEFAULT_STATS },
 };
@@ -325,6 +327,15 @@ export class MetaManager {
         cleared: false,
       }
     );
+  }
+
+  public getSelectedTorment(): number {
+    return this.records.selectedTorment ?? 0;
+  }
+
+  public setSelectedTorment(rank: number): void {
+    this.records.selectedTorment = Math.max(0, Math.min(5, rank));
+    this.saveRecords();
   }
 
   // --- ACHIEVEMENTS MANAGEMENT ---

@@ -1524,6 +1524,90 @@
   box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
 }
 
+.stage-mod-tag.gold {
+  color: var(--tavern-gold-bright);
+  border-color: rgba(217, 119, 6, 0.5);
+  background: rgba(217, 119, 6, 0.1);
+}
+
+/* ==========================================================================
+   STAGE TORMENT SELECTOR (Tavern Iron & Carved Wood)
+   ========================================================================== */
+.stage-torment-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 680px;
+  margin: 0.75rem auto;
+  padding: 0.6rem 1rem;
+  background: var(--tavern-panel-bg);
+  border: 2.5px solid var(--tavern-iron-dark);
+  box-shadow: 
+    inset 0 0 10px rgba(0, 0, 0, 0.6),
+    0 4px 10px rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-sm);
+  gap: 0.8rem;
+  box-sizing: border-box;
+}
+
+.stage-torment-nav {
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 900;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, var(--tavern-wood-light) 0%, var(--tavern-wood-dark) 100%);
+  border: 2px solid var(--tavern-iron-dark);
+  color: var(--tavern-gold-bright);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform 0.1s, filter 0.15s;
+}
+
+.stage-torment-nav:hover:not(:disabled) {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+.stage-torment-nav:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.stage-torment-nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.stage-torment-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.stage-torment-badge {
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--tavern-gold-bright);
+  text-shadow: 1px 1px 0 #1b120c;
+}
+
+.stage-torment-desc {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-dim);
+}
+
 .bounty-card-content {
   flex-grow: 1;
   display: flex;

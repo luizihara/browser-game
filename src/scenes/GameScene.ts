@@ -48,6 +48,7 @@ import type { BreakableProp } from '../entities/destructible/BreakableProp';
 import { AuraWeapon } from '../weapons/AuraWeapon';
 import { ACHIEVEMENTS_CONFIG } from '../config/achievementConfig';
 import { RelicSystem } from '../systems/RelicSystem';
+import { TORMENT_CONFIG } from '../config/tormentConfig';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -92,6 +93,7 @@ export class GameScene extends BaseScene {
   private isGameOver: boolean = false;
   private isLevelingUp: boolean = false;
   private isVictory: boolean = false;
+  private isEndless: boolean = false;
   private isChestOpening: boolean = false;
   private runTime: number = 0;
   private killCount: number = 0;
@@ -147,7 +149,8 @@ export class GameScene extends BaseScene {
     });
     this.victoryMenu = new VictoryMenu(
       () => this.restart(),
-      () => this.goToMainMenu()
+      () => this.goToMainMenu(),
+      () => this.continueEndlessMode()
     );
   }
 
@@ -198,6 +201,7 @@ export class GameScene extends BaseScene {
     this.isGameOver = false;
     this.isLevelingUp = false;
     this.isVictory = false;
+    this.isEndless = false;
     this.isChestOpening = false;
     this.runTime = 0;
     this.killCount = 0;
@@ -232,10 +236,20 @@ export class GameScene extends BaseScene {
       charDef.startingWeapon
     );
     this.directorSystem.reset();
+
+    const tormentRank = MetaManager.getInstance().getSelectedTorment();
+    const tormentCfg = TORMENT_CONFIG[tormentRank] ?? TORMENT_CONFIG[0];
+    this.directorSystem.setTormentModifiers(
+      tormentCfg.enemyHpMult,
+      tormentCfg.enemySpeedMult,
+      tormentCfg.enemyDamageMult
+    );
+
     this.relicSystem.reset();
     this.applyPermanentMetaUpgrades();
 
     this.hud.mount(this.context.uiRoot);
+    this.hud.setEndlessMode(false);
     this.hud.updateRelics(this.relicSystem.getActiveRelics());
     this.damageNumberSystem.mount(this.context.uiRoot);
     this.telegraphSystem.setScene(this.threeScene);
@@ -631,6 +645,11 @@ export class GameScene extends BaseScene {
         return;
       }
 
+      if (this.runTime >= 300 && !this.isVictory && !this.isEndless) {
+        this.triggerVictory();
+        return;
+      }
+
       if (IS_DEV) {
         const fps = this.fpsTracker.update();
         this.hud.updateDebug(
@@ -727,6 +746,14 @@ export class GameScene extends BaseScene {
     this.pickupSystem.trySpawnRandomDrop(boss.position.x - 1.2, boss.position.z);
 
     this.removeActiveBoss();
+
+    if (boss.bossId === 'malakor' && !this.isVictory && !this.isEndless) {
+      setTimeout(() => {
+        if (!this.isGameOver) {
+          this.triggerVictory();
+        }
+      }, 1500);
+    }
   }
 
   private removeActiveBoss(): void {
@@ -875,9 +902,11 @@ export class GameScene extends BaseScene {
     this.isGameOver = true;
     this.soundManager.playGameOver();
     const stageDef = STAGE_CONFIG[this.currentStageId] ?? STAGE_CONFIG.verdant;
+    const tormentRank = MetaManager.getInstance().getSelectedTorment();
+    const tormentCfg = TORMENT_CONFIG[tormentRank] ?? TORMENT_CONFIG[0];
     const level = this.experienceSystem.getLevel();
     const baseGold = Math.floor(this.killCount * 0.5 + this.runTime * 0.2 + level * 5);
-    const goldEarned = Math.round(baseGold * stageDef.modifiers.goldMult);
+    const goldEarned = Math.round(baseGold * stageDef.modifiers.goldMult * tormentCfg.goldMult);
     const selectedCharId = MetaManager.getInstance().getSelectedCharacter();
     MetaManager.getInstance().submitRun(
       this.runTime,
@@ -887,7 +916,12 @@ export class GameScene extends BaseScene {
       this.currentStageId,
       selectedCharId
     );
-    this.gameOverMenu.mount(this.context.uiRoot, formatTime(this.runTime));
+    this.gameOverMenu.mount(
+      this.context.uiRoot,
+      formatTime(this.runTime),
+      this.isEndless,
+      tormentRank
+    );
   }
 
   private triggerVictory(): void {
@@ -896,9 +930,11 @@ export class GameScene extends BaseScene {
     this.cameraController.addTrauma(0.5);
 
     const stageDef = STAGE_CONFIG[this.currentStageId] ?? STAGE_CONFIG.verdant;
+    const tormentRank = MetaManager.getInstance().getSelectedTorment();
+    const tormentCfg = TORMENT_CONFIG[tormentRank] ?? TORMENT_CONFIG[0];
     const level = this.experienceSystem.getLevel();
     const baseGold = Math.floor(this.killCount * 1.0 + this.runTime * 0.5 + level * 20);
-    const goldEarned = Math.round(baseGold * stageDef.modifiers.goldMult);
+    const goldEarned = Math.round(baseGold * stageDef.modifiers.goldMult * tormentCfg.goldMult);
     const selectedCharId = MetaManager.getInstance().getSelectedCharacter();
     const isNewRecord = MetaManager.getInstance().submitRun(
       this.runTime,
@@ -925,6 +961,14 @@ export class GameScene extends BaseScene {
       weaponStats,
       isNewRecord,
     });
+  }
+
+  private continueEndlessMode(): void {
+    this.isVictory = false;
+    this.isEndless = true;
+    const torment = MetaManager.getInstance().getSelectedTorment();
+    this.hud.setEndlessMode(true, torment);
+    this.context.inputSystem.reset();
   }
 
   private applyPermanentMetaUpgrades(): void {
@@ -1105,6 +1149,8 @@ export class GameScene extends BaseScene {
     this.hud.updateRelics(this.relicSystem.getActiveRelics());
     this.isGameOver = false;
     this.isVictory = false;
+    this.isEndless = false;
+    this.hud.setEndlessMode(false);
     this.isPaused = false;
     this.isLevelingUp = false;
     this.isChestOpening = false;
@@ -1167,6 +1213,13 @@ export class GameScene extends BaseScene {
     this.cameraController.resetTrauma();
     this.experienceSystem.reset();
     this.directorSystem.reset();
+    const tormentRank = MetaManager.getInstance().getSelectedTorment();
+    const tormentCfg = TORMENT_CONFIG[tormentRank] ?? TORMENT_CONFIG[0];
+    this.directorSystem.setTormentModifiers(
+      tormentCfg.enemyHpMult,
+      tormentCfg.enemySpeedMult,
+      tormentCfg.enemyDamageMult
+    );
     this.sandboxSpawner?.clearDummies();
 
     this.hud.updateTime(formatTime(this.runTime));

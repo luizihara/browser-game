@@ -11,7 +11,12 @@ export class GameOverMenu {
     this.onMainMenuCallback = onMainMenu;
   }
 
-  public mount(parent: HTMLElement, survivedTime: string): void {
+  public mount(
+    parent: HTMLElement,
+    survivedTime: string,
+    isEndless: boolean = false,
+    tormentRank: number = 0
+  ): void {
     if (this.element) return;
 
     this.element = document.createElement('div');
@@ -19,11 +24,18 @@ export class GameOverMenu {
 
     const title = document.createElement('h1');
     title.className = 'game-over-title';
-    title.textContent = 'GAME OVER';
+    title.textContent = isEndless ? 'FALLEN IN ENDLESS COMBAT' : 'GAME OVER';
 
     this.statText = document.createElement('p');
     this.statText.className = 'survival-stat';
-    this.statText.textContent = `SURVIVED: ${survivedTime}`;
+    const tag = isEndless
+      ? tormentRank > 0
+        ? ` (ENDLESS • TORMENTO ${tormentRank})`
+        : ' (MODO SEM FIM)'
+      : tormentRank > 0
+        ? ` (TORMENTO ${tormentRank})`
+        : '';
+    this.statText.textContent = `SOBREVIVEU: ${survivedTime}${tag}`;
 
     const restartBtn = document.createElement('button');
     restartBtn.className = 'menu-button';
