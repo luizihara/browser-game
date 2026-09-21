@@ -97,7 +97,7 @@ export class EnemyMovementSystem {
         enemy.position.z += moveDirZ * effectiveSpeed * deltaTime;
 
         // Model forward is -Z, always face toward the player
-        enemy.getMesh().rotation.y = Math.atan2(dx * invDist, -(dz * invDist));
+        enemy.getMesh().rotation.y = Math.atan2(-(dx * invDist), -(dz * invDist));
       }
 
       // Hard circle separation against the Player: two bodies cannot occupy the same space

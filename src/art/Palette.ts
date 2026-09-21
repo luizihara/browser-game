@@ -64,6 +64,10 @@ export const PALETTE = {
     templarGold: 0xf59e0b,
     templarSun: 0xfbbf24,
     templarGlow: 0xffedd5,
+    // Shading & Details
+    steelDark: 0x475569,
+    leatherDark: 0x2e1b10,
+    goldHighlight: 0xfde047,
   },
 
   // Enemies & Archetypes

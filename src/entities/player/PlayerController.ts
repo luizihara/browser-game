@@ -50,9 +50,22 @@ export class PlayerController implements Updatable {
         this.player.speed * deltaTime
       );
 
-      // Rotate player mesh toward movement direction (model forward is -Z)
-      const angle = Math.atan2(this.moveDirection.x, -this.moveDirection.z);
-      this.player.getMesh().rotation.y = angle;
+      // Target heading angle (model forward is -Z in Three.js coordinates)
+      const targetAngle = Math.atan2(-this.moveDirection.x, -this.moveDirection.z);
+
+      // Smooth angular interpolation for natural, responsive turning
+      const mesh = this.player.getMesh();
+      let diff = targetAngle - mesh.rotation.y;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+
+      const turnSpeed = 24; // rad/s for snappy yet fluid turning
+      const step = turnSpeed * deltaTime;
+      if (Math.abs(diff) <= step) {
+        mesh.rotation.y = targetAngle;
+      } else {
+        mesh.rotation.y += Math.sign(diff) * step;
+      }
     } else {
       this.moveDirection.set(0, 0, 0);
     }

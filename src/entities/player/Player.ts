@@ -36,6 +36,9 @@ export class Player extends Entity {
       PLAYER_CONFIG.initialPosition.z
     );
 
+    // Initial heroic facing south (towards camera, Math.PI)
+    this.mesh.rotation.y = Math.PI;
+
     this.lastX = this.position.x;
     this.lastZ = this.position.z;
   }
@@ -104,7 +107,7 @@ export class Player extends Entity {
       }
     }
 
-    // 2. Procedural walk bobbing & breathing
+    // 2. Procedural locomotion with articulated limbs & dynamic cape
     const dx = this.position.x - this.lastX;
     const dz = this.position.z - this.lastZ;
     const movedSq = dx * dx + dz * dz;
@@ -114,21 +117,58 @@ export class Player extends Entity {
     this.lastZ = this.position.z;
 
     const model = this.visualComponents.modelGroup;
+    const leftLeg = this.visualComponents.leftLeg;
+    const rightLeg = this.visualComponents.rightLeg;
+    const leftArm = this.visualComponents.leftArm;
+    const rightArm = this.visualComponents.rightArm;
+    const cape = this.visualComponents.capeMesh;
 
     if (isMoving) {
       this.walkTimer += deltaTime * 14.0;
-      // Walking bob: bounce up on each step with subtle lateral sway
-      model.position.y = Math.abs(Math.sin(this.walkTimer)) * 0.06;
-      model.rotation.z = Math.sin(this.walkTimer) * 0.035;
+      const legStride = Math.sin(this.walkTimer);
+
+      // Articulated leg walking stride
+      leftLeg.rotation.x = legStride * 0.55;
+      rightLeg.rotation.x = -legStride * 0.55;
+
+      // Arm counter-swing
+      leftArm.rotation.x = -legStride * 0.35;
+      rightArm.rotation.x = legStride * 0.35;
+
+      // Vertical bounce up on every step
+      model.position.y = Math.abs(Math.sin(this.walkTimer)) * 0.05;
+      // Lateral weight shift / sway
+      model.rotation.z = legStride * 0.035;
+      // Slight forward athletic lean when sprinting
+      model.rotation.x = 0.08;
+
+      // Dynamic fluttering cape trailing in the wind
+      if (cape) {
+        cape.rotation.x = 0.15 + 0.18 + Math.sin(this.walkTimer * 2) * 0.12;
+      }
     } else {
       this.idleTimer += deltaTime * 2.5;
+      const breath = Math.sin(this.idleTimer);
+
+      // Return limbs smoothly to neutral standing pose
+      leftLeg.rotation.x *= 0.8;
+      rightLeg.rotation.x *= 0.8;
+      leftArm.rotation.x *= 0.8;
+      rightArm.rotation.x *= 0.8;
+      model.rotation.x *= 0.8;
+      model.rotation.z *= 0.8;
+
       // Idle breathing: soft vertical float
-      model.position.y = Math.sin(this.idleTimer) * 0.02;
-      model.rotation.z = 0;
+      model.position.y = breath * 0.018;
+
+      // Gentle resting cape drape
+      if (cape) {
+        cape.rotation.x = 0.15 + breath * 0.03;
+      }
     }
 
-    // 3. Staff gem idle spin
-    this.visualComponents.staffGemMesh.rotation.y += deltaTime * 2.0;
+    // 3. Accessory / Gem / Halo idle spin
+    this.visualComponents.staffGemMesh.rotation.y += deltaTime * 2.2;
   }
 
   public override dispose(): void {
