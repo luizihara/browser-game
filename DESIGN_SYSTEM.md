@@ -278,6 +278,53 @@ Elimina-se o `backdrop-filter: blur`. Em seu lugar:
 
 ---
 
+## As 10 Opções Autorais de Menu (/1 a /10)
+
+Para superar qualquer estética genérica de IA/SaaS, foram desenvolvidos 10 temas visuais artesanais com identidades gráficas radicais, acessíveis diretamente pelas URLs `/1` a `/10` ou através da barra de alternância superior no menu:
+
+1. **`/1` — Arcade 16-Bit Pixel Brawler**:
+   - *Estética*: Gabinete de fliperama coin-op dos anos 90.
+   - *Tipografia*: `'Press Start 2P'`, monospace pixelada.
+   - *Elementos*: Scanlines CRT sutis, bordas chanfradas em degraus de pixel, botões vermelhos/azuis arcade com sombra sólida escalonada e placa de high scores.
+2. **`/2` — Dynamic Comic Book / Graphic Novel**:
+   - *Estética*: Pop-art / história em quadrinhos de ação (*Hades*, *Hi-Fi Rush*).
+   - *Tipografia*: `'Bangers'`, traço grosso e expressivo.
+   - *Elementos*: Banners diagonais inclinados (`skewX(-8deg) rotate(-1.5deg)`), pontilhado halftone vermelho, bordas pretas de nanquim de 4px e estrelas de impacto.
+3. **`/3` — Adventurer's Tome & Wax Seal**:
+   - *Estética*: Grimório medieval / diário de expedição em mesa de carvalho.
+   - *Tipografia*: `'MedievalSharp'`, caligrafia de escriba.
+   - *Elementos*: Folha de pergaminho antigo com cantos arredondados, botões em formato de selo de cera carmesim/ouro com relevo e fita de registro.
+4. **`/4` — Tavern Carved Wood & Iron Shield**:
+   - *Estética*: Placa rústica de taberna em madeira entalhada (*Torchlight*, *Brawl Stars*).
+   - *Tipografia*: `'Russo One'`.
+   - *Elementos*: Pranchas de carvalho escuro com ranhuras, botões chanfrados em madeira com rebites de bronze e placa de ferro martelado.
+5. **`/5` — Claymation / Plasticine Toy-Box**:
+   - *Estética*: Universo tátil estilo massinha de modelar / argila esculpida.
+   - *Tipografia*: `'Fredoka'`.
+   - *Elementos*: Botões ultra-arredondados (`border-radius: 36px`) com relevo macio, indentação tátil ao clique, cores de brinquedo (rosa chiclete, ciano, amarelo) e sensação de afundamento de massinha.
+6. **`/6` — Gothic Cathedral / Dark Soulslike**:
+   - *Estética*: Dark fantasy sombrio (*Dark Souls*, *Castlevania*).
+   - *Tipografia*: `'Cinzel'`, serifada imponente.
+   - *Elementos*: Lápides de obsidiana fosca, bordas vermelho-sangue, brasão de caveira, sombras profundas e inscrições solenes.
+7. **`/7` — Tactical War Table / Guild Cartographer**:
+   - *Estética*: Mesa de estratégia militar e cartografia de guerra.
+   - *Tipografia*: `'Special Elite'`, carimbo mecânico/máquina de escrever.
+   - *Elementos*: Grade milimetrada de planejamento, botões em carimbo de despacho militar (`[MISSION: DEPLOY]`, `[REQUISITION]`) com bordas tracejadas.
+8. **`/8` — Cyber-Runic Magitech Terminal**:
+   - *Estética*: Magia antiga fundida com tecnologia de luz sólida (*Magitech*).
+   - *Tipografia*: `'Orbitron'`, futurista angular.
+   - *Elementos*: Placas chanfradas em polígono (`clip-path`), brilho de plasma ciano/violeta e molduras de circuitos energéticos.
+9. **`/9` — Retro 80s Synthwave / Outrun Survivor**:
+   - *Estética*: Cyberpunk neon dos anos 80, VHS outrun.
+   - *Tipografia*: `'Righteous'`, tipografia fluida retrô.
+   - *Elementos*: Grade de chão wireframe em perspectiva 3D, gradiente metálico cromado, botões em fita neon magenta/ciano e estética laser.
+10. **`/10` — Shonen Manga Slash / Fighting Game**:
+    - *Estética*: Clímax de anime shonen / jogo de luta de alta voltagem.
+    - *Tipografia*: `'Russo One'`.
+    - *Elementos*: Corte diagonal de katana cortando a tela, fita de ação com corte em lâmina (`clip-path: polygon(...)`), detalhes em amarelo relâmpago e vermelho escarlate.
+
+---
+
 ## UI Design Principles
 
 1. **Game UI, not Web UI**: Toda decisão deve remeter a um jogo de console/arcade e nunca a um painel SaaS.

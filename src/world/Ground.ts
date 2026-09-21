@@ -154,10 +154,13 @@ export class Ground implements Disposable {
           tempColor.lerp(plazaCenterColor, 0.4 + ringStep * 0.15);
         }
       }
-      // 2. Cardinal Avenues / Stepping Pathways radiating from center
-      else if ((Math.abs(x) < 2.0 || Math.abs(y) < 2.0) && distFromCenter < 26) {
-        const pathFactor = Math.abs(Math.abs(x) < 2.0 ? x : y) / 2.0;
-        tempColor.lerp(pathColor, (1.0 - pathFactor) * 0.4);
+      // 2. Cardinal Avenues & Concentric Outer Rings
+      else if ((Math.abs(x) < 2.2 || Math.abs(y) < 2.2) && distFromCenter < 28) {
+        const pathFactor = Math.abs(Math.abs(x) < 2.2 ? x : y) / 2.2;
+        tempColor.lerp(pathColor, (1.0 - pathFactor) * 0.45);
+      } else if (Math.abs(distFromCenter - 14.5) < 1.2 || Math.abs(distFromCenter - 21.0) < 1.0) {
+        // Concentric paved outer rings connecting the avenues
+        tempColor.lerp(pathColor, 0.35);
       }
 
       // 3. Biome-specific Fissures & Veins

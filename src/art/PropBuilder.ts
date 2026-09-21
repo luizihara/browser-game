@@ -18,7 +18,9 @@ export class PropBuilder implements Disposable {
 
     // Universal core landmarks across all biomes
     this.buildCentralSanctuary(biome);
+    this.buildSanctuaryGuardianStatues(biome);
     this.buildStonePathways(width, depth, biome);
+    this.buildRunicMonoliths(width, depth, biome);
     this.buildFoliageBushes(width, depth, biome);
 
     switch (biome) {
@@ -32,6 +34,8 @@ export class PropBuilder implements Disposable {
         this.buildCentralCobblestones();
         this.buildGlowingMushrooms(width, depth);
         this.buildFieldBoulders(width, depth);
+        this.buildFairyCircles(width, depth);
+        this.buildAncientKnightStatues(width, depth);
         break;
 
       case 'inferno':
@@ -42,6 +46,8 @@ export class PropBuilder implements Disposable {
         this.buildVolcanicVents(width, depth);
         this.buildDeadwoodTrees(width, depth);
         this.buildAshMounds(width, depth);
+        this.buildObsidianHorns(width, depth);
+        this.buildMagmaCraters(width, depth);
         break;
 
       case 'glacial':
@@ -51,6 +57,8 @@ export class PropBuilder implements Disposable {
         this.buildSnowDrifts(width, depth);
         this.buildFrozenRuins(width, depth);
         this.buildFrostGrass(width, depth);
+        this.buildIceSpireClusters(width, depth);
+        this.buildFrozenTombs(width, depth);
         break;
     }
   }
@@ -1016,6 +1024,326 @@ export class PropBuilder implements Disposable {
       grassMesh.setMatrixAt(i, dummy.matrix);
     }
     this.registerInstancedMesh(grassMesh);
+  }
+
+  private buildSanctuaryGuardianStatues(biome: StageId): void {
+    const sentinelPositions = [
+      { x: 3.8, z: 3.8, rotY: -Math.PI * 0.75 },
+      { x: -3.8, z: 3.8, rotY: -Math.PI * 0.25 },
+      { x: 3.8, z: -3.8, rotY: Math.PI * 0.75 },
+      { x: -3.8, z: -3.8, rotY: Math.PI * 0.25 },
+    ];
+    const total = sentinelPositions.length;
+
+    const stoneColor = biome === 'inferno' ? 0x1f2937 : biome === 'glacial' ? 0x94a3b8 : PALETTE.environment.wallStone;
+    const stoneMat = ToonMaterialFactory.getMaterial(stoneColor);
+
+    // Pedestal
+    const pedGeo = new THREE.BoxGeometry(0.7, 0.4, 0.7);
+    pedGeo.translate(0, 0.2, 0);
+    const pedMesh = new THREE.InstancedMesh(pedGeo, stoneMat, total);
+    pedMesh.castShadow = true;
+    pedMesh.receiveShadow = true;
+
+    // Statue Body & Sword
+    const bodyGeo = new THREE.CylinderGeometry(0.24, 0.36, 1.2, 5);
+    bodyGeo.translate(0, 0.4 + 0.6, 0);
+    const bodyMesh = new THREE.InstancedMesh(bodyGeo, stoneMat, total);
+    bodyMesh.castShadow = true;
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < total; i++) {
+      const p = sentinelPositions[i]!;
+      dummy.position.set(p.x, 0, p.z);
+      dummy.rotation.set(0, p.rotY, 0);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+
+      pedMesh.setMatrixAt(i, dummy.matrix);
+      bodyMesh.setMatrixAt(i, dummy.matrix);
+    }
+
+    this.registerInstancedMesh(pedMesh);
+    this.registerInstancedMesh(bodyMesh);
+  }
+
+  private buildRunicMonoliths(_width: number, _depth: number, biome: StageId): void {
+    const monolithPositions = [
+      { x: 14.5, z: 14.5 },
+      { x: -14.5, z: 14.5 },
+      { x: 14.5, z: -14.5 },
+      { x: -14.5, z: -14.5 },
+    ];
+    const total = monolithPositions.length;
+
+    const stoneColor = biome === 'inferno' ? 0x22222b : biome === 'glacial' ? 0x64748b : 0x52525b;
+    const pillarMat = ToonMaterialFactory.getMaterial(stoneColor);
+
+    const pillarGeo = new THREE.CylinderGeometry(0.5, 0.85, 4.4, 6);
+    pillarGeo.translate(0, 2.2, 0);
+    const pillarMesh = new THREE.InstancedMesh(pillarGeo, pillarMat, total);
+    pillarMesh.castShadow = true;
+    pillarMesh.receiveShadow = true;
+
+    // Runic floating ring
+    const ringColor = biome === 'inferno' ? 0xf97316 : biome === 'glacial' ? 0x38bdf8 : 0xfacc15;
+    const ringMat = ToonMaterialFactory.getMaterial(ringColor);
+    const ringGeo = new THREE.TorusGeometry(0.85, 0.08, 4, 8);
+    ringGeo.rotateX(Math.PI * 0.5);
+    ringGeo.translate(0, 2.6, 0);
+    const ringMesh = new THREE.InstancedMesh(ringGeo, ringMat, total);
+
+    // Apex Crystal
+    const crystalGeo = new THREE.OctahedronGeometry(0.48, 0);
+    crystalGeo.translate(0, 4.8, 0);
+    const crystalMesh = new THREE.InstancedMesh(crystalGeo, ringMat, total);
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < total; i++) {
+      const p = monolithPositions[i]!;
+      dummy.position.set(p.x, 0, p.z);
+      dummy.rotation.set(0, i * 0.785, 0);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+
+      pillarMesh.setMatrixAt(i, dummy.matrix);
+      ringMesh.setMatrixAt(i, dummy.matrix);
+      crystalMesh.setMatrixAt(i, dummy.matrix);
+    }
+
+    this.registerInstancedMesh(pillarMesh);
+    this.registerInstancedMesh(ringMesh);
+    this.registerInstancedMesh(crystalMesh);
+  }
+
+  private buildFairyCircles(_width: number, _depth: number): void {
+    const centers = [
+      { cx: 11.5, cz: -13.0 },
+      { cx: -13.0, cz: 11.5 },
+      { cx: 15.0, cz: 13.0 },
+      { cx: -11.0, cz: -14.5 },
+    ];
+    const mushroomsPerCircle = 7;
+    const totalMushrooms = centers.length * mushroomsPerCircle;
+
+    const shroomGeo = new THREE.ConeGeometry(0.24, 0.35, 5);
+    shroomGeo.translate(0, 0.2, 0);
+    const shroomMat = ToonMaterialFactory.getMaterial(0x34d399); // Glowing emerald
+    const shroomMesh = new THREE.InstancedMesh(shroomGeo, shroomMat, totalMushrooms);
+
+    const dummy = new THREE.Object3D();
+    let idx = 0;
+    for (let c = 0; c < centers.length; c++) {
+      const center = centers[c]!;
+      const radius = 1.4;
+      for (let m = 0; m < mushroomsPerCircle; m++) {
+        const angle = (m / mushroomsPerCircle) * Math.PI * 2 + c * 0.5;
+        const x = center.cx + Math.cos(angle) * radius;
+        const z = center.cz + Math.sin(angle) * radius;
+
+        dummy.position.set(x, 0, z);
+        dummy.rotation.set(Math.sin(m) * 0.15, angle, 0);
+        const s = 0.8 + (m % 3) * 0.2;
+        dummy.scale.set(s, s, s);
+        dummy.updateMatrix();
+        shroomMesh.setMatrixAt(idx++, dummy.matrix);
+      }
+    }
+    this.registerInstancedMesh(shroomMesh);
+  }
+
+  private buildAncientKnightStatues(_width: number, _depth: number): void {
+    const statuePositions = [
+      { x: 18.0, z: 0.0, rotY: -Math.PI * 0.5 },
+      { x: -18.0, z: 0.0, rotY: Math.PI * 0.5 },
+      { x: 0.0, z: 18.0, rotY: Math.PI },
+      { x: 0.0, z: -18.0, rotY: 0.0 },
+    ];
+    const total = statuePositions.length;
+
+    const stoneMat = ToonMaterialFactory.getMaterial(PALETTE.environment.wallStone);
+    const pedestalGeo = new THREE.BoxGeometry(1.2, 0.5, 1.2);
+    pedestalGeo.translate(0, 0.25, 0);
+    const pedestalMesh = new THREE.InstancedMesh(pedestalGeo, stoneMat, total);
+    pedestalMesh.castShadow = true;
+    pedestalMesh.receiveShadow = true;
+
+    // Torso and embedded greatsword
+    const knightGeo = new THREE.CylinderGeometry(0.35, 0.45, 1.4, 5);
+    knightGeo.translate(0, 0.5 + 0.7, 0);
+    const knightMesh = new THREE.InstancedMesh(knightGeo, stoneMat, total);
+    knightMesh.castShadow = true;
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < total; i++) {
+      const p = statuePositions[i]!;
+      dummy.position.set(p.x, 0, p.z);
+      dummy.rotation.set(0, p.rotY, 0);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+
+      pedestalMesh.setMatrixAt(i, dummy.matrix);
+      knightMesh.setMatrixAt(i, dummy.matrix);
+    }
+
+    this.registerInstancedMesh(pedestalMesh);
+    this.registerInstancedMesh(knightMesh);
+  }
+
+  private buildObsidianHorns(width: number, depth: number): void {
+    const totalHorns = 14;
+    const hornPositions: { x: number; z: number; scale: number; rotY: number; tilt: number }[] = [];
+
+    const halfW = width * 0.42;
+    const halfD = depth * 0.42;
+    for (let i = 0; i < totalHorns; i++) {
+      const angle = (i / totalHorns) * Math.PI * 2;
+      const radius = Math.min(halfW, halfD) * (0.65 + Math.sin(i * 3.7) * 0.25);
+      hornPositions.push({
+        x: Math.cos(angle) * radius,
+        z: Math.sin(angle) * radius,
+        scale: 0.8 + Math.abs(Math.sin(i * 1.9)) * 0.5,
+        rotY: i * 1.2,
+        tilt: 0.15 + (i % 3) * 0.08,
+      });
+    }
+
+    const hornGeo = new THREE.ConeGeometry(0.55, 3.2, 5);
+    hornGeo.translate(0, 1.6, 0);
+    const hornMat = ToonMaterialFactory.getMaterial(0x18181b); // Jet black obsidian
+    const hornMesh = new THREE.InstancedMesh(hornGeo, hornMat, totalHorns);
+    hornMesh.castShadow = true;
+    hornMesh.receiveShadow = true;
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < totalHorns; i++) {
+      const h = hornPositions[i]!;
+      dummy.position.set(h.x, 0, h.z);
+      dummy.rotation.set(h.tilt, h.rotY, 0);
+      dummy.scale.set(h.scale, h.scale * 1.2, h.scale);
+      dummy.updateMatrix();
+      hornMesh.setMatrixAt(i, dummy.matrix);
+    }
+
+    this.registerInstancedMesh(hornMesh);
+  }
+
+  private buildMagmaCraters(_width: number, _depth: number): void {
+    const craterPositions = [
+      { x: 8.5, z: -10.5, r: 1.6 },
+      { x: -9.5, z: 12.0, r: 1.8 },
+      { x: 13.5, z: 8.5, r: 1.5 },
+      { x: -12.0, z: -9.5, r: 1.9 },
+      { x: 11.5, z: -14.0, r: 1.4 },
+      { x: -14.0, z: 13.5, r: 1.7 },
+    ];
+    const total = craterPositions.length;
+
+    // Rim
+    const rimGeo = new THREE.CylinderGeometry(1.6, 1.9, 0.35, 7, 1, true);
+    rimGeo.translate(0, 0.18, 0);
+    const rimMat = ToonMaterialFactory.getMaterial(0x27272a);
+    const rimMesh = new THREE.InstancedMesh(rimGeo, rimMat, total);
+    rimMesh.receiveShadow = true;
+
+    // Inner glowing magma pool
+    const poolGeo = new THREE.CircleGeometry(1.3, 7);
+    poolGeo.rotateX(-Math.PI * 0.5);
+    poolGeo.translate(0, 0.08, 0);
+    const poolMat = ToonMaterialFactory.getMaterial(0xef4444); // Magma red
+    const poolMesh = new THREE.InstancedMesh(poolGeo, poolMat, total);
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < total; i++) {
+      const c = craterPositions[i]!;
+      dummy.position.set(c.x, 0, c.z);
+      dummy.rotation.set(0, i * 0.9, 0);
+      dummy.scale.set(c.r / 1.6, 1, c.r / 1.6);
+      dummy.updateMatrix();
+
+      rimMesh.setMatrixAt(i, dummy.matrix);
+      poolMesh.setMatrixAt(i, dummy.matrix);
+    }
+
+    this.registerInstancedMesh(rimMesh);
+    this.registerInstancedMesh(poolMesh);
+  }
+
+  private buildIceSpireClusters(width: number, depth: number): void {
+    const totalSpires = 18;
+    const spirePositions: { x: number; z: number; h: number; rotY: number }[] = [];
+
+    const halfW = width * 0.42;
+    const halfD = depth * 0.42;
+    for (let i = 0; i < totalSpires; i++) {
+      const angle = (i / totalSpires) * Math.PI * 2 + Math.sin(i) * 0.3;
+      const dist = Math.min(halfW, halfD) * (0.6 + (i % 4) * 0.1);
+      spirePositions.push({
+        x: Math.cos(angle) * dist,
+        z: Math.sin(angle) * dist,
+        h: 2.2 + (i % 3) * 0.8,
+        rotY: i * 0.85,
+      });
+    }
+
+    const spireGeo = new THREE.CylinderGeometry(0.06, 0.42, 2.8, 5);
+    spireGeo.translate(0, 1.4, 0);
+    const spireMat = ToonMaterialFactory.getMaterial(0x67e8f9); // Crystal ice cyan
+    const spireMesh = new THREE.InstancedMesh(spireGeo, spireMat, totalSpires);
+    spireMesh.castShadow = true;
+    spireMesh.receiveShadow = true;
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < totalSpires; i++) {
+      const s = spirePositions[i]!;
+      dummy.position.set(s.x, 0, s.z);
+      dummy.rotation.set(0.08, s.rotY, -0.06);
+      dummy.scale.set(1, s.h / 2.8, 1);
+      dummy.updateMatrix();
+      spireMesh.setMatrixAt(i, dummy.matrix);
+    }
+
+    this.registerInstancedMesh(spireMesh);
+  }
+
+  private buildFrozenTombs(_width: number, _depth: number): void {
+    const tombPositions = [
+      { x: 10.5, z: -11.5, rotY: 0.4 },
+      { x: -11.0, z: 10.5, rotY: -0.6 },
+      { x: 14.0, z: 11.0, rotY: 1.2 },
+      { x: -13.5, z: -12.0, rotY: -0.3 },
+      { x: 12.0, z: -16.0, rotY: 0.8 },
+      { x: -15.5, z: 12.5, rotY: -1.1 },
+    ];
+    const total = tombPositions.length;
+
+    const stoneMat = ToonMaterialFactory.getMaterial(0x475569);
+    const tombGeo = new THREE.BoxGeometry(1.2, 0.55, 2.0);
+    tombGeo.translate(0, 0.28, 0);
+    const tombMesh = new THREE.InstancedMesh(tombGeo, stoneMat, total);
+    tombMesh.castShadow = true;
+    tombMesh.receiveShadow = true;
+
+    // Frost cap
+    const capGeo = new THREE.BoxGeometry(1.26, 0.15, 2.06);
+    capGeo.translate(0, 0.6, 0);
+    const capMat = ToonMaterialFactory.getMaterial(0xe0f2fe);
+    const capMesh = new THREE.InstancedMesh(capGeo, capMat, total);
+
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < total; i++) {
+      const t = tombPositions[i]!;
+      dummy.position.set(t.x, 0, t.z);
+      dummy.rotation.set(0.06, t.rotY, 0);
+      dummy.scale.set(1, 1, 1);
+      dummy.updateMatrix();
+
+      tombMesh.setMatrixAt(i, dummy.matrix);
+      capMesh.setMatrixAt(i, dummy.matrix);
+    }
+
+    this.registerInstancedMesh(tombMesh);
+    this.registerInstancedMesh(capMesh);
   }
 
   public clear(): void {
