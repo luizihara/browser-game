@@ -634,6 +634,80 @@ export class SoundManager implements Disposable {
     };
   }
 
+  /**
+   * Procedural triumphant medieval fanfare for achievement unlock.
+   */
+  public playAchievementUnlock(): void {
+    if (!this.canPlay('achievement', 0.2)) return;
+    if (!this.audioContext || !this.masterGain) return;
+
+    const ctx = this.audioContext;
+    const now = ctx.currentTime;
+    const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+    const noteDuration = 0.12;
+
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const startTime = now + idx * 0.08;
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      gain.gain.setValueAtTime(0.001, startTime);
+      gain.gain.linearRampToValueAtTime(0.24, startTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + (idx === 3 ? 0.45 : noteDuration));
+
+      osc.connect(gain);
+      gain.connect(this.masterGain!);
+
+      osc.start(startTime);
+      osc.stop(startTime + (idx === 3 ? 0.5 : noteDuration + 0.05));
+
+      osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+      };
+    });
+  }
+
+  /**
+   * Procedural bright crystalline coin reward jingle.
+   */
+  public playCoinReward(): void {
+    if (!this.canPlay('coin_reward', 0.05)) return;
+    if (!this.audioContext || !this.masterGain) return;
+
+    const ctx = this.audioContext;
+    const now = ctx.currentTime;
+    const freqs = [987.77, 1318.51, 1975.53]; // B5, E6, B6
+
+    freqs.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const startTime = now + idx * 0.04;
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, startTime);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.05, startTime + 0.1);
+
+      gain.gain.setValueAtTime(0.001, startTime);
+      gain.gain.linearRampToValueAtTime(0.18, startTime + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.18);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain!);
+
+      osc.start(startTime);
+      osc.stop(startTime + 0.2);
+
+      osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+      };
+    });
+  }
+
   public setMasterVolume(val: number): void {
     this.masterVolume = Math.max(0, Math.min(1, val));
     if (this.audioContext && this.masterGain && !this.muted) {

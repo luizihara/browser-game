@@ -3,6 +3,7 @@ import { SettingsMenu } from './SettingsMenu';
 import { MetaShopMenu } from './MetaShopMenu';
 import { CharacterSelectMenu } from './CharacterSelectMenu';
 import { StageSelectMenu } from './StageSelectMenu';
+import { BountyBoardMenu } from './BountyBoardMenu';
 import { MetaManager } from '../config/metaConfig';
 import { formatTime } from '../utils/math';
 import '../styles/menu.css';
@@ -14,7 +15,9 @@ export class MainMenu {
   private metaShopMenu: MetaShopMenu;
   private characterSelectMenu: CharacterSelectMenu;
   private stageSelectMenu: StageSelectMenu;
+  private bountyBoardMenu: BountyBoardMenu;
   private parentContainer: HTMLElement | null = null;
+  private bountyBtn: HTMLButtonElement | null = null;
 
   constructor(onStart: () => void) {
     this.onStartCallback = onStart;
@@ -28,6 +31,14 @@ export class MainMenu {
 
     this.metaShopMenu = new MetaShopMenu(() => {
       this.metaShopMenu.unmount();
+      if (this.element) {
+        this.element.style.display = 'flex';
+        this.refreshRecords();
+      }
+    });
+
+    this.bountyBoardMenu = new BountyBoardMenu(() => {
+      this.bountyBoardMenu.unmount();
       if (this.element) {
         this.element.style.display = 'flex';
         this.refreshRecords();
@@ -103,6 +114,16 @@ export class MainMenu {
       this.metaShopMenu.mount(parent);
     };
 
+    this.bountyBtn = document.createElement('button');
+    this.bountyBtn.className = 'menu-button';
+    this.bountyBtn.textContent = 'BOUNTY BOARD 📜';
+    this.bountyBtn.onclick = () => {
+      if (this.element) {
+        this.element.style.display = 'none';
+      }
+      this.bountyBoardMenu.mount(parent);
+    };
+
     const optionsBtn = document.createElement('button');
     optionsBtn.className = 'menu-button secondary';
     optionsBtn.textContent = 'OPTIONS';
@@ -117,6 +138,7 @@ export class MainMenu {
     buttonContainer.className = 'main-menu-buttons';
     buttonContainer.appendChild(startBtn);
     buttonContainer.appendChild(shopBtn);
+    buttonContainer.appendChild(this.bountyBtn);
     buttonContainer.appendChild(optionsBtn);
 
     this.element.appendChild(signBoard);
@@ -129,6 +151,16 @@ export class MainMenu {
 
   private refreshRecords(): void {
     if (!this.element) return;
+
+    // Refresh Bounty Button badge
+    if (this.bountyBtn) {
+      const unclaimed = MetaManager.getInstance().getUnclaimedAchievementsCount();
+      if (unclaimed > 0) {
+        this.bountyBtn.innerHTML = `BOUNTY BOARD 📜 <span class="tavern-notify-badge">${unclaimed}</span>`;
+      } else {
+        this.bountyBtn.textContent = 'BOUNTY BOARD 📜';
+      }
+    }
 
     const oldBadge = this.element.querySelector('.main-menu-records');
     if (oldBadge) {
@@ -152,6 +184,7 @@ export class MainMenu {
   public unmount(): void {
     this.settingsMenu.unmount();
     this.metaShopMenu.unmount();
+    this.bountyBoardMenu.unmount();
     this.characterSelectMenu.unmount();
     this.stageSelectMenu.unmount();
     if (this.element && this.element.parentElement) {
@@ -159,5 +192,6 @@ export class MainMenu {
     }
     this.element = null;
     this.parentContainer = null;
+    this.bountyBtn = null;
   }
 }

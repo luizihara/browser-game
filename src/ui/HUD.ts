@@ -21,6 +21,11 @@ export class HUD {
   private bossNameText: HTMLSpanElement | null = null;
   private bossHpFill: HTMLDivElement | null = null;
   private bossHpText: HTMLSpanElement | null = null;
+  private achievementToast: HTMLDivElement | null = null;
+  private achievementToastIcon: HTMLSpanElement | null = null;
+  private achievementToastTitle: HTMLDivElement | null = null;
+  private achievementToastReward: HTMLSpanElement | null = null;
+  private achievementToastTimeout: number | null = null;
 
   public mount(parent: HTMLElement): void {
     if (this.element) return;
@@ -177,6 +182,42 @@ export class HUD {
     this.bossBarContainer.appendChild(bossHpTrack);
     this.element.appendChild(this.bossBarContainer);
 
+    // 5. Achievement Toast Banner (Slides down when unlocked)
+    this.achievementToast = document.createElement('div');
+    this.achievementToast.className = 'hud-achievement-toast';
+
+    this.achievementToastIcon = document.createElement('span');
+    this.achievementToastIcon.className = 'hud-achievement-toast-icon';
+    this.achievementToastIcon.textContent = '🏆';
+
+    const toastContent = document.createElement('div');
+    toastContent.className = 'hud-achievement-toast-content';
+
+    const toastHeader = document.createElement('div');
+    toastHeader.className = 'hud-achievement-toast-header';
+
+    const toastLabel = document.createElement('span');
+    toastLabel.className = 'hud-achievement-toast-label';
+    toastLabel.textContent = '📜 CONQUISTA DESBLOQUEADA';
+
+    this.achievementToastReward = document.createElement('span');
+    this.achievementToastReward.className = 'hud-achievement-toast-reward';
+    this.achievementToastReward.textContent = '+100 🪙';
+
+    toastHeader.appendChild(toastLabel);
+    toastHeader.appendChild(this.achievementToastReward);
+
+    this.achievementToastTitle = document.createElement('div');
+    this.achievementToastTitle.className = 'hud-achievement-toast-title';
+    this.achievementToastTitle.textContent = '';
+
+    toastContent.appendChild(toastHeader);
+    toastContent.appendChild(this.achievementToastTitle);
+
+    this.achievementToast.appendChild(this.achievementToastIcon);
+    this.achievementToast.appendChild(toastContent);
+    this.element.appendChild(this.achievementToast);
+
     parent.appendChild(this.element);
   }
 
@@ -276,6 +317,28 @@ export class HUD {
     this.bossHpText.textContent = `${Math.round(hp)} / ${maxHp}`;
   }
 
+  public showAchievementToast(title: string, rewardGold: number, icon: string = '🏆', durationMs: number = 3800): void {
+    if (!this.achievementToast || !this.achievementToastTitle || !this.achievementToastReward || !this.achievementToastIcon) return;
+
+    if (this.achievementToastTimeout !== null) {
+      window.clearTimeout(this.achievementToastTimeout);
+      this.achievementToastTimeout = null;
+    }
+
+    this.achievementToastIcon.textContent = icon;
+    this.achievementToastTitle.textContent = title;
+    this.achievementToastReward.textContent = `+${rewardGold} 🪙`;
+
+    this.achievementToast.classList.add('active');
+
+    this.achievementToastTimeout = window.setTimeout(() => {
+      if (this.achievementToast) {
+        this.achievementToast.classList.remove('active');
+      }
+      this.achievementToastTimeout = null;
+    }, durationMs);
+  }
+
   public hideBossBar(): void {
     if (this.bossBarContainer) {
       this.bossBarContainer.style.display = 'none';
@@ -290,6 +353,10 @@ export class HUD {
     if (this.alertTimeoutId !== null) {
       window.clearTimeout(this.alertTimeoutId);
       this.alertTimeoutId = null;
+    }
+    if (this.achievementToastTimeout !== null) {
+      window.clearTimeout(this.achievementToastTimeout);
+      this.achievementToastTimeout = null;
     }
     if (this.xpBarContainer && this.xpBarContainer.parentElement) {
       this.xpBarContainer.parentElement.removeChild(this.xpBarContainer);
@@ -315,5 +382,9 @@ export class HUD {
     this.bossNameText = null;
     this.bossHpFill = null;
     this.bossHpText = null;
+    this.achievementToast = null;
+    this.achievementToastIcon = null;
+    this.achievementToastTitle = null;
+    this.achievementToastReward = null;
   }
 }

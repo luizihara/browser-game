@@ -45,6 +45,7 @@ import { STAGE_CONFIG, type StageId } from '../config/stageConfig';
 import { DestructibleSystem, type PropDrop } from '../systems/DestructibleSystem';
 import type { BreakableProp } from '../entities/destructible/BreakableProp';
 import { AuraWeapon } from '../weapons/AuraWeapon';
+import { ACHIEVEMENTS_CONFIG } from '../config/achievementConfig';
 
 export class GameScene extends BaseScene {
   public readonly name: string = 'game';
@@ -52,6 +53,8 @@ export class GameScene extends BaseScene {
   private threeScene: THREE.Scene;
   private gameCamera: GameCamera;
   private cameraController: CameraController;
+  private unsubscribeAchievement: (() => void) | null = null;
+  private tookDamageThisRun: boolean = false;
   private world: World | null = null;
   private entityManager: EntityManager;
   private sandboxSpawner: SandboxSpawner | null = null;
@@ -187,6 +190,18 @@ export class GameScene extends BaseScene {
     this.isChestOpening = false;
     this.runTime = 0;
     this.killCount = 0;
+    this.tookDamageThisRun = false;
+
+    if (this.unsubscribeAchievement) {
+      this.unsubscribeAchievement();
+    }
+    this.unsubscribeAchievement = MetaManager.getInstance().onAchievementUnlocked((id) => {
+      const def = ACHIEVEMENTS_CONFIG[id];
+      if (def) {
+        this.soundManager.playAchievementUnlock();
+        this.hud.showAchievementToast(def.title, def.rewardGold, def.icon);
+      }
+    });
 
     this.pickupSystem.clear();
     this.experienceSystem.reset();
@@ -263,6 +278,10 @@ export class GameScene extends BaseScene {
     this.runTime += deltaTime;
     this.hud.updateTime(formatTime(this.runTime));
 
+    if (this.runTime >= 120 && !this.tookDamageThisRun) {
+      MetaManager.getInstance().unlockAchievement('untouchable');
+    }
+
     // Check Victory condition (Stage clear at victoryTime)
     if (this.runTime >= DIRECTOR_CONFIG.victoryTime && !this.isVictory && !this.isGameOver) {
       this.triggerVictory();
@@ -304,6 +323,7 @@ export class GameScene extends BaseScene {
             if (pdx * pdx + pdz * pdz <= radius * radius) {
               const took = this.player.takeDamage(damage);
               if (took) {
+                this.tookDamageThisRun = true;
                 this.soundManager.playHit();
                 this.damageNumberSystem.spawn(
                   this.player.position.x,
@@ -331,6 +351,7 @@ export class GameScene extends BaseScene {
             if (pdx * pdx + pdz * pdz <= 5.0 * 5.0) {
               const took = this.player.takeDamage(25);
               if (took) {
+                this.tookDamageThisRun = true;
                 this.soundManager.playHit();
                 this.damageNumberSystem.spawn(
                   this.player.position.x,
@@ -353,6 +374,7 @@ export class GameScene extends BaseScene {
         if (bdx * bdx + bdz * bdz <= bDist * bDist) {
           const took = this.player.takeDamage(this.activeBoss.contactDamage);
           if (took) {
+            this.tookDamageThisRun = true;
             this.soundManager.playHit();
             this.cameraController.addTrauma(0.3);
             this.damageNumberSystem.spawn(
@@ -434,6 +456,7 @@ export class GameScene extends BaseScene {
         this.weaponSystem.removeProjectile(hitProjectile);
       },
       () => {
+        this.tookDamageThisRun = true;
         this.cameraController.addTrauma(0.25);
         if (this.player) {
           this.damageNumberSystem.spawn(
@@ -620,6 +643,8 @@ export class GameScene extends BaseScene {
     this.soundManager.playEnemyDeath();
     this.cameraController.addTrauma(0.8);
 
+    MetaManager.getInstance().recordBossKill(boss.bossId);
+
     this.particleSystem.emitDeathExplosion(
       boss.position.x,
       boss.position.y,
@@ -667,6 +692,14 @@ export class GameScene extends BaseScene {
       this.weaponSystem,
       this.experienceSystem
     );
+
+    if (upgradeId.startsWith('evolution_')) {
+      MetaManager.getInstance().recordEvolutionCrafted();
+    }
+    if (this.weaponSystem.getWeapons().length >= 4) {
+      MetaManager.getInstance().unlockAchievement('full_arsenal');
+    }
+
     this.levelUpMenu.unmount();
     this.isLevelingUp = false;
     this.context.inputSystem.reset();
@@ -680,6 +713,8 @@ export class GameScene extends BaseScene {
       prop.position.z,
       prop.getColor()
     );
+
+    MetaManager.getInstance().recordPropDestroyed();
 
     const stageDef = STAGE_CONFIG[this.currentStageId] ?? STAGE_CONFIG.verdant;
 
@@ -731,12 +766,14 @@ export class GameScene extends BaseScene {
     const level = this.experienceSystem.getLevel();
     const baseGold = Math.floor(this.killCount * 0.5 + this.runTime * 0.2 + level * 5);
     const goldEarned = Math.round(baseGold * stageDef.modifiers.goldMult);
+    const selectedCharId = MetaManager.getInstance().getSelectedCharacter();
     MetaManager.getInstance().submitRun(
       this.runTime,
       level,
       this.killCount,
       goldEarned,
-      this.currentStageId
+      this.currentStageId,
+      selectedCharId
     );
     this.gameOverMenu.mount(this.context.uiRoot, formatTime(this.runTime));
   }
@@ -750,12 +787,14 @@ export class GameScene extends BaseScene {
     const level = this.experienceSystem.getLevel();
     const baseGold = Math.floor(this.killCount * 1.0 + this.runTime * 0.5 + level * 20);
     const goldEarned = Math.round(baseGold * stageDef.modifiers.goldMult);
+    const selectedCharId = MetaManager.getInstance().getSelectedCharacter();
     const isNewRecord = MetaManager.getInstance().submitRun(
       this.runTime,
       level,
       this.killCount,
       goldEarned,
-      this.currentStageId
+      this.currentStageId,
+      selectedCharId
     );
 
     const weaponStats: WeaponDamageStat[] = (Object.keys(this.weaponDamageDealt) as WeaponId[])
@@ -902,6 +941,14 @@ export class GameScene extends BaseScene {
       this.weaponSystem,
       this.experienceSystem
     );
+
+    MetaManager.getInstance().recordChestOpened();
+    if (granted.category === 'evolution') {
+      MetaManager.getInstance().recordEvolutionCrafted();
+    }
+    if (this.weaponSystem.getWeapons().length >= 4) {
+      MetaManager.getInstance().unlockAchievement('full_arsenal');
+    }
 
     this.hud.updateHp(this.player.hp, this.player.maxHp);
     const xpProg = this.experienceSystem.getProgress();
@@ -1050,6 +1097,10 @@ export class GameScene extends BaseScene {
     this.removeActiveBoss();
     this.telegraphSystem.clear();
     this.radarSystem.clear();
+    if (this.unsubscribeAchievement) {
+      this.unsubscribeAchievement();
+      this.unsubscribeAchievement = null;
+    }
     this.isPaused = false;
     this.isGameOver = false;
     this.isVictory = false;
@@ -1070,6 +1121,10 @@ export class GameScene extends BaseScene {
     this.removeActiveBoss();
     this.telegraphSystem.dispose();
     this.radarSystem.dispose();
+    if (this.unsubscribeAchievement) {
+      this.unsubscribeAchievement();
+      this.unsubscribeAchievement = null;
+    }
     if (this.sandboxSpawner) {
       this.sandboxSpawner.dispose();
       this.sandboxSpawner = null;

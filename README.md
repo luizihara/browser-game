@@ -361,6 +361,23 @@ src/
   - Correção na chamada do callback de resgate de tesouro (`onClaimCallback`) e suporte a atalhos de teclado (Enter / Espaço).
   - Padronização da largura dos botões do Menu Principal para 340px uniforme.
 
+### Milestone 16 — GUILD BOUNTY BOARD & ACHIEVEMENT SYSTEM (Concluída)
+- [x] **16 Conquistas Artesanais da Guilda (`src/config/achievementConfig.ts`)**:
+  - 5 Categorias temáticas: Combate, Sobrevivência, Chefes Épicos, Arsenal/Descobertas e Mestria com Heróis.
+  - Recompensas volumosas em moedas de ouro para acelerar a meta-progressão e compra de heróis/atributos.
+- [x] **Quadro de Caçadas da Taberna (`src/ui/BountyBoardMenu.ts`, `src/styles/menu.css`)**:
+  - Interface esculpida em carvalho e ferro com tiras de pergaminho pregadas, ícones heráldicos, barras de progresso proporcionais e botão `[ COLETAR TODAS 🪙 ]`.
+  - Estados dinâmicos de botões: Em Progresso, Reivindicar Ouro (pulsante) e Selo de Cera Vermelha (`COLETADO ✔️`).
+  - Filtros de categoria: `TODAS`, `COMBATE`, `SOBREVIVÊNCIA`, `CHEFES`, `ARSENAL`, `HERÓIS`.
+- [x] **Notificações Toast em Tempo Real no HUD (`src/ui/HUD.ts`, `src/styles/hud.css`)**:
+  - Banner elegante em pergaminho e ferro forjado que desliza do topo ao desbloquear conquistas durante o combate.
+- [x] **Efeitos Sonoros Procedurais de Triunfo (`src/audio/SoundManager.ts`)**:
+  - Fanfarra triunfante em arpejo harmônico medieval para desbloqueio e cascata de moedas cristalinas ao resgatar ouro.
+- [x] **Persistência Meta Completa (`src/config/metaConfig.ts`, `src/scenes/GameScene.ts`)**:
+  - Rastreamento acumulado de monstros eliminados, chefes derrotados, baús abertos, objetos quebrados, tempo intocado sem dano e vitórias por classe de herói, salvos em `localStorage`.
+  - Selo de notificação vermelho com contador de recompensas pendentes exibido no botão `BOUNTY BOARD 📜` do Menu Principal.
+
+
 
 
 
