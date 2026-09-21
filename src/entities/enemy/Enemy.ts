@@ -36,6 +36,12 @@ export class Enemy extends Entity {
   public chillTimer: number = 0;
   public chillSlow: number = 0.40;
 
+  // Archetype special ability state
+  public abilityTimer: number = 0;
+  public isPriming: boolean = false;
+  public primeTimer: number = 0;
+  public speedBuffTimer: number = 0;
+
   constructor(
     x: number = 0,
     z: number = 0,
@@ -99,7 +105,26 @@ export class Enemy extends Entity {
           this.haloMesh.rotation.z += deltaTime * 2.5;
         }
         break;
+      case 'ranged': // Cultist: ominous occult levitation
+        model.position.y = Math.sin(this.wobbleTimer * 4.0) * 0.06;
+        break;
+      case 'shaman': // Bone Shaman: rhythmic tribal incantation sway
+        model.rotation.z = Math.sin(this.wobbleTimer * 3.5) * 0.08;
+        break;
+      case 'volatile': // Volatile Crawler: erratic jitter or pulsating swelling
+        if (this.isPriming) {
+          const pulse = 1.0 + Math.sin(this.primeTimer * 22.0) * 0.35;
+          model.scale.set(pulse, pulse, pulse);
+        } else {
+          model.rotation.z = (Math.random() - 0.5) * 0.1;
+        }
+        break;
       }
+    }
+
+    if (this.speedBuffTimer > 0) {
+      this.speedBuffTimer -= deltaTime;
+      if (this.speedBuffTimer < 0) this.speedBuffTimer = 0;
     }
 
     // 2. Individual hit flash countdown
@@ -155,6 +180,11 @@ export class Enemy extends Entity {
     if (this.isDead) return;
     this.chillTimer = Math.max(this.chillTimer, duration);
     this.chillSlow = slowFactor;
+  }
+
+  public heal(amount: number): void {
+    if (this.isDead) return;
+    this.hp = Math.min(this.maxHp, this.hp + amount);
   }
 
   public takeDamage(amount: number): boolean {

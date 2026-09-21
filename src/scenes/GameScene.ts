@@ -43,6 +43,7 @@ import { RadarSystem } from '../systems/RadarSystem';
 import { DamageNumberSystem, type DamageNumberType } from '../fx/DamageNumberSystem';
 import { STAGE_CONFIG, type StageId } from '../config/stageConfig';
 import { DestructibleSystem, type PropDrop } from '../systems/DestructibleSystem';
+import { EnemyAbilitySystem } from '../systems/EnemyAbilitySystem';
 import type { BreakableProp } from '../entities/destructible/BreakableProp';
 import { AuraWeapon } from '../weapons/AuraWeapon';
 import { ACHIEVEMENTS_CONFIG } from '../config/achievementConfig';
@@ -73,6 +74,7 @@ export class GameScene extends BaseScene {
   private particleSystem: ParticleSystem;
   private damageNumberSystem: DamageNumberSystem = new DamageNumberSystem();
   private telegraphSystem: TelegraphSystem = new TelegraphSystem();
+  private enemyAbilitySystem: EnemyAbilitySystem = new EnemyAbilitySystem();
   private radarSystem: RadarSystem = new RadarSystem();
   private activeBoss: Boss | null = null;
   private combatEnemies: Enemy[] = [];
@@ -237,6 +239,8 @@ export class GameScene extends BaseScene {
     this.hud.updateRelics(this.relicSystem.getActiveRelics());
     this.damageNumberSystem.mount(this.context.uiRoot);
     this.telegraphSystem.setScene(this.threeScene);
+    this.enemyAbilitySystem.setScene(this.threeScene);
+    this.enemyAbilitySystem.reset();
     this.radarSystem.mount(this.context.uiRoot);
     this.hud.updateTime(formatTime(this.runTime));
     this.hud.updateKills(this.killCount);
@@ -532,6 +536,21 @@ export class GameScene extends BaseScene {
 
     if (this.activeBoss) {
       this.hud.updateBossHp(this.activeBoss.hp, this.activeBoss.maxHp);
+    }
+
+    if (this.player) {
+      this.enemyAbilitySystem.update(
+        deltaTime,
+        this.player,
+        this.combatEnemies,
+        this.currentStageId,
+        this.telegraphSystem,
+        this.particleSystem,
+        this.damageNumberSystem,
+        this.soundManager,
+        this.cameraController,
+        (killedEnemy) => this.onEnemyDefeated(killedEnemy)
+      );
     }
 
     // Update Experience & Pickups
@@ -1245,6 +1264,7 @@ export class GameScene extends BaseScene {
     this.particleSystem.dispose();
     this.soundManager.dispose();
     this.weaponSystem.dispose();
+    this.enemyAbilitySystem.dispose();
     this.enemySpawner.dispose();
     this.experienceSystem.dispose();
     this.entityManager.dispose();

@@ -30,8 +30,8 @@ interface RectTelegraphSlot {
   onComplete: (() => void) | null;
 }
 
-const MAX_CIRCLES = 6;
-const MAX_RECTS = 4;
+const MAX_CIRCLES = 16;
+const MAX_RECTS = 6;
 
 export class TelegraphSystem implements Disposable {
   private scene: THREE.Scene | null = null;

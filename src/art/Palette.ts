@@ -85,6 +85,18 @@ export const PALETTE = {
     goliathGold: 0xf1c40f,
     goliathHalo: 0xffd700,
     goliathGlow: 0xe67e22,
+
+    rangedRobe: 0x312e81,
+    rangedStaff: 0x7c3aed,
+    rangedGlow: 0xc084fc,
+
+    shamanBody: 0x064e3b,
+    shamanMask: 0xf3f4f6,
+    shamanGlow: 0x34d399,
+
+    volatileShell: 0x991b1b,
+    volatilePustule: 0xf97316,
+    volatileCore: 0xfacc15,
   },
 
   // VFX, Pickups & Highlights

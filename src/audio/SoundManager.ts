@@ -804,6 +804,78 @@ export class SoundManager implements Disposable {
     });
   }
 
+  /**
+   * Procedural explosion sound: deep seismic blast + decaying rumble.
+   */
+  public playExplosion(): void {
+    if (!this.canPlay('explosion', 0.12)) return;
+
+    const ctx = this.audioContext!;
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(25, now + 0.45);
+
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(320, now);
+    filter.frequency.exponentialRampToValueAtTime(45, now + 0.45);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.35, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain!);
+
+    osc.start(now);
+    osc.stop(now + 0.5);
+
+    osc.onended = () => {
+      osc.disconnect();
+      filter.disconnect();
+      gain.disconnect();
+    };
+  }
+
+  /**
+   * Procedural arcane cast sound: high eerie whoosh.
+   */
+  public playCast(): void {
+    if (!this.canPlay('cast', 0.15)) return;
+
+    const ctx = this.audioContext!;
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(420, now);
+    osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+    osc.frequency.exponentialRampToValueAtTime(330, now + 0.25);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.15, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain!);
+
+    osc.start(now);
+    osc.stop(now + 0.28);
+
+    osc.onended = () => {
+      osc.disconnect();
+      gain.disconnect();
+    };
+  }
+
   public setMasterVolume(val: number): void {
     this.masterVolume = Math.max(0, Math.min(1, val));
     if (this.audioContext && this.masterGain && !this.muted) {

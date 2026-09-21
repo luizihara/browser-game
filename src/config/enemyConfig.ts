@@ -1,4 +1,4 @@
-export type EnemyType = 'basic' | 'fast' | 'tank' | 'elite';
+export type EnemyType = 'basic' | 'fast' | 'tank' | 'elite' | 'ranged' | 'shaman' | 'volatile';
 
 export interface EnemyArchetypeConfig {
   name: string;
@@ -71,6 +71,48 @@ export const ENEMY_CONFIG = {
     metalness: 0.6,
     xpReward: 100,
     gemTier: 'gold' as const,
+  },
+  ranged: {
+    name: 'Cultist',
+    speed: 3.0,
+    maxHp: 32,
+    damage: 14,
+    radius: 0.45,
+    height: 1.3,
+    color: 0x312e81, // Shadow indigo robe
+    accentColor: 0xc084fc, // Arcane lavender glow
+    roughness: 0.35,
+    metalness: 0.25,
+    xpReward: 12,
+    gemTier: 'green' as const,
+  },
+  shaman: {
+    name: 'Bone Shaman',
+    speed: 2.7,
+    maxHp: 55,
+    damage: 10,
+    radius: 0.52,
+    height: 1.4,
+    color: 0x064e3b, // Deep moss green
+    accentColor: 0x34d399, // Vibrant emerald ritual glow
+    roughness: 0.5,
+    metalness: 0.2,
+    xpReward: 22,
+    gemTier: 'blue' as const,
+  },
+  volatile: {
+    name: 'Volatile Crawler',
+    speed: 5.4,
+    maxHp: 18,
+    damage: 35,
+    radius: 0.38,
+    height: 0.75,
+    color: 0x991b1b, // Volcanic crimson
+    accentColor: 0xf97316, // Fiery glowing orange pustule
+    roughness: 0.3,
+    metalness: 0.1,
+    xpReward: 15,
+    gemTier: 'green' as const,
   },
   spawner: {
     initialInterval: 2.0,

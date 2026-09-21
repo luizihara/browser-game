@@ -50,16 +50,54 @@ export class EnemyMovementSystem {
       const distSq = dx * dx + dz * dz;
 
       if (distSq > 0.0001) {
-        const invDist = 1 / Math.sqrt(distSq);
-        const dirX = dx * invDist;
-        const dirZ = dz * invDist;
+        const dist = Math.sqrt(distSq);
+        const invDist = 1 / dist;
+        let moveDirX = dx * invDist;
+        let moveDirZ = dz * invDist;
 
-        const effectiveSpeed = enemy.chillTimer > 0 ? enemy.speed * (1.0 - enemy.chillSlow) : enemy.speed;
-        enemy.position.x += dirX * effectiveSpeed * deltaTime;
-        enemy.position.z += dirZ * effectiveSpeed * deltaTime;
+        let baseSpd = enemy.speed;
+        if (enemy.speedBuffTimer > 0) {
+          baseSpd *= 1.3;
+        }
 
-        // Model forward is -Z, so face toward movement vector (dirX, -dirZ)
-        enemy.getMesh().rotation.y = Math.atan2(dirX, -dirZ);
+        let effectiveSpeed = enemy.chillTimer > 0 ? baseSpd * (1.0 - enemy.chillSlow) : baseSpd;
+
+        // Archetype movement adjustments
+        if (enemy.type === 'volatile') {
+          if (dist <= 2.2 && !enemy.isPriming) {
+            enemy.isPriming = true;
+            enemy.primeTimer = 0;
+          }
+          if (enemy.isPriming) {
+            effectiveSpeed = 0;
+          }
+        } else if (enemy.type === 'ranged') {
+          if (dist < 6.5) {
+            // Back away slowly from player
+            moveDirX = -moveDirX;
+            moveDirZ = -moveDirZ;
+            effectiveSpeed *= 0.65;
+          } else if (dist <= 9.0) {
+            // Hold casting position
+            effectiveSpeed = 0;
+          }
+        } else if (enemy.type === 'shaman') {
+          if (dist < 5.0) {
+            // Keep safe backline distance
+            moveDirX = -moveDirX;
+            moveDirZ = -moveDirZ;
+            effectiveSpeed *= 0.6;
+          } else if (dist <= 7.5) {
+            // Channel ritual support from backline
+            effectiveSpeed *= 0.25;
+          }
+        }
+
+        enemy.position.x += moveDirX * effectiveSpeed * deltaTime;
+        enemy.position.z += moveDirZ * effectiveSpeed * deltaTime;
+
+        // Model forward is -Z, always face toward the player
+        enemy.getMesh().rotation.y = Math.atan2(dx * invDist, -(dz * invDist));
       }
 
       // Hard circle separation against the Player: two bodies cannot occupy the same space

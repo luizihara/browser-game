@@ -63,7 +63,7 @@ export class DirectorSystem {
     let accum = 0;
 
     // Ordered check for deterministic cumulative distribution
-    const types: EnemyType[] = ['basic', 'fast', 'tank', 'elite'];
+    const types: EnemyType[] = ['basic', 'fast', 'tank', 'elite', 'ranged', 'shaman', 'volatile'];
     for (let i = 0; i < types.length; i++) {
       const type = types[i];
       const weight = chosenPhase.weights[type] ?? 0;

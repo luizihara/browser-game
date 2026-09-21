@@ -36,6 +36,12 @@ export class EnemyVisualBuilder {
         return this.buildBrute();
       case 'elite':
         return this.buildGoliath();
+      case 'ranged':
+        return this.buildRanged();
+      case 'shaman':
+        return this.buildShaman();
+      case 'volatile':
+        return this.buildVolatile();
       case 'basic':
       default:
         return this.buildStalker();
@@ -276,5 +282,178 @@ export class EnemyVisualBuilder {
     modelGroup.add(chestCore);
 
     return { rootGroup, modelGroup, bodyMesh, haloMesh, baseMaterial };
+  }
+
+  /**
+   * Cultist (Ranged):
+   * Robed silhouette with dark hood, glowing arcane eye slit, and staff with floating crystal.
+   */
+  private static buildRanged(): EnemyVisualSetup {
+    const rootGroup = new THREE.Group();
+    const modelGroup = new THREE.Group();
+    rootGroup.add(modelGroup);
+
+    const baseMaterial = ToonMaterialFactory.getMaterial(PALETTE.enemies.rangedRobe);
+    const staffMaterial = ToonMaterialFactory.getMaterial(PALETTE.enemies.rangedStaff);
+    const glowMaterial = ToonMaterialFactory.getMaterial(PALETTE.enemies.rangedGlow, {
+      emissive: PALETTE.enemies.rangedGlow,
+      emissiveIntensity: 0.9,
+    });
+
+    // Robe Cone Body
+    const bodyGeo = new THREE.ConeGeometry(0.42, 1.25, 7);
+    bodyGeo.translate(0, 0.6, 0);
+    const bodyMesh = new THREE.Mesh(bodyGeo, baseMaterial);
+    bodyMesh.castShadow = true;
+    modelGroup.add(bodyMesh);
+
+    // Hood / Cowl
+    const hoodGeo = new THREE.SphereGeometry(0.24, 6, 6);
+    hoodGeo.scale(1, 1.2, 1);
+    const hood = new THREE.Mesh(hoodGeo, baseMaterial);
+    hood.position.set(0, 1.15, -0.05);
+    hood.castShadow = true;
+    modelGroup.add(hood);
+
+    // Arcane Eye Visor Slit
+    const eyeGeo = new THREE.BoxGeometry(0.22, 0.06, 0.1);
+    const eyes = new THREE.Mesh(eyeGeo, glowMaterial);
+    eyes.position.set(0, 1.15, -0.22);
+    modelGroup.add(eyes);
+
+    // Staff in right hand
+    const staffGeo = new THREE.CylinderGeometry(0.035, 0.035, 1.35, 5);
+    staffGeo.translate(0, 0.65, 0);
+    const staff = new THREE.Mesh(staffGeo, staffMaterial);
+    staff.position.set(0.4, 0, -0.15);
+    staff.castShadow = true;
+    modelGroup.add(staff);
+
+    // Floating Arcane Crystal on staff tip
+    const crystalGeo = new THREE.OctahedronGeometry(0.12, 0);
+    const crystal = new THREE.Mesh(crystalGeo, glowMaterial);
+    crystal.position.set(0.4, 1.38, -0.15);
+    modelGroup.add(crystal);
+
+    return { rootGroup, modelGroup, bodyMesh, haloMesh: null, baseMaterial };
+  }
+
+  /**
+   * Bone Shaman:
+   * Moss green ritualist with animal bone skull mask, horns, and ritual glow.
+   */
+  private static buildShaman(): EnemyVisualSetup {
+    const rootGroup = new THREE.Group();
+    const modelGroup = new THREE.Group();
+    rootGroup.add(modelGroup);
+
+    const baseMaterial = ToonMaterialFactory.getMaterial(PALETTE.enemies.shamanBody);
+    const maskMaterial = ToonMaterialFactory.getMaterial(PALETTE.enemies.shamanMask);
+    const glowMaterial = ToonMaterialFactory.getMaterial(PALETTE.enemies.shamanGlow, {
+      emissive: PALETTE.enemies.shamanGlow,
+      emissiveIntensity: 0.85,
+    });
+
+    // Ritual Robe
+    const robeGeo = new THREE.CylinderGeometry(0.28, 0.48, 1.3, 6);
+    robeGeo.translate(0, 0.65, 0);
+    const bodyMesh = new THREE.Mesh(robeGeo, baseMaterial);
+    bodyMesh.castShadow = true;
+    modelGroup.add(bodyMesh);
+
+    // Animal Skull Mask
+    const skullGeo = new THREE.BoxGeometry(0.28, 0.32, 0.28);
+    const skull = new THREE.Mesh(skullGeo, maskMaterial);
+    skull.position.set(0, 1.25, -0.15);
+    skull.castShadow = true;
+    modelGroup.add(skull);
+
+    // Antler Horns
+    const hornGeo = new THREE.ConeGeometry(0.06, 0.45, 4);
+    hornGeo.translate(0, 0.22, 0);
+
+    const leftHorn = new THREE.Mesh(hornGeo, maskMaterial);
+    leftHorn.position.set(-0.2, 1.35, -0.05);
+    leftHorn.rotation.z = 0.5;
+    leftHorn.castShadow = true;
+    modelGroup.add(leftHorn);
+
+    const rightHorn = new THREE.Mesh(hornGeo, maskMaterial);
+    rightHorn.position.set(0.2, 1.35, -0.05);
+    rightHorn.rotation.z = -0.5;
+    rightHorn.castShadow = true;
+    modelGroup.add(rightHorn);
+
+    // Glowing Ritual Eyes in Mask
+    const eyeGeo = new THREE.SphereGeometry(0.05, 4, 4);
+    const leftEye = new THREE.Mesh(eyeGeo, glowMaterial);
+    leftEye.position.set(-0.08, 1.25, -0.3);
+    modelGroup.add(leftEye);
+
+    const rightEye = new THREE.Mesh(eyeGeo, glowMaterial);
+    rightEye.position.set(0.08, 1.25, -0.3);
+    modelGroup.add(rightEye);
+
+    return { rootGroup, modelGroup, bodyMesh, haloMesh: null, baseMaterial };
+  }
+
+  /**
+   * Volatile Crawler:
+   * Bulbous volcanic tick with pulsating molten pustules on its back.
+   */
+  private static buildVolatile(): EnemyVisualSetup {
+    const rootGroup = new THREE.Group();
+    const modelGroup = new THREE.Group();
+    rootGroup.add(modelGroup);
+
+    const baseMaterial = ToonMaterialFactory.getMaterial(PALETTE.enemies.volatileShell);
+    const pustuleMaterial = ToonMaterialFactory.getMaterial(PALETTE.enemies.volatilePustule, {
+      emissive: PALETTE.enemies.volatilePustule,
+      emissiveIntensity: 0.7,
+    });
+    const coreMaterial = ToonMaterialFactory.getMaterial(PALETTE.enemies.volatileCore, {
+      emissive: PALETTE.enemies.volatileCore,
+      emissiveIntensity: 0.9,
+    });
+
+    // Bulbous Body
+    const bodyGeo = new THREE.SphereGeometry(0.38, 7, 6);
+    bodyGeo.scale(1.2, 0.7, 1.2);
+    bodyGeo.translate(0, 0.35, 0);
+    const bodyMesh = new THREE.Mesh(bodyGeo, baseMaterial);
+    bodyMesh.castShadow = true;
+    modelGroup.add(bodyMesh);
+
+    // Glowing Volcanic Pustules on shell
+    const pustuleGeo = new THREE.SphereGeometry(0.14, 5, 5);
+    const p1 = new THREE.Mesh(pustuleGeo, pustuleMaterial);
+    p1.position.set(-0.15, 0.58, 0.1);
+    modelGroup.add(p1);
+
+    const p2 = new THREE.Mesh(pustuleGeo, pustuleMaterial);
+    p2.position.set(0.16, 0.55, -0.05);
+    p2.scale.set(0.85, 0.85, 0.85);
+    modelGroup.add(p2);
+
+    const p3 = new THREE.Mesh(pustuleGeo, coreMaterial);
+    p3.position.set(0, 0.62, 0.15);
+    p3.scale.set(1.1, 1.1, 1.1);
+    modelGroup.add(p3);
+
+    // Front Pincer Fangs
+    const fangGeo = new THREE.ConeGeometry(0.06, 0.22, 4);
+    fangGeo.rotateX(-Math.PI / 2);
+
+    const leftFang = new THREE.Mesh(fangGeo, pustuleMaterial);
+    leftFang.position.set(-0.14, 0.25, -0.45);
+    leftFang.rotation.y = 0.25;
+    modelGroup.add(leftFang);
+
+    const rightFang = new THREE.Mesh(fangGeo, pustuleMaterial);
+    rightFang.position.set(0.14, 0.25, -0.45);
+    rightFang.rotation.y = -0.25;
+    modelGroup.add(rightFang);
+
+    return { rootGroup, modelGroup, bodyMesh, haloMesh: null, baseMaterial };
   }
 }

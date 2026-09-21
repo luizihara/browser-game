@@ -15,7 +15,7 @@ export interface WaveEvent {
 
 export interface PhaseProbability {
   endTime: number; // up to which second this phase applies
-  weights: Record<EnemyType, number>;
+  weights: Partial<Record<EnemyType, number>>;
 }
 
 export const DIRECTOR_CONFIG = {
@@ -32,23 +32,23 @@ export const DIRECTOR_CONFIG = {
   phaseProbabilities: [
     {
       endTime: 35, // 0 - 35s
-      weights: { basic: 1.0, fast: 0.0, tank: 0.0, elite: 0.0 },
+      weights: { basic: 0.9, fast: 0.1 },
     },
     {
       endTime: 75, // 35 - 75s
-      weights: { basic: 0.7, fast: 0.3, tank: 0.0, elite: 0.0 },
+      weights: { basic: 0.5, fast: 0.3, ranged: 0.15, volatile: 0.05 },
     },
     {
       endTime: 130, // 75 - 130s
-      weights: { basic: 0.5, fast: 0.35, tank: 0.15, elite: 0.0 },
+      weights: { basic: 0.3, fast: 0.25, tank: 0.15, ranged: 0.15, shaman: 0.1, volatile: 0.05 },
     },
     {
       endTime: 210, // 130 - 210s
-      weights: { basic: 0.35, fast: 0.4, tank: 0.2, elite: 0.05 },
+      weights: { basic: 0.2, fast: 0.2, tank: 0.18, ranged: 0.15, shaman: 0.12, volatile: 0.1, elite: 0.05 },
     },
     {
       endTime: Infinity, // 210s+
-      weights: { basic: 0.25, fast: 0.4, tank: 0.28, elite: 0.07 },
+      weights: { basic: 0.15, fast: 0.2, tank: 0.2, ranged: 0.15, shaman: 0.12, volatile: 0.11, elite: 0.07 },
     },
   ] as PhaseProbability[],
 
