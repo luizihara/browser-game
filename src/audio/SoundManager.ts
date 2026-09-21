@@ -708,6 +708,102 @@ export class SoundManager implements Disposable {
     });
   }
 
+  /**
+   * Procedural lightning sound: electric crack + resonant bass thunder crash.
+   */
+  public playLightning(): void {
+    if (!this.canPlay('lightning', 0.1)) return;
+
+    const ctx = this.audioContext!;
+    const now = ctx.currentTime;
+
+    // High electric crack
+    const osc = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(520, now);
+    osc.frequency.exponentialRampToValueAtTime(60, now + 0.22);
+
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(900, now);
+    filter.Q.setValueAtTime(3.0, now);
+
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.24, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain!);
+
+    osc.start(now);
+    osc.stop(now + 0.26);
+
+    // Deep sub bass impact
+    const subOsc = ctx.createOscillator();
+    const subGain = ctx.createGain();
+
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(75, now);
+    subOsc.frequency.exponentialRampToValueAtTime(35, now + 0.35);
+
+    subGain.gain.setValueAtTime(0.001, now);
+    subGain.gain.linearRampToValueAtTime(0.3, now + 0.015);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+    subOsc.connect(subGain);
+    subGain.connect(this.masterGain!);
+
+    subOsc.start(now);
+    subOsc.stop(now + 0.36);
+
+    subOsc.onended = () => {
+      osc.disconnect();
+      filter.disconnect();
+      gain.disconnect();
+      subOsc.disconnect();
+      subGain.disconnect();
+    };
+  }
+
+  /**
+   * Procedural glass flask shatter sound: sharp brittle chime + splash.
+   */
+  public playPotionShatter(): void {
+    if (!this.canPlay('potionShatter', 0.08)) return;
+
+    const ctx = this.audioContext!;
+    const now = ctx.currentTime;
+
+    const freqs = [1760, 2489, 3520]; // Glass harmonics A6, D#7, A7
+    freqs.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const start = now + idx * 0.01;
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, start);
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.7, start + 0.15);
+
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.linearRampToValueAtTime(0.12, start + 0.003);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.16);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain!);
+
+      osc.start(start);
+      osc.stop(start + 0.17);
+
+      osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+      };
+    });
+  }
+
   public setMasterVolume(val: number): void {
     this.masterVolume = Math.max(0, Math.min(1, val));
     if (this.audioContext && this.masterGain && !this.muted) {

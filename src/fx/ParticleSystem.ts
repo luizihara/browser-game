@@ -339,6 +339,81 @@ export class ParticleSystem implements Disposable, Updatable {
     this.markBuffersUpdated();
   }
 
+  public emitChemicalSplash(
+    x: number,
+    y: number,
+    z: number,
+    count: number = 14,
+    isMidas: boolean = false
+  ): void {
+    const colors = isMidas ? [0xfacc15, 0xf59e0b, 0xfef08a] : [0x10b981, 0x34d399, 0xa7f3d0];
+    for (let c = 0; c < count; c++) {
+      const slot = this.allocateSlot();
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.5 + Math.random() * 3.0;
+
+      const pIdx = slot * 3;
+      this.positions[pIdx] = x + (Math.random() - 0.5) * 0.2;
+      this.positions[pIdx + 1] = y + 0.1;
+      this.positions[pIdx + 2] = z + (Math.random() - 0.5) * 0.2;
+
+      this.velX[slot] = Math.cos(angle) * speed;
+      this.velY[slot] = 2.5 + Math.random() * 3.0;
+      this.velZ[slot] = Math.sin(angle) * speed;
+
+      const pColor = colors[Math.floor(Math.random() * colors.length)];
+      this.setColorAt(slot, pColor);
+
+      this.alphas[slot] = 1.0;
+      const sz = 0.22 + Math.random() * 0.16;
+      this.sizes[slot] = sz;
+      this.initialSizes[slot] = sz;
+
+      this.life[slot] = 0;
+      this.maxLife[slot] = 0.45 + Math.random() * 0.35;
+      this.gravity[slot] = 14.0;
+      this.drag[slot] = 0.08;
+    }
+    this.markBuffersUpdated();
+  }
+
+  public emitLightningSparks(
+    x: number,
+    y: number,
+    z: number,
+    count: number = 10
+  ): void {
+    const colors = [0x38bdf8, 0x67e8f9, 0xfacc15, 0xffffff];
+    for (let c = 0; c < count; c++) {
+      const slot = this.allocateSlot();
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 2.0 + Math.random() * 4.0;
+
+      const pIdx = slot * 3;
+      this.positions[pIdx] = x + (Math.random() - 0.5) * 0.2;
+      this.positions[pIdx + 1] = y + 0.3 + Math.random() * 0.4;
+      this.positions[pIdx + 2] = z + (Math.random() - 0.5) * 0.2;
+
+      this.velX[slot] = Math.cos(angle) * speed;
+      this.velY[slot] = (Math.random() - 0.3) * speed;
+      this.velZ[slot] = Math.sin(angle) * speed;
+
+      const pColor = colors[Math.floor(Math.random() * colors.length)];
+      this.setColorAt(slot, pColor);
+
+      this.alphas[slot] = 1.0;
+      const sz = 0.18 + Math.random() * 0.14;
+      this.sizes[slot] = sz;
+      this.initialSizes[slot] = sz;
+
+      this.life[slot] = 0;
+      this.maxLife[slot] = 0.2 + Math.random() * 0.2;
+      this.gravity[slot] = 0;
+      this.drag[slot] = 0.15;
+    }
+    this.markBuffersUpdated();
+  }
+
   public update(deltaTime: number): void {
     if (this.activeCount === 0) {
       if (this.geometry.drawRange.count !== 0) {

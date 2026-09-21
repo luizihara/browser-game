@@ -90,7 +90,7 @@ export class UpgradeSystem {
     const evolutions = this.getEligibleEvolutions(weaponSystem);
 
     if (weaponSystem) {
-      const allWeaponIds: WeaponId[] = ['wand', 'orbital', 'aura', 'dagger'];
+      const allWeaponIds: WeaponId[] = ['wand', 'orbital', 'aura', 'dagger', 'hammer', 'flask'];
 
       // 1. Offer unowned weapons if player has open equipment slots
       if (weaponSystem.canEquipNewWeapon()) {

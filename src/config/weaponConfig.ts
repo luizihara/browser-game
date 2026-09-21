@@ -1,4 +1,4 @@
-export type WeaponId = 'wand' | 'orbital' | 'aura' | 'dagger';
+export type WeaponId = 'wand' | 'orbital' | 'aura' | 'dagger' | 'hammer' | 'flask';
 
 export interface WeaponLevelConfig {
   level: number;
@@ -246,6 +246,112 @@ export const WEAPON_CONFIG = {
         cooldown: 0.7,
         count: 5,
         speed: 24.0,
+      },
+    ],
+  },
+
+  hammer: {
+    id: 'hammer' as WeaponId,
+    name: 'Thunder Hammer',
+    icon: '⚡',
+    maxLevel: 5,
+    color: 0x38bdf8,
+    emissiveColor: 0xfacc15,
+    emissiveIntensity: 1.4,
+    range: 14.0,
+    levels: [
+      {
+        level: 1,
+        description: 'Calls down lightning striking the nearest foe and chaining to 2 adjacent enemies.',
+        damage: 35,
+        cooldown: 1.8,
+        count: 3,
+        range: 14.0,
+      },
+      {
+        level: 2,
+        description: 'Increases chain jumps to 4 targets and increases lightning damage.',
+        damage: 45,
+        cooldown: 1.8,
+        count: 4,
+        range: 14.0,
+      },
+      {
+        level: 3,
+        description: 'Reduces lightning cooldown and intensifies electric voltage.',
+        damage: 55,
+        cooldown: 1.45,
+        count: 4,
+        range: 15.0,
+      },
+      {
+        level: 4,
+        description: 'Chains to 5 targets with wider search radius and shocks enemies.',
+        damage: 70,
+        cooldown: 1.35,
+        count: 5,
+        range: 16.0,
+      },
+      {
+        level: 5,
+        description: 'Dual thunderbolts strike down simultaneously, chaining up to 8 targets.',
+        damage: 90,
+        cooldown: 1.15,
+        count: 8,
+        range: 18.0,
+      },
+    ],
+  },
+
+  flask: {
+    id: 'flask' as WeaponId,
+    name: 'Alchemist Flask',
+    icon: '🧪',
+    maxLevel: 5,
+    color: 0x10b981,
+    emissiveColor: 0x34d399,
+    emissiveIntensity: 1.1,
+    range: 13.0,
+    levels: [
+      {
+        level: 1,
+        description: 'Lobs a toxic chemical flask creating a lingering pool that inflicts Burn DoT.',
+        damage: 20,
+        cooldown: 2.2,
+        count: 1,
+        radius: 2.2,
+      },
+      {
+        level: 2,
+        description: 'Expands acid puddle radius and increases caustic Burn damage.',
+        damage: 28,
+        cooldown: 2.0,
+        count: 1,
+        radius: 2.7,
+      },
+      {
+        level: 3,
+        description: 'Reduces lob cooldown and increases chemical burn intensity.',
+        damage: 38,
+        cooldown: 1.7,
+        count: 1,
+        radius: 2.9,
+      },
+      {
+        level: 4,
+        description: 'Lobs 2 volatile flasks simultaneously in wide spread.',
+        damage: 48,
+        cooldown: 1.6,
+        count: 2,
+        radius: 3.2,
+      },
+      {
+        level: 5,
+        description: 'Lobs 3 flasks creating devastating cascading toxic hazard zones.',
+        damage: 62,
+        cooldown: 1.35,
+        count: 3,
+        radius: 3.6,
       },
     ],
   },

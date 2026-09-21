@@ -99,6 +99,8 @@ export class GameScene extends BaseScene {
     orbital: 0,
     aura: 0,
     dagger: 0,
+    hammer: 0,
+    flask: 0,
   };
   private fpsTracker: FpsTracker;
 
@@ -197,6 +199,15 @@ export class GameScene extends BaseScene {
     this.isChestOpening = false;
     this.runTime = 0;
     this.killCount = 0;
+    this.totalDamageDealt = 0;
+    this.weaponDamageDealt = {
+      wand: 0,
+      orbital: 0,
+      aura: 0,
+      dagger: 0,
+      hammer: 0,
+      flask: 0,
+    };
     this.tookDamageThisRun = false;
 
     if (this.unsubscribeAchievement) {
@@ -491,6 +502,14 @@ export class GameScene extends BaseScene {
         this.totalDamageDealt += d;
         this.weaponDamageDealt[wId] = (this.weaponDamageDealt[wId] || 0) + d;
 
+        if (wId === 'hammer') {
+          this.soundManager.playLightning();
+          this.particleSystem.emitLightningSparks(hitX, hitY, hitZ, 6);
+        } else if (wId === 'flask') {
+          this.soundManager.playPotionShatter();
+          this.particleSystem.emitChemicalSplash(hitX, hitY, hitZ, 6);
+        }
+
         const type: DamageNumberType =
           wId === 'wand'
             ? 'magic'
@@ -498,7 +517,11 @@ export class GameScene extends BaseScene {
               ? 'holy'
               : wId === 'dagger'
                 ? 'shadow'
-                : 'default';
+                : wId === 'hammer'
+                  ? 'lightning'
+                  : wId === 'flask'
+                    ? 'fire'
+                    : 'default';
         this.damageNumberSystem.spawn(hitX, hitY, hitZ, d, type, isCrit ?? false);
 
         if (isCrit && this.player) {
@@ -1074,6 +1097,8 @@ export class GameScene extends BaseScene {
       orbital: 0,
       aura: 0,
       dagger: 0,
+      hammer: 0,
+      flask: 0,
     };
 
     const selectedCharId = MetaManager.getInstance().getSelectedCharacter();

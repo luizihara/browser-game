@@ -5,7 +5,9 @@ export type WeaponEvolutionId =
   | 'astral_beam'
   | 'aegis_citadel'
   | 'solar_supernova'
-  | 'thousand_blades';
+  | 'thousand_blades'
+  | 'storm_cataclysm'
+  | 'midas_plague';
 
 export interface WeaponEvolutionDefinition {
   id: WeaponEvolutionId;
@@ -72,5 +74,31 @@ export const EVOLUTION_CONFIG: Record<WeaponId, WeaponEvolutionDefinition> = {
     badgeLabel: '👑 EVOLUTION',
     color: 0xa855f7, // Deep shadow purple
     textColor: '#c084fc',
+  },
+  hammer: {
+    id: 'storm_cataclysm',
+    baseWeaponId: 'hammer',
+    requiredPassiveId: 'might',
+    name: 'Storm Cataclysm',
+    icon: '🌩️',
+    title: 'STORM CATACLYSM',
+    description:
+      'Tempestade cataclísmica ininterrupta com raios celestiais em cadeia massiva que eletrocutam e congelam hordas inteiras.',
+    badgeLabel: '👑 EVOLUTION',
+    color: 0x06b6d4, // Cyan lightning
+    textColor: '#22d3ee',
+  },
+  flask: {
+    id: 'midas_plague',
+    baseWeaponId: 'flask',
+    requiredPassiveId: 'magnet',
+    name: 'Midas Plague',
+    icon: '⚗️',
+    title: 'MIDAS PLAGUE',
+    description:
+      'Transmuta o solo em ouro líquido cáustico. Causa dano de queimadura extremo e inimigos derrotados rendem ouro extra.',
+    badgeLabel: '👑 EVOLUTION',
+    color: 0xeab308, // Midas gold
+    textColor: '#facc15',
   },
 };

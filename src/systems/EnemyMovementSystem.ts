@@ -54,8 +54,9 @@ export class EnemyMovementSystem {
         const dirX = dx * invDist;
         const dirZ = dz * invDist;
 
-        enemy.position.x += dirX * enemy.speed * deltaTime;
-        enemy.position.z += dirZ * enemy.speed * deltaTime;
+        const effectiveSpeed = enemy.chillTimer > 0 ? enemy.speed * (1.0 - enemy.chillSlow) : enemy.speed;
+        enemy.position.x += dirX * effectiveSpeed * deltaTime;
+        enemy.position.z += dirZ * effectiveSpeed * deltaTime;
 
         // Model forward is -Z, so face toward movement vector (dirX, -dirZ)
         enemy.getMesh().rotation.y = Math.atan2(dirX, -dirZ);

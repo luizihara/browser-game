@@ -30,6 +30,11 @@ export class Enemy extends Entity {
   protected flashTimer: number = 0;
   protected wobbleTimer: number = 0;
   public freezeTimer: number = 0;
+  public burnTimer: number = 0;
+  public burnDps: number = 0;
+  private burnTickTimer: number = 0;
+  public chillTimer: number = 0;
+  public chillSlow: number = 0.40;
 
   constructor(
     x: number = 0,
@@ -113,11 +118,43 @@ export class Enemy extends Entity {
       this.freezeTimer -= deltaTime;
       if (this.freezeTimer < 0) this.freezeTimer = 0;
     }
+
+    // 4. Chill timer countdown
+    if (this.chillTimer > 0) {
+      this.chillTimer -= deltaTime;
+      if (this.chillTimer < 0) this.chillTimer = 0;
+    }
+
+    // 5. Burn DoT tick
+    if (this.burnTimer > 0 && !this.isDead) {
+      this.burnTimer -= deltaTime;
+      this.burnTickTimer += deltaTime;
+      if (this.burnTickTimer >= 0.5) {
+        this.burnTickTimer = 0;
+        this.takeDamage(Math.max(1, this.burnDps * 0.5));
+      }
+      if (this.burnTimer <= 0) {
+        this.burnTimer = 0;
+        this.burnDps = 0;
+      }
+    }
   }
 
   public applyFreeze(duration: number): void {
     if (this.isDead) return;
     this.freezeTimer = Math.max(this.freezeTimer, duration);
+  }
+
+  public applyBurn(duration: number, dps: number): void {
+    if (this.isDead) return;
+    this.burnTimer = Math.max(this.burnTimer, duration);
+    this.burnDps = Math.max(this.burnDps, dps);
+  }
+
+  public applyChill(duration: number, slowFactor: number = 0.40): void {
+    if (this.isDead) return;
+    this.chillTimer = Math.max(this.chillTimer, duration);
+    this.chillSlow = slowFactor;
   }
 
   public takeDamage(amount: number): boolean {

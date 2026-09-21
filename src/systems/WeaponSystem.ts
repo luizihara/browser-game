@@ -7,6 +7,8 @@ import { ProjectileWeapon } from '../weapons/ProjectileWeapon';
 import { OrbitalWeapon } from '../weapons/OrbitalWeapon';
 import { AuraWeapon } from '../weapons/AuraWeapon';
 import { DaggerWeapon } from '../weapons/DaggerWeapon';
+import { HammerWeapon } from '../weapons/HammerWeapon';
+import { FlaskWeapon } from '../weapons/FlaskWeapon';
 import type { Projectile } from '../entities/projectile/Projectile';
 import { WEAPON_CONFIG, type WeaponId } from '../config/weaponConfig';
 import type { Disposable } from '../types';
@@ -34,7 +36,12 @@ export class WeaponSystem implements Disposable {
     this.scene = scene;
     for (let i = 0; i < this.weapons.length; i++) {
       const w = this.weapons[i];
-      if (w instanceof OrbitalWeapon || w instanceof AuraWeapon) {
+      if (
+        w instanceof OrbitalWeapon ||
+        w instanceof AuraWeapon ||
+        w instanceof HammerWeapon ||
+        w instanceof FlaskWeapon
+      ) {
         w.setScene(scene);
       }
     }
@@ -46,7 +53,12 @@ export class WeaponSystem implements Disposable {
     weapon.projectileSpeedMultiplier = this.projectileSpeedMultiplier;
 
     if (this.scene) {
-      if (weapon instanceof OrbitalWeapon || weapon instanceof AuraWeapon) {
+      if (
+        weapon instanceof OrbitalWeapon ||
+        weapon instanceof AuraWeapon ||
+        weapon instanceof HammerWeapon ||
+        weapon instanceof FlaskWeapon
+      ) {
         weapon.setScene(this.scene);
       }
     }
@@ -88,6 +100,12 @@ export class WeaponSystem implements Disposable {
         break;
       case 'dagger':
         newWeapon = new DaggerWeapon();
+        break;
+      case 'hammer':
+        newWeapon = new HammerWeapon(this.scene ?? undefined);
+        break;
+      case 'flask':
+        newWeapon = new FlaskWeapon(this.scene ?? undefined);
         break;
     }
 

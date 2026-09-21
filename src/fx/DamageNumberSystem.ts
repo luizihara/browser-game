@@ -8,6 +8,8 @@ export type DamageNumberType =
   | 'magic'
   | 'holy'
   | 'shadow'
+  | 'lightning'
+  | 'fire'
   | 'hero'
   | 'heal';
 

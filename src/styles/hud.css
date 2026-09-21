@@ -307,6 +307,18 @@
   color: #d8b4fe;
 }
 
+.dmg-lightning {
+  color: #38bdf8;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.9), 0 0 3px #fef08a;
+  font-weight: 900;
+}
+
+.dmg-fire {
+  color: #f97316;
+  text-shadow: 0 0 8px rgba(249, 115, 22, 0.9), 0 0 3px #ea580c;
+  font-weight: 900;
+}
+
 .dmg-hero {
   color: #ef4444;
   font-size: 1.4rem;
